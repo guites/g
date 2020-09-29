@@ -1,6 +1,7 @@
 .DS_Store
 node_modules
-
+old.docs/
+client-deploy.sh
 
 # local env files
 .env.local

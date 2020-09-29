@@ -42,7 +42,7 @@
         </div>
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
-    <div class='gifBoxWrapper'>
+    <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
       <div v-if="emptyGifResults" class='emptyGifResults'>
         <img src="https://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
       </div>
@@ -102,6 +102,7 @@ export default {
     numPages: 5,
     error: '',
     apiRoute: 'giphy',
+    isGifBeingSearched: '',
     emptyGifResults: '',
     hasPag: '',
     messages: [],
@@ -162,6 +163,11 @@ export default {
 
       if (e.target.id === 'giphyURL') {
         searchString = e.target.value;
+        if (searchString === '') {
+          this.isGifBeingSearched = '';
+        } else {
+          this.isGifBeingSearched = 1;
+        }
       } else {
         searchString = document.querySelector('#giphyURL').value;
       }

@@ -10,11 +10,15 @@ body{
 header{
     width:100vw;
     background-color:#303030;
+    .resp-header{
+        display:none;
+    }
     .inner-header{
-        max-width:980px;
-        margin:0 auto;
         display:flex;
-        justify-content:space-between;
+        justify-content:space-around;
+        max-width:980px;
+        width:95%;
+        margin:0 auto;
         nav{
             ul{
                 display:flex;
@@ -34,6 +38,15 @@ header{
                 }
                 li:not(:nth-child(1)){
                     margin-top:3px;
+                }
+                li:nth-child(1){
+                    display:flex;
+                    flex-direction:column;
+                    align-items:center;
+                    img{
+                        width:32px;
+                        margin:0;
+                    }
                 }
             }
         }
@@ -259,6 +272,12 @@ div{
             border:2px solid #a4a4a4;
             border-radius:3px;
             margin-right:15px;
+            &:hover{
+                filter:none;
+            }
+        }
+        div{
+            width: calc(100% - 300px);
         }
     }
     hr{
@@ -284,3 +303,62 @@ div{
         margin:0 auto;
     }
   }
+
+@media screen and (max-width: 767px) {
+    header{
+        .inner-header{
+            flex-direction:column;
+            nav{
+                ul{
+                    font-size:30px;
+                    li{
+                        &:not(:first-child){
+                            display:none;
+                        }
+                        img{
+                            width:32px;
+                            margin:0;
+                        }
+                    }
+                }
+            }
+            form{
+                flex-direction: column;
+                button{
+                    display:none;
+                }
+                input{
+                    text-align: center;
+                }
+                label{
+                    margin-bottom:5px;
+                }
+            }
+        }
+        .resp-header{
+            // display:flex;
+            justify-content:center;
+        }
+    }
+    div{
+        li{
+            flex-direction:column;
+            align-items:center;
+            div{
+             width:100%;
+            }
+            img{
+               width:75%;
+            }
+        }
+    }
+}
+@media screen and (max-width: 479px){
+    div{
+        li{
+            img{
+                width:100%;
+            }
+        }
+    }
+}
