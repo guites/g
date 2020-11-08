@@ -166,6 +166,7 @@ export default {
     if (consentCookie !== '') {
       window.cookie_consent_variable = consentCookie;
       this.set_cookie_consent = false;
+      this.ajaxGtmRequest();
     } else {
       this.set_cookie_consent = true;
     }

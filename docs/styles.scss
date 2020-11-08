@@ -394,6 +394,18 @@ section#cookie_consent{
             }
         }
     }
+    section#cookie_consent{
+        width:100vw;
+        height:120px;
+        .cookie_consent_wrapper{
+            .cookie-btns{
+                flex-direction:column;
+                a{
+                    margin-bottom:5px;
+                }
+            }
+        }
+    }
 }
 @media screen and (max-width: 479px){
     div{
