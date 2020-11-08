@@ -89,6 +89,21 @@
       </li>
               <hr>
     </div>
+    <section v-if='set_cookie_consent' id="cookie_consent">
+      <div class="cookie_consent_wrapper">
+        <p class="cookie_message">
+          Nossos site coleta estatisticas de acesso através do google analytics.
+        </p>
+        <div class="cookie-btns">
+          <a href="cookie_politics.html">ver nossa política de cookies</a>
+          <div class="cookie_btn_wrapper">
+            <button v-on:click="defineCookieConsent" id="cookie-recusar">recusar</button>
+            <button v-on:click="defineCookieConsent" id='cookie-aceitar'>aceitar</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
@@ -97,6 +112,7 @@ const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
 export default {
   name: 'Home',
   data: () => ({
+    set_cookie_consent: false,
     gifsPerPage: 4,
     currPage: 1,
     numPages: 5,
@@ -139,20 +155,28 @@ export default {
     fetch(apiURL).then((response) => response.json()).then((result) => {
       this.messages = result.results;
     });
-    const gtmScript = document.createElement('script');
-    gtmScript.type = 'text/javascript';
-    const gtmCode = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-})(window,document,'script','dataLayer','GTM-K57247W');`;
-    try {
-      gtmScript.appendChild(document.createTextNode(gtmCode));
-      document.head.appendChild(gtmScript);
-    } catch (e) {
-      gtmScript.text = gtmCode;
-      document.head.appendChild(gtmScript);
+    function getCookieValue(a) {
+      const b = document.cookie.match(`(^|;)\\s*${a}\\s*=\\s*([^;]+)`);
+      return b ? b.pop() : '';
     }
+    // lógica para carregar o html do botão de aceitar cookies
+    // e ajustar a variável de acordo com  opção escolhida
+    // quando o usuário entra no site, o valor é falso. (DEFAULT_NO_TRACK)
+    const consentCookie = getCookieValue('cookie_consent_variable');
+    if (consentCookie !== '') {
+      window.cookie_consent_variable = consentCookie;
+      this.set_cookie_consent = false;
+    } else {
+      this.set_cookie_consent = true;
+    }
+    console.log('consentCookie', typeof consentCookie); // variável com o valor do cookie atual
+    console.log('window.cookie_consent_variable', window.cookie_consent_variable); // variável que, sendo true, ativa o GTM
+    console.log('this.set_cookie_consent', this.set_cookie_consent); // variável para mostrar ou não a pop up de consentimento
+    //  const date = new Date();
+    //   document.cookie = `cookie_consent_variable=true;expires=${date.setTime
+    // date.getTime() + 7 * 24 * 60 * 60 * 1000)}`;
+    // window.cookie_consent_variable = true;
+    // document.cookie = 'cookie_consent_variable=true';
   },
   methods: {
     addMessage() {
@@ -267,6 +291,35 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
       // }
       this.currPage = e.target.innerText;
       this.searchGif(e);
+    },
+    defineCookieConsent(e) {
+      window.cookie_consent_variable = e.target.id.includes('cookie-aceitar');
+      this.set_cookie_consent = window.cookie_consent_variable;
+      const date = new Date();
+      const expires = date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
+      if (this.set_cookie_consent) {
+        document.cookie = `cookie_consent_variable=true;expires=${expires}`;
+      } else {
+        document.cookie = `cookie_consent_variable=false;expires=${expires}`;
+      }
+      this.ajaxGtmRequest();
+      this.set_cookie_consent = false;
+    },
+    ajaxGtmRequest() {
+      const gtmScript = document.createElement('script');
+      gtmScript.type = 'text/javascript';
+      const gtmCode = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-K57247W');`;
+      try {
+        gtmScript.appendChild(document.createTextNode(gtmCode));
+        document.head.appendChild(gtmScript);
+      } catch (e) {
+        gtmScript.text = gtmCode;
+        document.head.appendChild(gtmScript);
+      }
     },
   },
 };

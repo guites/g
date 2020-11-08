@@ -286,7 +286,49 @@ div{
         margin:10px auto;
     }
 }
-
+section#cookie_consent{
+    height: 70px;
+    position: fixed;
+    bottom: 5px;
+    z-index: 99;
+    background-color: rgba(255, 255, 255, 0.8);
+    border:2px solid #212121;
+    border-radius:4px;
+    width: 525px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    .cookie_consent_wrapper{
+        border-radius:4px;
+        width:500px;
+        height:90%;
+        display:flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items:center;
+        background-color:#212121;
+        padding:5px;
+        .cookie_message{
+            margin-bottom:5px;
+        }
+        .cookie-btns{
+            width:100%;
+            display:flex;
+            justify-content:space-around;
+            align-items: center;
+            a{
+                color:#ce7b45;
+            }
+            .cookie_btn_wrapper{
+                button{
+                    padding:5px;
+                }
+            }
+        }
+    }
+}
 @media screen and (max-width: 979px) {
     section.create-thread{
         justify-content:initial;

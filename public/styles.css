@@ -380,6 +380,74 @@ div hr {
   margin: 10px auto;
 }
 
+section#cookie_consent {
+  height: 70px;
+  position: fixed;
+  bottom: 5px;
+  z-index: 99;
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 2px solid #212121;
+  border-radius: 4px;
+  width: 525px;
+  left: 50%;
+  -webkit-transform: translateX(-50%);
+          transform: translateX(-50%);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+section#cookie_consent .cookie_consent_wrapper {
+  border-radius: 4px;
+  width: 500px;
+  height: 90%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
+  -webkit-box-pack: justify;
+      -ms-flex-pack: justify;
+          justify-content: space-between;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  background-color: #212121;
+  padding: 5px;
+}
+
+section#cookie_consent .cookie_consent_wrapper .cookie_message {
+  margin-bottom: 5px;
+}
+
+section#cookie_consent .cookie_consent_wrapper .cookie-btns {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -ms-flex-pack: distribute;
+      justify-content: space-around;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+section#cookie_consent .cookie_consent_wrapper .cookie-btns a {
+  color: #ce7b45;
+}
+
+section#cookie_consent .cookie_consent_wrapper .cookie-btns .cookie_btn_wrapper button {
+  padding: 5px;
+}
+
 @media screen and (max-width: 979px) {
   section.create-thread {
     -webkit-box-pack: initial;
