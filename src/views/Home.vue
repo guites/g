@@ -146,21 +146,13 @@ new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
 j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
 })(window,document,'script','dataLayer','GTM-K57247W');`;
-    const gtmNoScript = document.createElement('noscript');
-    const gtmNoScriptCode = `<iframe src="https://www.googletagmanager.com/ns.html?id=GTM-K57247W"
-height="0" width="0" style="display:none;visibility:hidden"></iframe>`;
     try {
       gtmScript.appendChild(document.createTextNode(gtmCode));
       document.head.appendChild(gtmScript);
-      gtmNoScript.appendChild(document.createTextNode(gtmNoScriptCode));
-      document.body.appendChild(gtmNoScript);
     } catch (e) {
       gtmScript.text = gtmCode;
       document.head.appendChild(gtmScript);
-      gtmNoScript.text = gtmNoScriptCode;
-      document.body.appendChild(gtmNoScript);
     }
-
   },
   methods: {
     addMessage() {
