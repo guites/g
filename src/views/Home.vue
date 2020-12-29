@@ -44,7 +44,7 @@
     </form>
     <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
       <div v-if="emptyGifResults" class='emptyGifResults'>
-        <img src="https://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
+        <img src="http://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
       </div>
       <div v-if="emptyGifResults === ''" class="gifBox">
         <div v-for="gif in uniqueGifs" :key="gif.id" class="gifBoxGif">
@@ -54,20 +54,12 @@
       </div>
       <div class='paginate-arrows'>
         <ul v-if='hasPag' class="pagination">
-          <!-- <li v-if="this.apiRoute === 'gfycat'"
-          class="page-item disabled" v-on:click="paginateGif">
-            <a class="page-link" data-paginate='prev' href="#">&laquo;</a>
-          </li> -->
           <div>
             <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
             class="page-item" :class="{ 'active' : currPage == index}">
               <a class="page-link" href="#void">{{index}}</a>
             </li>
           </div>
-          <!-- <li v-if="this.apiRoute === 'gfycat'"
-          class="page-item" v-on:click="paginateGif">
-            <a class="page-link" data-paginate='next' href="#">&raquo;</a>
-          </li> -->
         </ul>
       </div>
     </div>
@@ -76,9 +68,16 @@
     <div class="list-unstyled d-flex flex-column align-items-center"
     v-for="message in reversedMessages" :key="message._id">
       <li class="media">
-        <img v-if="message.imageurl" class="img-thumbnail"
-        :src="message.imageurl" :alt="message.subject">
-        <img v-else class="img-thumbnail" src="https://via.placeholder.com/300?text=:(">
+        <img
+        v-if="message.imageurl"
+        class="img-thumbnail"
+        :data-src="message.imageurl"
+        :alt="message.subject"
+        :src="message.imageurl"
+        @error="createVideo($event)"
+        @load="preventVideo($event)"
+        >
+        <img v-else class="img-thumbnail" src="http://via.placeholder.com/300?text=:(">
         <div class="align-self-center media-body">
           <h4 class='mt-0 mb-1'>{{message.username}}</h4>
           <h5 class="mt-0 mb-1">{{message.subject}}</h5>
@@ -108,7 +107,8 @@
 </template>
 
 <script>
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
+// const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
+const apiURL = 'http://localhost:5000/messages';
 export default {
   name: 'Home',
   data: () => ({
@@ -132,7 +132,6 @@ export default {
   }),
   computed: {
     reversedMessages() {
-      console.log(this.messages);
       return this.messages.slice().reverse();
     },
     uniqueGifs() {
@@ -159,9 +158,6 @@ export default {
       const b = document.cookie.match(`(^|;)\\s*${a}\\s*=\\s*([^;]+)`);
       return b ? b.pop() : '';
     }
-    // lógica para carregar o html do botão de aceitar cookies
-    // e ajustar a variável de acordo com  opção escolhida
-    // quando o usuário entra no site, o valor é falso. (DEFAULT_NO_TRACK)
     const consentCookie = getCookieValue('cookie_consent_variable');
     if (consentCookie !== '') {
       window.cookie_consent_variable = consentCookie;
@@ -170,14 +166,6 @@ export default {
     } else {
       this.set_cookie_consent = true;
     }
-    console.log('consentCookie', typeof consentCookie); // variável com o valor do cookie atual
-    console.log('window.cookie_consent_variable', window.cookie_consent_variable); // variável que, sendo true, ativa o GTM
-    console.log('this.set_cookie_consent', this.set_cookie_consent); // variável para mostrar ou não a pop up de consentimento
-    //  const date = new Date();
-    //   document.cookie = `cookie_consent_variable=true;expires=${date.setTime
-    // date.getTime() + 7 * 24 * 60 * 60 * 1000)}`;
-    // window.cookie_consent_variable = true;
-    // document.cookie = 'cookie_consent_variable=true';
   },
   methods: {
     addMessage() {
@@ -320,6 +308,28 @@ export default {
       } catch (e) {
         gtmScript.text = gtmCode;
         document.head.appendChild(gtmScript);
+      }
+    },
+    createVideo(target) {
+      const image = target.target;
+      const video = document.createElement('video');
+      video.src = image.src;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      image.parentElement.insertBefore(video, image);
+      image.style.display = 'none';
+      image.error = null;
+    },
+    preventVideo(target) {
+      const image = target.target;
+      const prevSibling = image.previousElementSibling;
+      if (prevSibling) {
+        if (prevSibling.tagName === 'VIDEO') {
+          image.previousElementSibling.remove();
+          image.style.display = 'initial';
+        }
       }
     },
   },
