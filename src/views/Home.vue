@@ -107,8 +107,8 @@
 </template>
 
 <script>
-// const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const apiURL = 'http://localhost:5000/messages';
+const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
+// const apiURL = 'http://localhost:5000/messages';
 export default {
   name: 'Home',
   data: () => ({
