@@ -365,6 +365,10 @@ div li img {
   margin-right: 15px;
 }
 
+div li img.img-thumbnail {
+  min-height: 200px;
+}
+
 div li img:hover {
   -webkit-filter: none;
           filter: none;
