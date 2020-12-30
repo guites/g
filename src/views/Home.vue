@@ -74,6 +74,7 @@
     :key="message._id">
       <li class="media">
         <img
+        loading="lazy"
         v-if="message.imageurl"
         class="img-thumbnail"
         :data-src="message.imageurl"
@@ -82,7 +83,11 @@
         @error="createVideo($event)"
         @load="preventVideo($event)"
         >
-        <img v-else class="img-thumbnail" src="http://via.placeholder.com/300?text=:(">
+        <img
+        loading="lazy"
+        v-else
+        class="img-thumbnail"
+        src="http://via.placeholder.com/300?text=:(">
         <div class="align-self-center media-body">
           <div class="flash"
           :class="messageFlash.type"
