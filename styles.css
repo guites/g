@@ -80,6 +80,10 @@ header .inner-header form input {
   margin: 0 5px;
 }
 
+header .janitor-login form .fields div label {
+  padding: 10px;
+}
+
 section.create-thread {
   display: -webkit-box;
   display: -ms-flexbox;

@@ -57,6 +57,17 @@ header{
             }
         }
     }
+    .janitor-login{
+      form{
+        .fields{
+          div{
+            label{
+              padding:10px;
+            }
+          }
+        }
+      }
+    }
 }
 section.create-thread{
     display:flex;

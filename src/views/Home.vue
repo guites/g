@@ -1,7 +1,8 @@
 <template>
   <div>
+    <!-- <h2 v-if="auth.loggedIn">HAS USERNAME PROP</h2> -->
      <section class="create-thread">
-      <form @submit.prevent="addMessage">
+      <form @submit.prevent="addMessage()">
         <div v-if="error" class='alert-error'>
           <close v-on:click="error=''">x</close>
           <h4>Erro!</h4>
@@ -9,15 +10,18 @@
        </div>
         <div class="form-group">
           <label for="username">Usuário</label>
-          <input v-model="message.username" type="text" class="form-control" id="username"
-          aria-describedby="usernameHelp" value='anon' required>
+          <!-- v-model="message.username" -->
+          <input type="text" class="form-control" id="username"
+          aria-describedby="usernameHelp" :value="username"
+          placeholder="Anonymous"
+          required>
           <small id="usernameHelp" class="form-text text-muted">
             remember: no use for a name
             </small>
         </div>
         <div class="form-group">
           <label for="subject">Assunto</label>
-          <input v-model="message.subject" type="subject" class="form-control"
+          <input v-model="message.subject" type="text" class="form-control"
           id="subject" placeholder="subject" required>
         </div>
         <div class="form-group">
@@ -57,7 +61,7 @@
           <div>
             <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
             class="page-item" :class="{ 'active' : currPage == index}">
-              <a class="page-link" href="#void">{{index}}</a>
+              <p class="page-link">{{index}}</p>
             </li>
           </div>
         </ul>
@@ -66,7 +70,8 @@
 
     </section>
     <div class="list-unstyled d-flex flex-column align-items-center"
-    v-for="message in reversedMessages" :key="message._id">
+    v-for="message in reversedMessages"
+    :key="message._id">
       <li class="media">
         <img
         v-if="message.imageurl"
@@ -79,7 +84,38 @@
         >
         <img v-else class="img-thumbnail" src="http://via.placeholder.com/300?text=:(">
         <div class="align-self-center media-body">
-          <h4 class='mt-0 mb-1'>{{message.username}}</h4>
+          <div class="flash"
+          :class="messageFlash.type"
+          v-if="messageFlash.header && messageFlash.messageID === message.id">
+            <button class='flash-btn'
+            type="button"
+            v-on:click="messageFlash.header = ''">x</button>
+            <strong>{{messageFlash.header}}</strong>
+            {{messageFlash.text}}
+            <a :href="messageFlash.link">{{messageFlash.message}}</a>
+            <div class="opt-btns">
+              <button type="button"
+              v-on:click="handleMessage(message.id,'delete',$event)">
+                Deletar
+              </button>
+              <!-- <button type="button">pensando bem...</button> -->
+            </div>
+          </div>
+          <div class="edit_tab" :data-message-id="message.id">
+            <h4 class='mt-0 mb-1'>{{message.username}}</h4>
+            <button type="button"
+            v-if="message.user_id === auth.id"
+            v-on:click="deleteMessage($event)"
+            class='delete'>deletar</button>
+            <button type="button"
+            v-if="message.user_id === auth.id"
+            v-on:click="editMessage($event)"
+            class='edit'>editar</button>
+            <button type="button"
+            v-if="message.user_id !== auth.id"
+            v-on:click="reactMessage($event)"
+            class='react'>reagir</button>
+          </div>
           <h5 class="mt-0 mb-1">{{message.subject}}</h5>
           {{message.message}}
           <br />
@@ -88,31 +124,27 @@
       </li>
               <hr>
     </div>
-    <section v-if='set_cookie_consent' id="cookie_consent">
-      <div class="cookie_consent_wrapper">
-        <p class="cookie_message">
-          Nossos site coleta estatisticas de acesso através do google analytics.
-        </p>
-        <div class="cookie-btns">
-          <a href="cookie_politics.html">ver nossa política de cookies</a>
-          <div class="cookie_btn_wrapper">
-            <button v-on:click="defineCookieConsent" id="cookie-recusar">recusar</button>
-            <button v-on:click="defineCookieConsent" id='cookie-aceitar'>aceitar</button>
-          </div>
-
-        </div>
-      </div>
-    </section>
   </div>
 </template>
 
 <script>
 const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
 // const apiURL = 'http://localhost:5000/messages';
+const handleURL = 'https://gchan-message-board.herokuapp.com/';
+// const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
+  props: {
+    auth: {
+      default: () => ({
+        username: '',
+        loggedIn: '',
+        id: '',
+      }),
+      type: Object,
+    },
+  },
   data: () => ({
-    set_cookie_consent: false,
     gifsPerPage: 4,
     currPage: 1,
     numPages: 5,
@@ -121,6 +153,7 @@ export default {
     isGifBeingSearched: '',
     emptyGifResults: '',
     hasPag: '',
+    observer: null,
     messages: [],
     gifs: [],
     message: {
@@ -128,8 +161,31 @@ export default {
       subject: '',
       message: '',
       imageURL: '',
+      user_id: 0,
+    },
+    messageFlash: {
+      type: '',
+      header: '',
+      text: '',
+      message: '',
+      messageID: '',
     },
   }),
+  created() {
+    const options = {
+      // root:, //  defaults to browser viewport
+      rootMargin: '0px', // testar com margin bottom
+      theshold: 0, //  as soon as one pixel is visible
+    };
+    const callback = (entries) => {
+      console.log(entries);
+    };
+    const observer = new IntersectionObserver(callback, options);
+    // console.log(observer);
+    document
+      .querySelectorAll('.list-unstyled > li.media')
+      .forEach((li) => observer.observe(li));
+  },
   computed: {
     reversedMessages() {
       return this.messages.slice().reverse();
@@ -149,26 +205,33 @@ export default {
       });
       return result;
     },
+    username() {
+      return this.auth.username || this.message.username;
+    },
   },
   mounted() {
     fetch(apiURL).then((response) => response.json()).then((result) => {
       this.messages = result.results;
     });
-    function getCookieValue(a) {
-      const b = document.cookie.match(`(^|;)\\s*${a}\\s*=\\s*([^;]+)`);
-      return b ? b.pop() : '';
-    }
-    const consentCookie = getCookieValue('cookie_consent_variable');
-    if (consentCookie !== '') {
-      window.cookie_consent_variable = consentCookie;
-      this.set_cookie_consent = false;
-      this.ajaxGtmRequest();
-    } else {
-      this.set_cookie_consent = true;
-    }
   },
   methods: {
+    isMyPost() {
+      return true;
+    },
+    clearMsgForm() {
+      this.message.username = 'Anonymous';
+      this.message.subject = '';
+      this.message.message = '';
+      this.message.imageURL = '';
+      this.message.user_id = 0;
+    },
     addMessage() {
+      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
+      submitButton.disabled = true;
+      if (this.auth.username) {
+        this.message.username = this.auth.username;
+        this.message.user_id = parseInt(this.auth.id, 10);
+      }
       fetch(apiURL, {
         method: 'POST',
         body: JSON.stringify(this.message),
@@ -182,8 +245,64 @@ export default {
         } else {
           this.error = '';
           this.messages.push(JSON.parse(result));
+          this.clearMsgForm();
+        }
+        submitButton.disabled = false;
+      });
+    },
+    deleteMessage(e) {
+      const messageID = e.target.parentElement.getAttribute('data-message-id');
+      this.msgFlash('error', messageID, 'Deletar mensagem', 'Tem certa que deseja deletar esta mensagem? ):', 'ela não ofendeu ninguém');
+    },
+    editMessage() {
+      alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
+    },
+    reactMessage() {
+      alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
+    },
+    handleMessage(messageID, action, e) {
+      e.target.disabled = true;
+      let method;
+      let body;
+      let headers;
+      let url;
+      let finalizeFunction;
+      switch (action) {
+        case 'delete':
+          method = 'DELETE';
+          body = JSON.stringify('');
+          headers = {
+            'content-type': 'text/plain',
+          };
+          url = `message/${messageID}`;
+          finalizeFunction = (id) => this.messages.filter((message) => message.id !== id);
+          break;
+        default:
+          method = 'POST';
+          headers = {
+            'content-type': 'application/json',
+          };
+      }
+      fetch(`${handleURL}${url}`, {
+        method,
+        headers,
+        body,
+        credentials: 'include',
+      }).then((response) => response.json()).then((result) => {
+        if (!result) {
+          e.target.disabled = false;
+          this.msgFlash('error', messageID, 'Ocorreu um erro!', 'Tente deletar sua mensagem novamente.', 'Atualizar a página pode resolver o problema!');
+        } else {
+          this.messages = finalizeFunction(messageID);
         }
       });
+    },
+    msgFlash(type, messageID, header, text, message) {
+      this.messageFlash.type = type;
+      this.messageFlash.header = header;
+      this.messageFlash.text = text;
+      this.messageFlash.message = message;
+      this.messageFlash.messageID = parseInt(messageID, 10);
     },
     searchGif(e) {
       let searchString;
@@ -281,34 +400,20 @@ export default {
       this.currPage = e.target.innerText;
       this.searchGif(e);
     },
-    defineCookieConsent(e) {
-      window.cookie_consent_variable = e.target.id.includes('cookie-aceitar');
-      this.set_cookie_consent = window.cookie_consent_variable;
-      const date = new Date();
-      const expires = date.setTime(date.getTime() + 7 * 24 * 60 * 60 * 1000);
-      if (this.set_cookie_consent) {
-        document.cookie = `cookie_consent_variable=true;expires=${expires}`;
-      } else {
-        document.cookie = `cookie_consent_variable=false;expires=${expires}`;
-      }
-      this.ajaxGtmRequest();
-      this.set_cookie_consent = false;
-    },
-    ajaxGtmRequest() {
-      const gtmScript = document.createElement('script');
-      gtmScript.type = 'text/javascript';
-      const gtmCode = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-K57247W');`;
-      try {
-        gtmScript.appendChild(document.createTextNode(gtmCode));
-        document.head.appendChild(gtmScript);
-      } catch (e) {
-        gtmScript.text = gtmCode;
-        document.head.appendChild(gtmScript);
-      }
+    isInViewSight() {
+      const options = {
+        // root:, //  defaults to browser viewport
+        rootMargin: '0px', // testar com margin bottom
+        theshold: 0, //  as soon as one pixel is visible
+      };
+      const callback = (entries) => {
+        console.log(entries);
+      };
+      const observer = new IntersectionObserver(callback, options);
+      // console.log(observer);
+      document
+        .querySelectorAll('.list-unstyled > li.media')
+        .forEach((li) => observer.observe(li));
     },
     createVideo(target) {
       const image = target.target;
