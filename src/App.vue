@@ -34,7 +34,7 @@
               </div>
             </div>
             <div class="btns">
-              <input type="submit" value="entrar">
+              <button type="submit">entrar</button>
               <button type="button" v-if="showOptions">recuperar senha</button>
               <a href='/g#/info' v-if="showOptions && !this.auth.loggedIn">criar conta</a>
               <div class='img-wrapper' title="Informações"

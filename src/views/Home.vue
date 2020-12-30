@@ -213,18 +213,6 @@ export default {
     fetch(apiURL).then((response) => response.json()).then((result) => {
       this.messages = result.results;
     });
-    function getCookieValue(a) {
-      const b = document.cookie.match(`(^|;)\\s*${a}\\s*=\\s*([^;]+)`);
-      return b ? b.pop() : '';
-    }
-    const consentCookie = getCookieValue('cookie_consent_variable');
-    if (consentCookie !== '') {
-      window.cookie_consent_variable = consentCookie;
-      this.set_cookie_consent = false;
-      this.ajaxGtmRequest();
-    } else {
-      this.set_cookie_consent = true;
-    }
   },
   methods: {
     isMyPost() {

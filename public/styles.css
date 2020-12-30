@@ -523,7 +523,7 @@ div li {
           justify-content: flex-start;
 }
 
-div li img {
+div li img, div li video {
   -webkit-filter: brightness(75%);
           filter: brightness(75%);
   width: 300px;
@@ -532,11 +532,11 @@ div li img {
   margin-right: 15px;
 }
 
-div li img.img-thumbnail {
+div li img.img-thumbnail, div li video.img-thumbnail {
   min-height: 200px;
 }
 
-div li img:hover {
+div li img:hover, div li video:hover {
   -webkit-filter: none;
           filter: none;
 }
