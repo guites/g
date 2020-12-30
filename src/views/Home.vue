@@ -48,7 +48,7 @@
     </form>
     <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
       <div v-if="emptyGifResults" class='emptyGifResults'>
-        <img src="https://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
+        <img src="http://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
       </div>
       <div v-if="emptyGifResults === ''" class="gifBox">
         <div v-for="gif in uniqueGifs" :key="gif.id" class="gifBoxGif">
@@ -58,20 +58,12 @@
       </div>
       <div class='paginate-arrows'>
         <ul v-if='hasPag' class="pagination">
-          <!-- <li v-if="this.apiRoute === 'gfycat'"
-          class="page-item disabled" v-on:click="paginateGif">
-            <a class="page-link" data-paginate='prev' href="#">&laquo;</a>
-          </li> -->
           <div>
             <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
             class="page-item" :class="{ 'active' : currPage == index}">
               <p class="page-link">{{index}}</p>
             </li>
           </div>
-          <!-- <li v-if="this.apiRoute === 'gfycat'"
-          class="page-item" v-on:click="paginateGif">
-            <a class="page-link" data-paginate='next' href="#">&raquo;</a>
-          </li> -->
         </ul>
       </div>
     </div>
@@ -81,9 +73,16 @@
     v-for="message in reversedMessages"
     :key="message._id">
       <li class="media">
-        <img loading="lazy" v-if="message.imageurl" class="img-thumbnail"
-        :src="message.imageurl" :alt="message.subject">
-        <img loading="lazy" v-else class="img-thumbnail" src="https://via.placeholder.com/300?text=:(">
+        <img
+        v-if="message.imageurl"
+        class="img-thumbnail"
+        :data-src="message.imageurl"
+        :alt="message.subject"
+        :src="message.imageurl"
+        @error="createVideo($event)"
+        @load="preventVideo($event)"
+        >
+        <img v-else class="img-thumbnail" src="http://via.placeholder.com/300?text=:(">
         <div class="align-self-center media-body">
           <div class="flash"
           :class="messageFlash.type"
@@ -214,6 +213,18 @@ export default {
     fetch(apiURL).then((response) => response.json()).then((result) => {
       this.messages = result.results;
     });
+    function getCookieValue(a) {
+      const b = document.cookie.match(`(^|;)\\s*${a}\\s*=\\s*([^;]+)`);
+      return b ? b.pop() : '';
+    }
+    const consentCookie = getCookieValue('cookie_consent_variable');
+    if (consentCookie !== '') {
+      window.cookie_consent_variable = consentCookie;
+      this.set_cookie_consent = false;
+      this.ajaxGtmRequest();
+    } else {
+      this.set_cookie_consent = true;
+    }
   },
   methods: {
     isMyPost() {
@@ -415,6 +426,28 @@ export default {
       document
         .querySelectorAll('.list-unstyled > li.media')
         .forEach((li) => observer.observe(li));
+    },
+    createVideo(target) {
+      const image = target.target;
+      const video = document.createElement('video');
+      video.src = image.src;
+      video.autoplay = true;
+      video.loop = true;
+      video.muted = true;
+      video.playsInline = true;
+      image.parentElement.insertBefore(video, image);
+      image.style.display = 'none';
+      image.error = null;
+    },
+    preventVideo(target) {
+      const image = target.target;
+      const prevSibling = image.previousElementSibling;
+      if (prevSibling) {
+        if (prevSibling.tagName === 'VIDEO') {
+          image.previousElementSibling.remove();
+          image.style.display = 'initial';
+        }
+      }
     },
   },
 };
