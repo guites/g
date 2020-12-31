@@ -6,7 +6,7 @@
                 <ul>
                     <li><p>gchan</p><img src="@/assets/sham.png"></li>
                     <li v-if="!isHome"><a href='/g'>mensagens</a></li>
-                    <li v-if="!isInfo"><a href='/g#/info'>info/postagem</a></li>
+                    <li v-if="!isInfo"><a href='/g#/info'>info/minha conta</a></li>
                     <li>
                       <button v-if="!auth.loggedIn" v-on:click="janitor=!janitor">login</button>
                       <button v-if="auth.loggedIn" v-on:click="logOut()">logout</button>
@@ -67,7 +67,7 @@ export default {
     janitor: false,
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     showOptions: '',
     auth: {
       loggedIn: '',

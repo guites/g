@@ -15,9 +15,12 @@
           aria-describedby="usernameHelp" :value="username"
           placeholder="Anonymous"
           required>
-          <small id="usernameHelp" class="form-text text-muted">
+          <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
+            anonimato é para os fracos
+          </small>
+          <small v-else id="usernameHelp" class="form-text text-muted">
             remember: no use for a name
-            </small>
+          </small>
         </div>
         <div class="form-group">
           <label for="subject">Assunto</label>
@@ -133,8 +136,8 @@
 </template>
 
 <script>
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const apiURL = 'http://localhost:5000/messages';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
   props: {
