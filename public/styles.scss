@@ -377,6 +377,13 @@ section.create-thread{
                     object-fit:cover;
                 }
             }
+            .gif-attribute{
+              position:absolute;
+              bottom:-40px;
+              left:50%;
+              transform:translateX(-50%);
+              padding-top:5px;
+            }
         }
     }
 
@@ -402,6 +409,14 @@ div{
         }
         div{
             width: calc(100% - 300px);
+            img{
+              width:50px;
+              border:none;
+            }
+            small{
+              display:block;
+              margin:15px 0;
+            }
             &.edit_tab{
               width:100%;
               display:flex;

@@ -67,7 +67,7 @@ export default {
     janitor: false,
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     showOptions: '',
     auth: {
       loggedIn: '',
