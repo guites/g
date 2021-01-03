@@ -58,6 +58,12 @@
           <img class="gif-thumb" v-on:click="selectGif"
           :data-original="gif.originalUrl" :src="gif.thumbUrl">
         </div>
+        <div class="gif-attribute">
+          <a href="https://giphy.com/" v-if="this.apiRoute === 'giphy'"
+          title="Visitar giphy.com" target="_blank">
+            <img src="@/assets/giphy-attr.png" alt="Powered by GIPHY">
+          </a>
+        </div>
       </div>
       <div class='paginate-arrows'>
         <ul v-if='hasPag' class="pagination">
@@ -127,7 +133,11 @@
           <h5 class="mt-0 mb-1">{{message.subject}}</h5>
           {{message.message}}
           <br />
-          <small>{{message.created}}</small>
+          <small>{{message.created}}</small><br />
+          <img v-if="message.gif_origin == 'giphy'"
+          alt='powered by GIPHY'
+          class="gif_origin"
+          src="@/assets/giphy-attr1.png">
         </div>
       </li>
               <hr>
@@ -136,8 +146,8 @@
 </template>
 
 <script>
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const apiURL = 'http://localhost:5000/messages';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
   props: {
@@ -168,6 +178,7 @@ export default {
       message: '',
       imageURL: '',
       user_id: 0,
+      gif_origin: '',
     },
     messageFlash: {
       type: '',
@@ -237,6 +248,13 @@ export default {
       if (this.auth.username) {
         this.message.username = this.auth.username;
         this.message.user_id = parseInt(this.auth.id, 10);
+      }
+      if (/giphy/.test(this.message.imageURL)) {
+        this.message.gif_origin = 'giphy';
+      } else if (/gfycat/.test(this.message.imageURL)) {
+        this.message.gif_origin = 'gfycat';
+      } else if (/tenor/.test(this.message.imageURL)) {
+        this.message.gif_origin = 'tenor';
       }
       fetch(apiURL, {
         method: 'POST',
@@ -394,15 +412,6 @@ export default {
       this.message.imageURL = originalUrl;
     },
     paginateGif(e) {
-      // if (this.apiRoute === 'giphy') {
-      //   this.currPage = e.target.innerText;
-      // } else if (this.apiRoute === 'gfycat') {
-      //   this.gfycatCursor = e.target.getAttribute('data-cursor');
-      //   if (e.target.getAttribute('data-paginate') === 'next') {
-      //     document.querySelectorAll('[data-paginate]')[0].setAttribute
-      // ('data-cursor', e.target.getAttribute('data-cursor'));
-      //   }
-      // }
       this.currPage = e.target.innerText;
       this.searchGif(e);
     },

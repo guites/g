@@ -59,7 +59,7 @@ export default {
   },
   data: () => ({
     cookie_consent: window.ua_consent,
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     name: '',
     email: '',
     password: '',
