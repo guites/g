@@ -178,7 +178,7 @@ export default {
       message: '',
       imageURL: '',
       user_id: 0,
-      gif_origin: '',
+      gif_origin: 'none',
     },
     messageFlash: {
       type: '',
@@ -441,6 +441,9 @@ export default {
       image.parentElement.insertBefore(video, image);
       image.style.display = 'none';
       image.error = null;
+      video.onerror = function test(e) {
+        e.target.parentElement.querySelector('.img-thumbnail').src = 'http://via.placeholder.com/300?text=erro ao carregar url  :(';
+      };
     },
     preventVideo(target) {
       const image = target.target;
