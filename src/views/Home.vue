@@ -4,7 +4,7 @@
      <section class="create-thread">
       <form @submit.prevent="addMessage()">
         <div v-if="error" class='alert-error'>
-          <close v-on:click="error=''">x</close>
+          <span v-on:click="error=''">x</span>
           <h4>Erro!</h4>
           <p>{{error}}</p>
        </div>
@@ -169,7 +169,6 @@ export default {
     isGifBeingSearched: '',
     emptyGifResults: '',
     hasPag: '',
-    observer: null,
     messages: [],
     gifs: [],
     message: {
@@ -188,21 +187,6 @@ export default {
       messageID: '',
     },
   }),
-  created() {
-    const options = {
-      // root:, //  defaults to browser viewport
-      rootMargin: '0px', // testar com margin bottom
-      theshold: 0, //  as soon as one pixel is visible
-    };
-    const callback = (entries) => {
-      console.log(entries);
-    };
-    const observer = new IntersectionObserver(callback, options);
-    // console.log(observer);
-    document
-      .querySelectorAll('.list-unstyled > li.media')
-      .forEach((li) => observer.observe(li));
-  },
   computed: {
     reversedMessages() {
       return this.messages.slice().reverse();
@@ -263,9 +247,16 @@ export default {
           'content-type': 'application/json',
         },
       }).then((response) => response.json()).then((result) => {
+        console.log(result);
         if (result.details) {
           const error = result.details.map((detail) => detail.message).join('.');
           this.error = error;
+        } else if (result.error) {
+          if (result.origin === 'psql') {
+            if (result.code === '23505') {
+              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+            }
+          }
         } else {
           this.error = '';
           this.messages.push(JSON.parse(result));
@@ -414,21 +405,6 @@ export default {
     paginateGif(e) {
       this.currPage = e.target.innerText;
       this.searchGif(e);
-    },
-    isInViewSight() {
-      const options = {
-        // root:, //  defaults to browser viewport
-        rootMargin: '0px', // testar com margin bottom
-        theshold: 0, //  as soon as one pixel is visible
-      };
-      const callback = (entries) => {
-        console.log(entries);
-      };
-      const observer = new IntersectionObserver(callback, options);
-      // console.log(observer);
-      document
-        .querySelectorAll('.list-unstyled > li.media')
-        .forEach((li) => observer.observe(li));
     },
     createVideo(target) {
       const image = target.target;

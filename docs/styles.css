@@ -292,21 +292,24 @@ section.create-thread form .alert-error {
   position: absolute;
   background-color: #e74c3c;
   max-width: 500px;
+  width: 100%;
   color: #fff;
-  padding: 10px;
+  padding: 20px;
   border-radius: 3px;
 }
 
 section.create-thread form .alert-error h4 {
   position: relative;
   font-size: 22px;
+  margin-bottom: 15px;
 }
 
 section.create-thread form .alert-error p {
   font-size: 18px;
+  margin-bottom: 15px;
 }
 
-section.create-thread form .alert-error close {
+section.create-thread form .alert-error span {
   text-align: right;
   width: 100%;
   opacity: 0.6;
@@ -322,7 +325,7 @@ section.create-thread form .alert-error close {
   z-index: 1;
 }
 
-section.create-thread form .alert-error close:hover {
+section.create-thread form .alert-error span:hover {
   opacity: 0.95;
 }
 
