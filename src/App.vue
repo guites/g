@@ -50,6 +50,23 @@
             <a :href="loginFlash.link">{{loginFlash.message}}</a>
           </div>
         </div>
+        <div v-if="marquee" class="marquee">
+          <p v-on:click="marqueeInput=!marqueeInput">⌨</p>
+          <span>Bem-vindo ao maior fórum de celibatos do norte do estado!</span>
+          <p v-on:click="marquee=!marquee">✖</p>
+        </div>
+        <form id="marqueeForm"
+          v-if="marqueeInput"
+          @submit.prevent="addMarquee()">
+          <input
+            type="text"
+            placeholder="Proibido palavrão neste servidor de minecraft cristão"
+            name="marqueeInput"
+            v-model="marqueeMessage.content"
+            required
+          >
+          <input type="submit" value="Enviar">
+        </form>
     </header>
     <!-- <Home :auth="this.auth"/> -->
     <router-view :auth="this.auth" class='container'/>
@@ -57,7 +74,7 @@
 </template>
 <script>
 // import Home from '@/views/Home.vue';
-
+const apiURL = 'http://localhost:5000/messages';
 export default {
   name: 'App',
   // components: {
@@ -65,9 +82,14 @@ export default {
   // },
   data: () => ({
     janitor: false,
+    marquee: true,
+    marqueeInput: false,
+    marqueeMessage: {
+      content: '',
+    },
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     showOptions: '',
     auth: {
       loggedIn: '',
@@ -173,6 +195,34 @@ export default {
             this.auth.id = '';
           }
         });
+    },
+    addMarquee() {
+      const submitButton = document.querySelector('marqueeForm > input[type=submit]');
+      submitButton.disabled = true;
+      fetch(apiURL, {
+        method: 'POST',
+        body: JSON.stringify(this.message),
+        headers: {
+          'content-type': 'application/json',
+        },
+      }).then((response) => response.json()).then((result) => {
+        console.log(result);
+        if (result.details) {
+          const error = result.details.map((detail) => detail.message).join('.');
+          this.error = error;
+        } else if (result.error) {
+          if (result.origin === 'psql') {
+            if (result.code === '23505') {
+              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+            }
+          }
+        } else {
+          this.error = '';
+          this.messages.push(JSON.parse(result));
+          this.clearMsgForm();
+        }
+        submitButton.disabled = false;
+      });
     },
   },
   beforeMount() {
