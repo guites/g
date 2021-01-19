@@ -146,8 +146,8 @@
 </template>
 
 <script>
-const apiURL = 'http://localhost:5000/messages';
-const handleURL = 'http://localhost:5000/';
+const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
+const handleURL = 'https://gchan-message-board.herokuapp.com/';
 export default {
   name: 'Home',
   props: {

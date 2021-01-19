@@ -7,6 +7,13 @@ body{
     background-color:#222;
     color:#b9b9b9;
 }
+
+//* SHARED SHIT *//
+form{
+
+}
+
+
 form{
   textarea, input[type="email"],input[type="password"],input[type="text"],input[type="url"]{
     height:36.5px;
@@ -53,6 +60,41 @@ form{
   }
   textarea{
     height:100px;
+  }
+  .alert-error{
+    position:absolute;
+    background-color:#e74c3c;
+    max-width:500px;
+    width:100%;
+    color:#fff;
+    padding:20px;
+    border-radius:3px;
+    h4{
+        position:relative;
+        font-size:22px;
+        margin-bottom:15px;
+    }
+    p{
+        font-size:18px;
+        margin-bottom:15px;
+    }
+    span{
+        text-align:right;
+        width:100%;
+        opacity:0.6;
+        font-size:22px;
+        padding:0 5px 0;
+        transition:opacity 300ms ease;
+        cursor:pointer;
+        position:absolute;
+        padding:3px 14px;
+        top:0;
+        right:0;
+        z-index:1;
+        &:hover{
+            opacity:0.95;
+        }
+    }
   }
 }
 header{
@@ -194,6 +236,209 @@ header{
         }
       }
     }
+    .marquee {
+      cursor:pointer;
+      margin: 0 auto;
+      width: 100%;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 2px;
+      position: relative;
+      background-color: #222;
+      font-size: 27px;
+      line-height:135%;
+      font-family: 'cxled',monospace;
+      &:after{
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        // background: radial-gradient(circle, transparent 20%, transparent 60%), radial-gradient(circle, transparent 40%, #303030 15%) 25px 25px;
+        background: radial-gradient(circle, transparent 20%, transparent 60%), radial-gradient(circle, transparent 80%, #303030 15%) 0px 0px;
+        // background-size: .05em 0.05em;
+        background-size:.025em 0.1em;
+      }
+      > span {
+        color: #edcd6c;
+        display: inline-block;
+        padding-left: 100%;
+        // -webkit-animation: marquee 20s linear infinite;
+        // animation: marquee 20s linear infinite;
+        animation: movement-steps20 10s linear infinite;
+        // font-size: 27px;
+        font-size: 22px;
+        line-height: 135%;
+        letter-spacing: 2px;
+        opacity: 0.8;
+      }
+      p{
+        color: white;
+        position: absolute;
+        top: -7px;
+        right: 0px;
+        opacity:0;
+        pointer-events:none;
+        transition:all 300ms ease;
+        cursor: pointer;
+        padding: 10px;
+        z-index: 2;
+        background-color: #222;
+        width: 50px;
+        text-align:center;
+        &:after{
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          // background: radial-gradient(circle, transparent 20%, transparent 60%), radial-gradient(circle, transparent 40%, #000 15%) 25px 25px;
+          // background-size: .05em 0.05em;
+          z-index:-1;
+        }
+        &:nth-child(1){
+          left: 0;
+          font-size: 52px;
+          &:after{
+            background-size: .1em 0.1em;
+          }
+        }
+        &:hover{
+          color:red;
+        }
+      }
+      &.has-opts{
+        p{
+          opacity:1;
+          pointer-events:initial;
+        }
+      }
+    }
+    #marqueeForm{
+      display:flex;
+      align-items:center;
+      max-width:500px;
+      width:100%;
+      margin:0 auto;
+      input[type="text"]{
+        width:calc(100% - 80px);
+      }
+    }
+    @keyframes marquee {
+      0% {
+        transform: translate(0, 0);
+      }
+      100% {
+        transform: translate(-100%, 0);
+      }
+    }
+    @keyframes movement-steps20 {
+      0% {
+        transform: translateX(0%);
+        left: 100%;
+      }
+      5%,
+      9.99% {
+        transform: translateX(-5%);
+        left: 95%;
+      }
+      10%,
+      14.99% {
+        transform: translateX(-10%);
+        left: 90%;
+      }
+      15%,
+      19.99% {
+        transform: translateX(-15%);
+        left: 85%;
+      }
+      20%,
+      24.99% {
+        transform: translateX(-20%);
+        left: 80%;
+      }
+      25%,
+      29.99% {
+        transform: translateX(-25%);
+        left: 75%;
+      }
+      30%,
+      34.99% {
+        transform: translateX(-30%);
+        left: 70%;
+      }
+      35%,
+      39.99% {
+        transform: translateX(-35%);
+        left: 65%;
+      }
+      40%,
+      44.99% {
+        transform: translateX(-40%);
+        left: 60%;
+      }
+      45%,
+      49.99% {
+        transform: translateX(-45%);
+        left: 55%;
+      }
+      50%,
+      54.99% {
+        transform: translateX(-50%);
+        left: 50%;
+      }
+      55%,
+      59.99% {
+        transform: translateX(-55%);
+        left: 45%;
+      }
+      60%,
+      64.99% {
+        transform: translateX(-60%);
+        left: 40%;
+      }
+      65%,
+      69.99% {
+        transform: translateX(-65%);
+        left: 35%;
+      }
+      70%,
+      74.99% {
+        transform: translateX(-70%);
+        left: 30%;
+      }
+      75%,
+      79.99% {
+        transform: translateX(-75%);
+        left: 25%;
+      }
+      80%,
+      84.99% {
+        transform: translateX(-80%);
+        left: 20%;
+      }
+      85%,
+      89.99% {
+        transform: translateX(-85%);
+        left: 15%;
+      }
+      90%,
+      94.99% {
+        transform: translateX(-90%);
+        left: 10%;
+      }
+      95%,
+      99.99% {
+        transform: translateX(-95%);
+        left: 5%;
+      }
+      100% {
+        transform: translateX(-100%);
+        left: 0%;
+      }
+    }
 }
 section.create-thread{
     display:flex;
@@ -203,41 +448,6 @@ section.create-thread{
     form{
         max-width: 500px;
         width:100%;
-        .alert-error{
-            position:absolute;
-            background-color:#e74c3c;
-            max-width:500px;
-            width:100%;
-            color:#fff;
-            padding:20px;
-            border-radius:3px;
-            h4{
-                position:relative;
-                font-size:22px;
-                margin-bottom:15px;
-            }
-            p{
-                font-size:18px;
-                margin-bottom:15px;
-            }
-            span{
-                text-align:right;
-                width:100%;
-                opacity:0.6;
-                font-size:22px;
-                padding:0 5px 0;
-                transition:opacity 300ms ease;
-                cursor:pointer;
-                position:absolute;
-                padding:3px 14px;
-                top:0;
-                right:0;
-                z-index:1;
-                &:hover{
-                    opacity:0.95;
-                }
-            }
-        }
         .form-group{
             display:flex;
             flex-direction:column;
@@ -690,7 +900,14 @@ section, .janitor-login, .media-body{
   }
 
 @media screen and (max-width: 767px) {
-    header{
+  header{
+      .marquee{
+        > span{
+          font-size:18px;
+          animation-duration:15s;
+          animation:movement-steps20 15s linear infinte;
+        }
+      }
         .inner-header{
             flex-direction:column;
             nav{
