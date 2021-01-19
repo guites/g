@@ -79,6 +79,7 @@ form .alert-error {
   color: #fff;
   padding: 20px;
   border-radius: 3px;
+  z-index: 3;
 }
 
 form .alert-error h4 {
