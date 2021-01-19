@@ -50,9 +50,15 @@
             <a :href="loginFlash.link">{{loginFlash.message}}</a>
           </div>
         </div>
-        <div v-if="marquee" class="marquee">
+        <div v-if="marquee"
+        @click="showMarqueeOpts($event)"
+        class="marquee">
           <p v-on:click="marqueeInput=!marqueeInput">⌨</p>
-          <span>Bem-vindo ao maior fórum de celibatos do norte do estado!</span>
+          <span>
+            <span v-for="marquee in marquees" :key="marquee.id">
+              {{marquee.content}};
+            </span>
+          </span>
           <p v-on:click="marquee=!marquee">✖</p>
         </div>
         <form id="marqueeForm"
@@ -60,12 +66,18 @@
           @submit.prevent="addMarquee()">
           <input
             type="text"
-            placeholder="Proibido palavrão neste servidor de minecraft cristão"
+            placeholder="Proibido mais de 50 chars neste fórum cristão"
             name="marqueeInput"
             v-model="marqueeMessage.content"
             required
+            maxlength="50"
           >
           <input type="submit" value="Enviar">
+            <div v-if="error" class='alert-error'>
+            <span v-on:click="error=''">x</span>
+            <h4>Erro!</h4>
+            <p>{{error}}</p>
+          </div>
         </form>
     </header>
     <!-- <Home :auth="this.auth"/> -->
@@ -74,7 +86,7 @@
 </template>
 <script>
 // import Home from '@/views/Home.vue';
-const apiURL = 'http://localhost:5000/messages';
+const marqueeURL = 'http://localhost:5000/marquee';
 export default {
   name: 'App',
   // components: {
@@ -82,11 +94,13 @@ export default {
   // },
   data: () => ({
     janitor: false,
+    marquees: [],
     marquee: true,
     marqueeInput: false,
     marqueeMessage: {
       content: '',
     },
+    error: '',
     username: '',
     password: '',
     SERVERurl: 'http://localhost:5000',
@@ -196,30 +210,34 @@ export default {
           }
         });
     },
+    showMarqueeOpts(e) {
+      e.target.classList.toggle('has-opts');
+    },
+    clearMarqueeForm() {
+      this.marqueeMessage.content = '';
+    },
     addMarquee() {
-      const submitButton = document.querySelector('marqueeForm > input[type=submit]');
+      const submitButton = document.querySelector('#marqueeForm > input[type=submit]');
       submitButton.disabled = true;
-      fetch(apiURL, {
+      fetch(marqueeURL, {
         method: 'POST',
-        body: JSON.stringify(this.message),
+        body: JSON.stringify(this.marqueeMessage),
         headers: {
           'content-type': 'application/json',
         },
       }).then((response) => response.json()).then((result) => {
         console.log(result);
-        if (result.details) {
-          const error = result.details.map((detail) => detail.message).join('.');
-          this.error = error;
-        } else if (result.error) {
+        if (result.error) {
           if (result.origin === 'psql') {
             if (result.code === '23505') {
-              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+              this.error = 'Aviso duplicado!\ngit gud e pense em algo novo antes de enviar ᕦ(ò_óˇ)ᕤ';
             }
           }
         } else {
           this.error = '';
-          this.messages.push(JSON.parse(result));
-          this.clearMsgForm();
+          this.marqueeInput = false;
+          this.marquees.unshift(JSON.parse(result));
+          this.clearMarqueeForm();
         }
         submitButton.disabled = false;
       });
@@ -230,6 +248,10 @@ export default {
   },
   mounted() {
     this.checkCookies();
+    fetch(marqueeURL).then((response) => response.json()).then((result) => {
+      this.marquees = result.results;
+    });
+    console.log(this.marquees);
   },
   computed: {
     isHome() {
