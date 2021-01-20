@@ -316,7 +316,6 @@ header .janitor-login form div div label {
 }
 
 header .marquee {
-  cursor: pointer;
   margin: 0 auto;
   width: 100%;
   overflow: hidden;
@@ -327,6 +326,12 @@ header .marquee {
   font-size: 27px;
   line-height: 135%;
   font-family: 'cxled',monospace;
+  pointer-events: none;
+}
+
+header .marquee:hover > span {
+  -webkit-animation-play-state: paused;
+  animation-play-state: paused;
 }
 
 header .marquee:after {
@@ -344,12 +349,26 @@ header .marquee > span {
   color: #edcd6c;
   display: inline-block;
   padding-left: 100%;
-  -webkit-animation: movement-steps20 10s linear infinite;
-          animation: movement-steps20 10s linear infinite;
+  -webkit-animation: movement-steps20 10s linear infinite forwards;
+  animation: movement-steps20 10s linear infinite forwards;
   font-size: 22px;
   line-height: 135%;
   letter-spacing: 2px;
   opacity: 0.8;
+  pointer-events: initial;
+}
+
+header .marquee > span span {
+  display: inline-block;
+  margin: 0 5px;
+}
+
+header .marquee > span span a {
+  pointer-events: initial;
+}
+
+header .marquee > span span a:visited {
+  color: #edcd6c;
 }
 
 header .marquee p {
@@ -390,6 +409,8 @@ header .marquee p:nth-child(1):after {
 
 header .marquee p:hover {
   color: red;
+  opacity: 1;
+  pointer-events: initial;
 }
 
 header .marquee.has-opts p {
@@ -401,6 +422,10 @@ header #marqueeForm {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
+  -webkit-box-orient: vertical;
+  -webkit-box-direction: normal;
+      -ms-flex-direction: column;
+          flex-direction: column;
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
@@ -413,14 +438,45 @@ header #marqueeForm input[type="text"] {
   width: calc(100% - 80px);
 }
 
+header #marqueeForm .marquee-form-top, header #marqueeForm .marquee-form-bottom {
+  width: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+header #marqueeForm .marquee-form-bottom label {
+  width: 105px;
+  height: 36.5px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+header #marqueeForm .marquee-form-bottom label input {
+  margin-left: 5px;
+}
+
+header #marqueeForm .marquee-form-bottom input {
+  width: calc(100% - 105px);
+}
+
 @-webkit-keyframes marquee {
   0% {
     -webkit-transform: translate(0, 0);
             transform: translate(0, 0);
+    padding-right: 0;
   }
   100% {
     -webkit-transform: translate(-100%, 0);
             transform: translate(-100%, 0);
+    padding-right: 100%;
   }
 }
 
@@ -428,10 +484,12 @@ header #marqueeForm input[type="text"] {
   0% {
     -webkit-transform: translate(0, 0);
             transform: translate(0, 0);
+    padding-right: 0;
   }
   100% {
     -webkit-transform: translate(-100%, 0);
             transform: translate(-100%, 0);
+    padding-right: 100%;
   }
 }
 

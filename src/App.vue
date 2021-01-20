@@ -51,12 +51,21 @@
           </div>
         </div>
         <div v-if="marquee"
-        @click="showMarqueeOpts($event)"
         class="marquee">
           <p v-on:click="marqueeInput=!marqueeInput">⌨</p>
           <span>
-            <span v-for="marquee in marquees" :key="marquee.id">
+            <span v-for="marquee in marquees"
+            :key="marquee.id"
+            >
+              <a v-if="marquee.has_url === 'true' || marquee.has_url === true"
+              :href="marquee.href"
+              target="_blank"
+              >
               {{marquee.content}};
+              </a>
+              <span v-else>
+                {{marquee.content}};
+              </span>
             </span>
           </span>
           <p v-on:click="marquee=!marquee">✖</p>
@@ -64,15 +73,35 @@
         <form id="marqueeForm"
           v-if="marqueeInput"
           @submit.prevent="addMarquee()">
-          <input
-            type="text"
-            placeholder="Proibido mais de 50 chars neste fórum cristão"
-            name="marqueeInput"
-            v-model="marqueeMessage.content"
+          <div class="marquee-form-top">
+            <input
+              type="text"
+              placeholder="Proibido mais de 50 chars neste fórum cristão"
+              name="marqueeInput"
+              v-model="marqueeMessage.content"
+              required
+              maxlength="50"
+            >
+            <input type="submit" value="Enviar">
+          </div>
+          <div class="marquee-form-bottom">
+            <label for="marqueeCheckUrl">
+              tem link?
+              <input type="checkbox"
+              id="marqueeCheckUrl"
+              name="marqueeCheckUrl"
+              v-model="marqueeMessage.has_url"
+              >
+            </label>
+            <input
+            type="url"
+            name="marqueeUrl"
+            placeholder="https://www.htmhell.dev/"
+            v-model="marqueeMessage.href"
+            v-if="marqueeMessage.has_url"
             required
-            maxlength="50"
-          >
-          <input type="submit" value="Enviar">
+            >
+          </div>
             <div v-if="error" class='alert-error'>
             <span v-on:click="error=''">x</span>
             <h4>Erro!</h4>
@@ -99,6 +128,8 @@ export default {
     marqueeInput: false,
     marqueeMessage: {
       content: '',
+      has_url: false,
+      href: '',
     },
     error: '',
     username: '',
@@ -210,14 +241,18 @@ export default {
           }
         });
     },
-    showMarqueeOpts(e) {
-      e.target.classList.toggle('has-opts');
+    showMarqueeOpts() {
+      document.querySelector('.marquee').classList.toggle('has-opts');
+      // e.target.classList.toggle('has-opts');
     },
     clearMarqueeForm() {
       this.marqueeMessage.content = '';
+      this.marqueeMessage.has_url = '';
+      this.marqueeMessage.href = '';
     },
     addMarquee() {
-      const submitButton = document.querySelector('#marqueeForm > input[type=submit]');
+      console.log('lol?');
+      const submitButton = document.querySelector('#marqueeForm input[type="submit"]');
       submitButton.disabled = true;
       fetch(marqueeURL, {
         method: 'POST',
@@ -242,6 +277,18 @@ export default {
         submitButton.disabled = false;
       });
     },
+    handleMarqueeResize() {
+      const marqueeSpan = document.querySelector('.marquee > span');
+      if (window.innerWidth > 979) {
+        marqueeSpan.removeEventListener('click', this.showMarqueeOpts);
+        marqueeSpan.addEventListener('mouseover', this.showMarqueeOpts);
+        marqueeSpan.addEventListener('mouseout', this.showMarqueeOpts);
+      } else {
+        marqueeSpan.addEventListener('click', this.showMarqueeOpts);
+        marqueeSpan.removeEventListener('mouseover', this.showMarqueeOpts);
+        marqueeSpan.removeEventListener('mouseout', this.showMarqueeOpts);
+      }
+    },
   },
   beforeMount() {
     this.checkLogin();
@@ -251,7 +298,7 @@ export default {
     fetch(marqueeURL).then((response) => response.json()).then((result) => {
       this.marquees = result.results;
     });
-    console.log(this.marquees);
+    this.handleMarqueeResize();
   },
   computed: {
     isHome() {
