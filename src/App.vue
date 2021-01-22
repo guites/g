@@ -19,37 +19,39 @@
                 <button type='sumit'>pesquisar</button>
             </form> -->
         </div>
-        <div class="janitor-login" v-if="janitor">
-          <form v-if="!auth.loggedIn" v-on:submit.prevent="login($event)">
-            <div class="fields">
-              <div class="login-wrapper">
-                <label for="janitor-login">email:</label>
-                <input type="email" name="janitor-login"
-                id="janitor-login" v-model="username" required>
+        <transition name="fadeForm">
+          <div class="janitor-login" v-if="janitor">
+            <form v-if="!auth.loggedIn" v-on:submit.prevent="login($event)">
+              <div class="fields">
+                <div class="login-wrapper">
+                  <label for="janitor-login">email:</label>
+                  <input type="email" name="janitor-login"
+                  id="janitor-login" v-model="username" required>
+                </div>
+                <div class="pwd-wrapper">
+                  <label for="janitor-pass">pass:</label>
+                  <input type="password" name="janitor-pass"
+                  id="janitor-pass" v-model="password" required>
+                </div>
               </div>
-              <div class="pwd-wrapper">
-                <label for="janitor-pass">pass:</label>
-                <input type="password" name="janitor-pass"
-                id="janitor-pass" v-model="password" required>
+              <div class="btns">
+                <button type="submit">entrar</button>
+                <!-- <button type="button" v-if="showOptions">recuperar senha</button> -->
+                <a href='/g#/info' v-if="showOptions && !this.auth.loggedIn">criar conta</a>
+                <div class='img-wrapper' title="Informações"
+                v-on:click="showOptions=!showOptions">
+                  <img src="@/assets/information.png" alt="Registro/Alterar senha">
+                </div>
               </div>
+            </form>
+            <div class="flash" :class="loginFlash.type" v-if="loginFlash.header">
+              <button class='flash-btn' type="button" v-on:click="loginFlash.header = ''">x</button>
+              <strong>{{loginFlash.header}}</strong>
+              {{loginFlash.text}}
+              <a :href="loginFlash.link">{{loginFlash.message}}</a>
             </div>
-            <div class="btns">
-              <button type="submit">entrar</button>
-              <button type="button" v-if="showOptions">recuperar senha</button>
-              <a href='/g#/info' v-if="showOptions && !this.auth.loggedIn">criar conta</a>
-              <div class='img-wrapper' title="Informações"
-              v-on:click="showOptions=!showOptions">
-                <img src="@/assets/information.png" alt="Registro/Alterar senha">
-              </div>
-            </div>
-          </form>
-          <div class="flash" :class="loginFlash.type" v-if="loginFlash.header">
-            <button class='flash-btn' type="button" v-on:click="loginFlash.header = ''">x</button>
-            <strong>{{loginFlash.header}}</strong>
-            {{loginFlash.text}}
-            <a :href="loginFlash.link">{{loginFlash.message}}</a>
           </div>
-        </div>
+        </transition>
         <div v-if="marquee"
         class="marquee">
           <p v-on:click="marqueeInput=!marqueeInput">⌨</p>
@@ -70,44 +72,49 @@
           </span>
           <p v-on:click="marquee=!marquee">✖</p>
         </div>
-        <form id="marqueeForm"
+        <transition name="fadeForm">
+          <form id="marqueeForm"
           v-if="marqueeInput"
           @submit.prevent="addMarquee()">
-          <div class="marquee-form-top">
-            <input
-              type="text"
-              placeholder="Proibido mais de 50 chars neste fórum cristão"
-              name="marqueeInput"
-              v-model="marqueeMessage.content"
-              required
-              maxlength="50"
-            >
-            <input type="submit" value="Enviar">
-          </div>
-          <div class="marquee-form-bottom">
-            <label for="marqueeCheckUrl">
-              tem link?
-              <input type="checkbox"
-              id="marqueeCheckUrl"
-              name="marqueeCheckUrl"
-              v-model="marqueeMessage.has_url"
+            <div class="marquee-form-top">
+              <input
+                type="text"
+                placeholder="Proibido mais de 50 chars neste fórum cristão"
+                name="marqueeInput"
+                v-model="marqueeMessage.content"
+                required
+                maxlength="50"
               >
-            </label>
-            <input
-            type="url"
-            name="marqueeUrl"
-            placeholder="https://www.htmhell.dev/"
-            v-model="marqueeMessage.href"
-            v-if="marqueeMessage.has_url"
-            required
-            >
-          </div>
+              <input type="submit" value="Enviar">
+            </div>
+            <div class="marquee-form-bottom">
+              <label for="marqueeCheckUrl">
+                tem link?
+                <input type="checkbox"
+                id="marqueeCheckUrl"
+                name="marqueeCheckUrl"
+                v-model="marqueeMessage.has_url"
+                >
+              </label>
+              <transition name="fade">
+                <input
+                type="url"
+                name="marqueeUrl"
+                placeholder="https://www.htmhell.dev/"
+                v-model="marqueeMessage.href"
+                v-if="marqueeMessage.has_url"
+                required
+                >
+              </transition>
+            </div>
             <div v-if="error" class='alert-error'>
-            <span v-on:click="error=''">x</span>
-            <h4>Erro!</h4>
-            <p>{{error}}</p>
-          </div>
-        </form>
+              <span v-on:click="error=''">x</span>
+              <h4>Erro!</h4>
+              <p>{{error}}</p>
+            </div>
+          </form>
+        </transition>
+
     </header>
     <!-- <Home :auth="this.auth"/> -->
     <router-view :auth="this.auth" class='container'/>
@@ -298,7 +305,7 @@ export default {
     fetch(marqueeURL).then((response) => response.json()).then((result) => {
       this.marquees = result.results;
     });
-    this.handleMarqueeResize();
+    // this.handleMarqueeResize();
   },
   computed: {
     isHome() {

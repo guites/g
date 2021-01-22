@@ -10,6 +10,17 @@ body {
   color: #b9b9b9;
 }
 
+.fadeForm-enter-active, .fadeForm-leave-active {
+  -webkit-transition: all .25s;
+  transition: all .25s;
+  max-height: 200px;
+  overflow: hidden;
+}
+
+.fadeForm-enter, .fadeForm-leave-to {
+  max-height: 0px;
+}
+
 form textarea, form input[type="email"], form input[type="password"], form input[type="text"], form input[type="url"] {
   height: 36.5px;
   border: 1px solid #222;
@@ -79,7 +90,6 @@ form .alert-error {
   color: #fff;
   padding: 20px;
   border-radius: 3px;
-  z-index: 3;
 }
 
 form .alert-error h4 {
@@ -323,10 +333,9 @@ header .marquee {
   padding: 2px;
   position: relative;
   background-color: #222;
-  font-size: 27px;
+  font-size: 16px;
   line-height: 135%;
   font-family: 'cxled',monospace;
-  pointer-events: none;
 }
 
 header .marquee:hover > span {
@@ -334,15 +343,8 @@ header .marquee:hover > span {
   animation-play-state: paused;
 }
 
-header .marquee:after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, transparent 20%, transparent 60%), radial-gradient(circle, transparent 80%, #303030 15%) 0px 0px;
-  background-size: .025em 0.1em;
+header .marquee:hover p {
+  opacity: 1;
 }
 
 header .marquee > span {
@@ -351,11 +353,10 @@ header .marquee > span {
   padding-left: 100%;
   -webkit-animation: movement-steps20 10s linear infinite forwards;
   animation: movement-steps20 10s linear infinite forwards;
-  font-size: 22px;
+  font-size: 16px;
   line-height: 135%;
   letter-spacing: 2px;
   opacity: 0.8;
-  pointer-events: initial;
 }
 
 header .marquee > span span {
@@ -364,7 +365,7 @@ header .marquee > span span {
 }
 
 header .marquee > span span a {
-  pointer-events: initial;
+  color: #edcd6c;
 }
 
 header .marquee > span span a:visited {
@@ -377,7 +378,6 @@ header .marquee p {
   top: -7px;
   right: 0px;
   opacity: 0;
-  pointer-events: none;
   -webkit-transition: all 300ms ease;
   transition: all 300ms ease;
   cursor: pointer;
@@ -386,16 +386,7 @@ header .marquee p {
   background-color: #222;
   width: 50px;
   text-align: center;
-}
-
-header .marquee p:after {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
+  font-size: 27px;
 }
 
 header .marquee p:nth-child(1) {
@@ -403,19 +394,9 @@ header .marquee p:nth-child(1) {
   font-size: 52px;
 }
 
-header .marquee p:nth-child(1):after {
-  background-size: .1em 0.1em;
-}
-
 header .marquee p:hover {
   color: red;
   opacity: 1;
-  pointer-events: initial;
-}
-
-header .marquee.has-opts p {
-  opacity: 1;
-  pointer-events: initial;
 }
 
 header #marqueeForm {
@@ -432,6 +413,7 @@ header #marqueeForm {
   max-width: 500px;
   width: 100%;
   margin: 0 auto;
+  height: 105px;
 }
 
 header #marqueeForm input[type="text"] {
@@ -461,6 +443,17 @@ header #marqueeForm .marquee-form-bottom label {
 
 header #marqueeForm .marquee-form-bottom label input {
   margin-left: 5px;
+  width: initial;
+  height: initial;
+}
+
+header #marqueeForm .marquee-form-bottom .fade-enter-active, header #marqueeForm .marquee-form-bottom .fade-leave-active {
+  -webkit-transition: opacity .25s;
+  transition: opacity .25s;
+}
+
+header #marqueeForm .marquee-form-bottom .fade-enter, header #marqueeForm .marquee-form-bottom .fade-leave-to {
+  opacity: 0;
 }
 
 header #marqueeForm .marquee-form-bottom input {

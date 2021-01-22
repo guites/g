@@ -29,7 +29,8 @@
         </div>
         <div class="form-group">
           <label for="message">Mensagem</label>
-          <textarea v-model="message.message" class="form-control" id="message" rows="5"></textarea>
+          <textarea v-model="message.message" class="form-control" id="message" rows="5" required>
+          </textarea>
         </div>
         <div class="form-group">
           <label for="imageURL">image URL</label>
