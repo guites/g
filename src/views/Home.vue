@@ -130,6 +130,9 @@
             v-if="message.user_id !== auth.id"
             v-on:click="reactMessage($event)"
             class='react'>reagir</button>
+            <button type="button"
+            v-on:click="replyMessage($event)"
+            class='reply'>responder</button>
           </div>
           <h5 class="mt-0 mb-1">{{message.subject}}</h5>
           {{message.message}}
@@ -143,14 +146,24 @@
       </li>
               <hr>
     </div>
+    <template>
+      <ReplyBox>
+      </ReplyBox>
+    </template>
+
   </div>
 </template>
 
 <script>
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+import ReplyBox from '../components/replybox.vue';
+
+const apiURL = 'http://localhost:5000/messages';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
+  components: {
+    ReplyBox,
+  },
   props: {
     auth: {
       default: () => ({
@@ -275,6 +288,9 @@ export default {
     },
     reactMessage() {
       alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
+    },
+    replyMessage() {
+      alert('babuinos babuinarão');
     },
     handleMessage(messageID, action, e) {
       e.target.disabled = true;
