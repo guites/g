@@ -19,6 +19,43 @@ body{
 }
 
 //* SHARED SHIT *//
+.alert-error{
+  position:absolute;
+  background-color:#e74c3c;
+  max-width:500px;
+  width:100%;
+  color:#fff;
+  padding:20px;
+  border-radius:3px;
+  h4{
+      position:relative;
+      font-size:22px;
+      margin-bottom:15px;
+  }
+  p{
+      font-size:18px;
+      margin-bottom:15px;
+  }
+  span{
+      text-align:right;
+      width:100%;
+      opacity:0.6;
+      font-size:22px;
+      padding:0 5px 0;
+      transition:opacity 300ms ease;
+      cursor:pointer;
+      position:absolute;
+      padding:3px 14px;
+      top:0;
+      right:0;
+      z-index:1;
+      &:hover{
+          opacity:0.95;
+      }
+  }
+}
+
+
 .noselect{
   -webkit-touch-callout: none; /* iOS Safari */
     -webkit-user-select: none; /* Safari */
@@ -27,6 +64,13 @@ body{
         -ms-user-select: none; /* Internet Explorer/Edge */
             user-select: none; /* Non-prefixed version, currently
                                 supported by Chrome, Edge, Opera and Firefox */
+}
+
+body.isdragging{
+  cursor:grabbing;
+  #replybox #replybox-head span{
+    cursor:grabbing;
+  }
 }
 
 form{
@@ -521,7 +565,7 @@ header{
 section.create-thread{
   display:flex;
   justify-content:space-around;
-  height: 515px;
+  // height: 515px;
   margin-top:20px;
   form{
       max-width: 500px;
@@ -536,6 +580,9 @@ section.create-thread{
           input,textarea{
               background-color:#e6e6e6;
               min-height:26px;
+          }
+          textarea{
+            max-width:100%;
           }
           input[type="radio"]{
               display:none;
@@ -681,84 +728,109 @@ section.create-thread{
 }
 div{
   li{
-      display:flex;
-      margin: 0 auto;
-      max-width:980px;
-      justify-content:flex-start;
-      img, video{
-          filter:brightness(75%);
-          width:300px;
-          border:2px solid #a4a4a4;
-          border-radius:3px;
-          margin-right:15px;
-          &.img-thumbnail{
-            min-height:200px;
-          }
-          &:hover{
-              filter:none;
-          }
-      }
-      div{
-          width: calc(100% - 300px);
-          img{
-            width:50px;
-            border:none;
-          }
-          small{
-            display:block;
-            margin:15px 0;
-          }
-          &.edit_tab{
-            width:100%;
-            display:flex;
-            button{
-              margin-left:15px;
-              cursor:pointer;
-              background-color:transparent;
-              height: 36.5px;
-              border-radius: 5px;
-              padding:5px;
-              transition:all 300ms ease;
-              border-width:0;
-              &.delete{
-                color:#e74c3c;
-                border-color:#e74c3c;
-                &:hover{
-                  background-color:#e74c3c;
-                }
-              }
-              &.edit{
-                color:#f39c12;
-                border-color:#f39c12;
-                &:hover{
-                  background-color:#f39c12;
-                }
-              }
-              &.react{
-                color:#3498db;
-                border-color:#3498db;
-                &:hover{
-                  background-color:#3498db;
-                }
-              }
-              &.reply{
-                color:#444;
-                border-color:#444;
-                &:hover{
-                  background-color:#444;
-                }
-              }
+    display:flex;
+    margin: 0 auto 10px;
+    max-width:980px;
+    justify-content:flex-start;
+    align-items:start;
+    img, video{
+        filter:brightness(75%);
+        width:300px;
+        border:2px solid #a4a4a4;
+        border-radius:3px;
+        margin-right:15px;
+        cursor:pointer;
+        &.img-thumbnail{
+          min-height:200px;
+        }
+        &:hover{
+            filter:none;
+        }
+        &.fullsize{
+          width:100%;
+        }
+    }
+    div{
+        width: calc(100% - 300px);
+        p{
+          white-space: pre-line;
+          overflow-wrap: break-word;
+          width:95%;
+        }
+        img{
+          width:50px;
+          border:none;
+        }
+        small{
+          display:block;
+          margin:0;
+          font-size:10px;
+        }
+        &.edit_tab{
+          width:100%;
+          display:flex;
+          button{
+            margin-left:15px;
+            cursor:pointer;
+            background-color:transparent;
+            height: 36.5px;
+            border-radius: 5px;
+            padding:5px;
+            transition:all 300ms ease;
+            border-width:0;
+            &.delete{
+              color:#e74c3c;
+              border-color:#e74c3c;
               &:hover{
-                color:#fff;
+                background-color:#e74c3c;
               }
             }
+            &.edit{
+              color:#f39c12;
+              border-color:#f39c12;
+              &:hover{
+                background-color:#f39c12;
+              }
+            }
+            &.react{
+              color:#3498db;
+              border-color:#3498db;
+              &:hover{
+                background-color:#3498db;
+              }
+            }
+            &.reply{
+              color:#444;
+              border-color:#444;
+              &:hover{
+                background-color:#444;
+              }
+            }
+            &:hover{
+              color:#fff;
+            }
           }
+        }
+    }
+    &.reply-item{
+      img, video{
+        width:150px;
+        min-height:initial;
+        &.fullsize{
+          width:100%;
+        }
       }
+      > div{
+        border: 2px solid #444;
+        background-color: #333;
+        padding:10px 10px 0;
+      }
+    }
   }
   hr{
-      opacity:0;
-      max-width:660px;
-      margin:10px auto;
+      opacity:1;
+      max-width:980px;
+      margin:15px auto;
   }
 }
 #replybox{
@@ -768,6 +840,8 @@ div{
   border:2px solid #444;
   background-color:#222;
   padding:15px;
+  max-width:calc(100vw - 25px);
+  max-height:100vh;
   #replybox-head{
     width: 100%;
     border-bottom: 2px solid #444;
@@ -801,6 +875,10 @@ div{
     .form-group{
       display:flex;
       flex-direction:column;
+      textarea{
+        max-width:100%;
+        max-height:calc(100vh - 305px);
+      }
     }
   }
 }
@@ -1021,6 +1099,10 @@ position:relative;
           width:100%;
       }
   }
+  #replybox{
+    left:0;
+    top:0;
+  }
   .list-unstyled{
       width:95%;
       margin:0 auto;
@@ -1075,12 +1157,17 @@ header{
   div{
       li{
           flex-direction:column;
-          align-items:center;
+          align-items:start;
           div{
            width:100%;
           }
           img{
              width:75%;
+          }
+          &.reply-item{
+            img, video{
+              width:250px;
+            }
           }
       }
   }

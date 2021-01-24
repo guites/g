@@ -1,28 +1,44 @@
 <template>
-  <div ref="replybox" id="replybox">
+  <div ref="replybox" id="replybox" v-if="messageToReplyTo">
+    <div v-if="error" class='alert-error'>
+      <span v-on:click="error=''">x</span>
+      <h4>Erro!</h4>
+      <p>{{error}}</p>
+    </div>
     <div id="replybox-head">
       <span class="noselect"
       ref="dragSpan"
       @mousedown="dragMouseDown"
       >
-        responder ao post #111
+        responder ao post #{{messageToReplyTo}}
       </span>
-      <button class="close" type="button">
+      <button class="close" type="button" @click="this.closeReply">
         x
       </button>
     </div>
-    <form id="replyForm" action="">
+    <form id="replyForm" @submit.prevent="addReply()">
+      <!-- <input type="hidden" name="message_id"
+      v-model="replyMessage.message_id"
+      :value="messageToReplyTo"> -->
       <div class="form-group">
         <label for="username">Usuário</label>
         <input type="text" class="form-control" id="username"
         aria-describedby="usernameHelp"
         placeholder="Anonymous"
+        v-model="replyMessage.username"
         required>
       </div>
       <div class="form-group">
         <label for="message">Mensagem</label>
-        <textarea class="form-control" id="message" rows="5" required>
+        <textarea class="form-control" id="message" rows="5"
+        v-model="replyMessage.content"
+        required>
         </textarea>
+      </div>
+      <div class="form-group">
+        <label for="imageURL">image URL</label>
+        <input v-model="replyMessage.imageURL" type="url" class="form-control"
+        id="imageURL" placeholder="https://~">
       </div>
       <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
@@ -30,32 +46,41 @@
 </template>
 
 <script>
+const replyURL = 'http://localhost:5000/replies';
 export default {
   name: 'ReplyBox',
+  props: ['messageToReplyTo'],
   data: () => ({
+    replyTo: {
+      message_id: '',
+    },
     positions: {
       clientX: undefined,
       clientY: undefined,
       movementX: 0,
       movementY: 0,
       boundsFlag: '',
+      boundsHorzFlag: '',
+      boundsVertFlag: '',
       dragging: false,
     },
+    replyMessage: {
+      username: 'Anonymous',
+      content: '',
+      imageURL: '',
+      message_id: '',
+      user_id: 0,
+    },
+    error: '',
   }),
   methods: {
     dragMouseDown(event) {
-      // event.target.classList.add('grabbing');
       event.preventDefault();
-      // console.log('event.clientX', event.clientX);
-      // console.log('event.screenX', event.screenX);
-      // console.log('dif between the two', event.screenX - event.clientX);
       // get the mouse cursor position at startup:
       const spanRect = event.target.getBoundingClientRect();
       this.positions.dragging = true;
       this.positions.clickedLeft = event.pageX - spanRect.left;
       this.positions.clickedTop = event.clientY - spanRect.top;
-      // console.log(event.pageY);
-      // console.log(this.positions.clickedTop);
       this.positions.clientX = event.clientX;
       this.positions.clientY = event.clientY;
       document.onmousemove = this.elementDrag;
@@ -64,51 +89,32 @@ export default {
     elementDrag(event) {
       event.preventDefault();
       if (this.positions.dragging) {
+        document.body.classList.add('isdragging');
         const replyBoxPos = this.$refs.replybox.getBoundingClientRect();
-        if (!(replyBoxPos.top > 0)) this.positions.boundsFlag = 'top';
-        // if (!(event.clientY > 0)) this.positions.boundsFlag = 'top';
-        // devo ver a posição que a replyBox está e não o mouse
-        // console.log('replyBox top:', this.$refs.replybox.style.top);
-        // console.log('clientY:', event.clientY);
+        if (!(replyBoxPos.top > 0)) this.positions.boundsVertFlag = 'top';
         if (!(replyBoxPos.top < window.innerHeight - replyBoxPos.height)) {
-          this.positions.boundsFlag = 'bottom';
+          this.positions.boundsVertFlag = 'bottom';
         }
-        // if (!(event.clientY < window.innerHeight - replyBoxPos.height))
-        //  this.positions.boundsFlag = 'bottom';
-        if (!(replyBoxPos.left > 0)) this.positions.boundsFlag = 'left';
-        if (!(replyBoxPos.left < window.innerWidth - replyBoxPos.width)) this.positions.boundsFlag = 'right';
-        if (this.positions.boundsFlag === '') {
+        if (!(replyBoxPos.left > 0)) this.positions.boundsHorzFlag = 'left';
+        if (!(replyBoxPos.left < window.innerWidth - replyBoxPos.width)) this.positions.boundsHorzFlag = 'right';
+        //  tem que ser dois verificadores separados
+        if (this.positions.boundsHorzFlag === '') {
           this.$refs.replybox.style.left = `${event.clientX - this.positions.clickedLeft}px`;
-          this.$refs.replybox.style.top = `${event.clientY - this.positions.clickedTop - 17}px`;
           // VERIFICAR APÓS SETAR OS VALORES DEIXA MAIS FLUIDO !!
           if (this.$refs.replybox.getBoundingClientRect().left < 0) {
             this.$refs.replybox.style.left = '1px';
           } else if (this.$refs.replybox.getBoundingClientRect().left > window.innerWidth) {
             this.$refs.replybox.style.left = `${window.innerWidth - 1}px`;
           }
+        // TEM QUE TRAVAR AS DIMENSÕES ISOLADAMENTE !!
         } else {
-          // TEM QUE TRAVAR AS DIMENSÕES ISOLADAMENTE !! TRAVOU DIREITA MAS AINDA PODE MOVER CIMA/BAIXO !!
-          switch (this.positions.boundsFlag) {
-            case 'top':
-              if ((event.clientY > 25)) {
-                this.positions.boundsFlag = '';
-              } else {
-                this.$refs.replybox.style.top = '1px';
-              }
-              break;
-            case 'bottom':
-              if ((event.clientY < window.innerHeight - replyBoxPos.height)) {
-                this.positions.boundsFlag = '';
-              } else {
-                this.$refs.replybox.style.top = `${window.innerHeight - replyBoxPos.height - 1}px`;
-              }
-              break;
+          switch (this.positions.boundsHorzFlag) {
             case 'left':
               if ((event.clientX > replyBoxPos.width / 3)) {
                 if (!(this.positions.clickedLeft > ((replyBoxPos.width / 3) - 50))) {
                   this.positions.clickedLeft = (replyBoxPos.width / 3) - 50;
                 }
-                this.positions.boundsFlag = '';
+                this.positions.boundsHorzFlag = '';
               } else {
                 this.$refs.replybox.style.left = '1px';
               }
@@ -116,61 +122,44 @@ export default {
             case 'right':
               if (event.clientX < window.innerWidth - replyBoxPos.width / 2) {
                 this.positions.clickedLeft = (0.5 * replyBoxPos.width) + 50;
-                this.positions.boundsFlag = '';
+                this.positions.boundsHorzFlag = '';
               } else {
                 this.$refs.replybox.style.left = `${window.innerWidth - replyBoxPos.width - 1}px`;
               }
               break;
             default:
-              this.positions.boundsFlag = '';
+              this.positions.boundsHorzFlag = '';
+          }
+        }
+        if (this.positions.boundsVertFlag === '') {
+          this.$refs.replybox.style.top = `${event.clientY - this.positions.clickedTop - 17}px`;
+        } else {
+          switch (this.positions.boundsVertFlag) {
+            case 'top':
+              if ((event.clientY > 25)) {
+                this.positions.boundsVertFlag = '';
+              } else {
+                this.$refs.replybox.style.top = '1px';
+              }
+              break;
+            case 'bottom':
+              if ((event.clientY < window.innerHeight - replyBoxPos.height)) {
+                this.positions.boundsVertFlag = '';
+              } else {
+                this.$refs.replybox.style.top = `${window.innerHeight - replyBoxPos.height - 1}px`;
+              }
+              break;
+            default:
+              this.positions.boundsVertFlag = '';
           }
         }
       }
-      //   else if (this.positions.boundsFlag === 'top') {
-      //     if ((event.clientY > 25)) {
-      //       this.positions.boundsFlag = '';
-      //     }
-      //   } else if ()
-      // }
-      // this.positions.movementX = this.positions.clientX - event.clientX;
-      // this.positions.movementY = this.positions.clientY - event.clientY;
-      // const replyBoxPos = this.$refs.replybox.getBoundingClientRect();
-      // // check that mouse is in screen
-      // if (!(event.clientY > 0)) this.positions.boundsFlag = 'top';
-      // if (!(event.clientY < window.innerHeight)) this.positions.boundsFlag = 'bottom';
-      // if (!(event.clientX > 0)) this.positions.boundsFlag = 'left';
-      // if (!(event.clientX < window.innerWidth)) this.positions.boundsFlag = 'right';
-      // // if (event.clientX > 0 && event.clientX < window.innerWidth
-      // // && event.clientY > 0 && event.clientY < window.innerHeight) {
-      // if (this.positions.boundsFlag === undefined) {
-      //   // check that mouse is inside draggable element
-      //   //  {
-      //   this.positions.clientX = event.clientX;
-      //   this.positions.clientY = event.clientY;
-      //   // set the element's new position:
-      //   const newPosY = (this.$refs.replybox.offsetTop - this.positions.movementY);
-      //   const bodyPosTop = newPosY + this.$refs.replybox.style.width;
-      //   const bodyPosBottom = newPosY + replyBoxPos.height;
-      //   if (bodyPosTop > 0
-      //   && bodyPosBottom <= (window.innerHeight || document.documentElement.clientHeight)) {
-      // this.$refs.replybox.style.top
-      // = `${(this.$refs.replybox.offsetTop - this.positions.movementY)}px`;
-      //   }
-      //   this.$refs.replybox.style.left = `${(this.$refs.replybox.offsetLeft
-      // - this.positions.movementX)}px`;
-      //   // }
-      // } else if (this.positions.boundsFlag === 'top') {
-      //   if ((event.clientY > 25) && this.isInSpan(event)) {
-      //     this.positions.boundsFlag = undefined;
-      //   }
-      // }
-      // console.log(this.positions.boundsFlag);
-      // console.log(event.clientY);
     },
     closeDragElement() {
       this.positions.dragging = false;
       document.onmouseup = null;
       document.onmousemove = null;
+      document.body.classList.remove('isdragging');
     },
     isInSpan(event) {
       const dragSpanPos = this.$refs.dragSpan.getBoundingClientRect();
@@ -190,6 +179,52 @@ export default {
         && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
         && rect.right <= (window.innerWidth || document.documentElement.clientWidth)
       );
+    },
+    closeReply() {
+      this.$emit('closeReply');
+    },
+    addReplyToThread(reply) {
+      console.log(reply);
+      this.$emit('addReplyToThread', reply);
+    },
+    clearReplyForm() {
+      this.replyMessage.message_id = '';
+      this.replyMessage.username = 'Anonymous';
+      this.replyMessage.content = '';
+      this.replyMessage.imageURL = '';
+      this.replyMessage.user_id = 0;
+    },
+    addReply() {
+      const submitButton = document.querySelector('#replybox form button[type="submit"]');
+      submitButton.disabled = true;
+      this.replyMessage.message_id = this.messageToReplyTo;
+      fetch(replyURL, {
+        method: 'POST',
+        body: JSON.stringify(this.replyMessage),
+        headers: {
+          'content-type': 'application/json',
+        },
+      }).then((response) => response.json()).then((result) => {
+        const parseResult = JSON.parse(result);
+        if (parseResult.details) {
+          const error = parseResult.details.map((detail) => detail.message).join('.');
+          this.error = error;
+        } else if (parseResult.error) {
+          if (parseResult.origin === 'psql') {
+            if (parseResult.code === '23505') {
+              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+            }
+          }
+        } else {
+          this.error = '';
+          // aqui tem que disponibilizar o conteúdo do reply na Home.vue
+          // this.addReplyToThread(this.replyMessage);
+          this.addReplyToThread(parseResult);
+          this.clearReplyForm();
+          this.closeReply();
+        }
+        submitButton.disabled = false;
+      });
     },
   },
 };

@@ -29,7 +29,8 @@
         </div>
         <div class="form-group">
           <label for="message">Mensagem</label>
-          <textarea v-model="message.message" class="form-control" id="message" rows="5" required>
+          <textarea v-model="message.message" class="form-control" id="message" rows="5"
+          required maxlength=250>
           </textarea>
         </div>
         <div class="form-group">
@@ -82,7 +83,7 @@
     <div class="list-unstyled d-flex flex-column align-items-center"
     v-for="message in reversedMessages"
     :key="message._id">
-      <li class="media">
+      <li class="media" :id="message.id">
         <img
         loading="lazy"
         v-if="message.imageurl"
@@ -90,6 +91,7 @@
         :data-src="message.imageurl"
         :alt="message.subject"
         :src="message.imageurl"
+        @click="fullSize($event)"
         @error="createVideo($event)"
         @load="preventVideo($event)"
         >
@@ -131,11 +133,12 @@
             v-on:click="reactMessage($event)"
             class='react'>reagir</button>
             <button type="button"
-            v-on:click="replyMessage($event)"
+            @click="replyMessage($event)"
+            :data-replyTo="message.id"
             class='reply'>responder</button>
           </div>
-          <h5 class="mt-0 mb-1">{{message.subject}}</h5>
-          {{message.message}}
+          <h5 class="mt-0 mb-1">#{{message.id}} / {{message.subject}}</h5>
+          <p>{{message.message}}</p>
           <br />
           <small>{{message.created}}</small><br />
           <img v-if="message.gif_origin == 'giphy'"
@@ -144,13 +147,39 @@
           src="@/assets/giphy-attr1.png">
         </div>
       </li>
-              <hr>
+      <li class="media reply-item"
+      v-for="reply of message.replies"
+      v-bind:key="reply.id"
+      >
+        <img
+        loading="lazy"
+        v-if="reply.imageurl"
+        class="img-thumbnail"
+        :data-src="reply.imageurl"
+        :src="reply.imageurl"
+        @click="fullSize($event)"
+        @error="createVideo($event)"
+        @load="preventVideo($event)"
+        >
+        <div class="align-self-center media-body">
+          <div class="edit_tab">
+            <p class="mt-0 mb-1">{{reply.username}}</p>
+          </div>
+            <p class="mt-0 mb-1">#{{reply.id}}</p>
+            <p>{{reply.content}}</p><br />
+            <small>{{reply.created}}</small><br />
+        </div>
+      </li>
+      <hr>
     </div>
     <template>
-      <ReplyBox>
+      <ReplyBox
+      :messageToReplyTo="this.messageToReplyTo"
+      @closeReply="this.closeReply"
+      @addReplyToThread="this.addReplyToThread"
+      >
       </ReplyBox>
     </template>
-
   </div>
 </template>
 
@@ -158,6 +187,7 @@
 import ReplyBox from '../components/replybox.vue';
 
 const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
 const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
@@ -175,6 +205,8 @@ export default {
     },
   },
   data: () => ({
+    replyObserver: null,
+    messageToReplyTo: '',
     gifsPerPage: 4,
     currPage: 1,
     numPages: 5,
@@ -225,9 +257,21 @@ export default {
     },
   },
   mounted() {
-    fetch(apiURL).then((response) => response.json()).then((result) => {
-      this.messages = result.results;
-    });
+    this.replyObserver = new IntersectionObserver(
+      this.onElementObserved,
+      {
+        threshold: 0,
+      },
+    );
+    // .forEach((li) => this.replyObserver.observe(li));
+    fetch(apiURL).then((response) => response.json())
+      .then((result) => {
+        this.messages = result.results;
+      })
+      .then(() => {
+        document.querySelectorAll('.list-unstyled li.media')
+          .forEach((li) => this.replyObserver.observe(li));
+      });
   },
   methods: {
     isMyPost() {
@@ -289,8 +333,33 @@ export default {
     reactMessage() {
       alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
     },
-    replyMessage() {
-      alert('babuinos babuinarão');
+    replyMessage(e) {
+      this.messageToReplyTo = e.target.getAttribute('data-replyto');
+    },
+    closeReply() {
+      this.messageToReplyTo = '';
+    },
+    addReplyToThread(reply) {
+      const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
+          === parseInt(reply.message_id, 10));
+      if (this.messages[msgIndex].replies === undefined) this.messages[msgIndex].replies = [];
+      this.messages[msgIndex].replies.push(reply);
+    },
+    onElementObserved(entries) {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        this.replyObserver.unobserve(entry.target);
+        fetch(`${repliesURL}/${entry.target.id}`).then((response) => response.json())
+          .then((replies) => {
+            if (replies.error) {
+              return;
+            }
+            console.log(replies);
+            const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
+          === parseInt(entry.target.id, 10));
+            this.$set(this.messages[msgIndex], 'replies', replies);
+          });
+      });
     },
     handleMessage(messageID, action, e) {
       e.target.disabled = true;
@@ -422,6 +491,9 @@ export default {
     paginateGif(e) {
       this.currPage = e.target.innerText;
       this.searchGif(e);
+    },
+    fullSize(e) {
+      e.target.classList.toggle('fullsize');
     },
     createVideo(target) {
       const image = target.target;
