@@ -46,7 +46,7 @@
 </template>
 
 <script>
-const replyURL = 'http://localhost:5000/replies';
+const replyURL = 'https://gchan-message-board.herokuapp.com/replies';
 export default {
   name: 'ReplyBox',
   props: ['messageToReplyTo'],
