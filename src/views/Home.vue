@@ -38,14 +38,18 @@
           <input v-model="message.imageURL" type="url" class="form-control"
           id="imageURL" placeholder="https://~">
           <div class="gif-search-toggle" data-toggle="buttons">
-            <input v-on:change="searchGif" type="radio" name="options" id="option1"
+            <label for ='option1' class="btn btn-primary">
+              Giphy
+              <input v-on:change="searchGif" type="radio" name="options" id="option1"
               autocomplete="off" checked value="giphy">
-            <label for ='option1' class="btn btn-primary">Giphy</label>
-            <input v-on:change="searchGif" type="radio" name="options" id="option2"
+            </label>
+            <label for='option2' class="btn btn-primary">
+              gfycat
+              <input v-on:change="searchGif" type="radio" name="options" id="option2"
               autocomplete="off" value="gfycat">
-            <label for='option2' class="btn btn-primary">gfycat</label>
+            </label>
           </div>
-          <label for='giphy-search'>Busque um gif</label>
+          <label for='giphyURL'>Busque um gif</label>
           <input v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
           class="form-control" id="giphyURL" placeholder="cats">
         </div>
@@ -80,7 +84,7 @@
     </div>
 
     </section>
-    <div class="list-unstyled d-flex flex-column align-items-center"
+    <ul class="list-unstyled d-flex flex-column align-items-center"
     v-for="message in reversedMessages"
     :key="message._id">
       <li class="media" :id="message.id">
@@ -99,7 +103,9 @@
         loading="lazy"
         v-else
         class="img-thumbnail"
-        src="http://via.placeholder.com/300?text=:(">
+        src="http://via.placeholder.com/300?text=:("
+        alt="post sem imagem"
+        >
         <div class="align-self-center media-body">
           <div class="flash"
           :class="messageFlash.type"
@@ -160,6 +166,7 @@
         @click="fullSize($event)"
         @error="createVideo($event)"
         @load="preventVideo($event)"
+        alt=""
         >
         <div class="align-self-center media-body">
           <div class="edit_tab">
@@ -171,7 +178,7 @@
         </div>
       </li>
       <hr>
-    </div>
+    </ul>
     <template>
       <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
@@ -186,9 +193,9 @@
 <script>
 import ReplyBox from '../components/replybox.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
   components: {
