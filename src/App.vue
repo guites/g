@@ -4,7 +4,7 @@
         <div class="inner-header">
             <nav>
                 <ul>
-                    <li><p>gchan</p><img src="@/assets/sham.png"></li>
+                    <li><p>gchan</p><img src="@/assets/sham.png" alt="gchan logo"></li>
                     <li v-if="!isHome"><a href='/g'>mensagens</a></li>
                     <li v-if="!isInfo"><a href='/g#/info'>info/minha conta</a></li>
                     <li>
@@ -37,11 +37,20 @@
               <div class="btns">
                 <button type="submit">entrar</button>
                 <!-- <button type="button" v-if="showOptions">recuperar senha</button> -->
-                <a href='/g#/info' v-if="showOptions && !this.auth.loggedIn">criar conta</a>
-                <div class='img-wrapper' title="Informações"
+                <button type="button" class='img-wrapper' title="Informações"
                 v-on:click="showOptions=!showOptions">
                   <img src="@/assets/information.png" alt="Registro/Alterar senha">
-                </div>
+                </button>
+                <a href='/g#/info' v-if="isHome && showOptions && !this.auth.loggedIn">
+                  criar conta
+                </a>
+                <button v-if="isInfo && showOptions && !this.auth.loggedIn"
+                type="button"
+                class="goto-form"
+                title="ir para o formulário"
+                @click="focusForm()">
+                  criar conta
+                </button>
               </div>
             </form>
             <div class="flash" :class="loginFlash.type" v-if="loginFlash.header">
@@ -62,6 +71,7 @@
               <a v-if="marquee.has_url === 'true' || marquee.has_url === true"
               :href="marquee.href"
               target="_blank"
+              rel="noreferrer"
               >
               {{marquee.content}};
               </a>
@@ -122,7 +132,7 @@
 </template>
 <script>
 // import Home from '@/views/Home.vue';
-const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
+const marqueeURL = 'http://localhost:5000/marquee';
 export default {
   name: 'App',
   // components: {
@@ -141,7 +151,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     showOptions: '',
     auth: {
       loggedIn: '',
@@ -295,6 +305,9 @@ export default {
         marqueeSpan.removeEventListener('mouseover', this.showMarqueeOpts);
         marqueeSpan.removeEventListener('mouseout', this.showMarqueeOpts);
       }
+    },
+    focusForm() {
+      document.querySelector('#register form #name').focus();
     },
   },
   beforeMount() {

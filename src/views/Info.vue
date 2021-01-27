@@ -24,17 +24,13 @@
         <input type="text" name="name" id="name" v-model="name" required>
         <label for="email">email</label>
         <input type="email" name="email" id="email" v-model="email" required>
-        <div class="pwd-wrapper">
-          <label for="password">senha</label>
-          <div class="img-wrapper">
-            <input type="password" name="password" id="password" v-model="password" required>
-            <div class="img" v-on:click="showPassword($event)" title="Mostrar senha">
-              <img src="@/assets/eye.png" alt="Mostrar senha" class='active'>
-              <img src="@/assets/eye1.png" alt="Esconder senha">
-            </div>
-          </div>
-          <input type="submit" value="Enviar">
+        <label for="password">senha</label>
+        <input type="password" name="password" id="password" v-model="password" required>
+        <div class="checkbox-wrapper">
+          <input @change="showPassword()" type="checkbox" name="mostrar-senha" id="mostrar-senha">
+          <label for="mostrar-senha">mostrar senha</label>
         </div>
+        <input type="submit" value="Enviar">
       </form>
       <div class="flash" :class="signUpFlash.type" v-if="signUpFlash.header">
         <button class='flash-btn' type="button" v-on:click="signUpFlash.header = ''">x</button>
@@ -59,7 +55,8 @@ export default {
   },
   data: () => ({
     cookie_consent: window.ua_consent,
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
+    show_pwd_checked: '',
     name: '',
     email: '',
     password: '',
@@ -94,18 +91,13 @@ export default {
       }
       document.cookie = `cookie_consent_variable=${e.target.value};expires=${expires}`;
     },
-    showPassword(e) {
-      const imgs = e.target.children;
-      imgs[0].classList.toggle('active');
-      imgs[1].classList.toggle('active');
-      const pwdField = e.target.previousElementSibling;
+    showPassword() {
+      const pwdField = document.querySelector('#password');
       const type = pwdField.getAttribute('type');
       if (type === 'password') {
         pwdField.setAttribute('type', 'text');
-        e.target.title = 'Esconder senha';
       } else {
         pwdField.setAttribute('type', 'password');
-        e.target.title = 'Mostrar senha';
       }
     },
     register(e) {
