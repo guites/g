@@ -199,8 +199,9 @@ header{
                   flex-direction:column;
                   align-items:center;
                   img{
-                      width:32px;
-                      margin:0;
+                    width:32px;
+                    margin:0;
+                    cursor:initial;
                   }
               }
           }
@@ -945,8 +946,23 @@ h2{
   font-size:28px;
   margin:15px;
 }
+p{
+  line-height:1.5;
+  a{
+    color:#999;
+    &:visited{
+      color:#888;
+    }
+  }
+}
 form{
   margin:20px;
+  #cookie-consent{
+    border: 1px solid #444;
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 5px;
+  }
 }
 }
 section#register{

@@ -6,11 +6,11 @@
                 <ul>
                     <li><p>gchan</p><img src="@/assets/sham.png" alt="gchan logo"></li>
                     <li v-if="!isHome"><a href='/'>mensagens</a></li>
-                    <li v-if="!isInfo"><a href='/#/info'>info/minha conta</a></li>
-                    <li>
+                    <li v-if="!isInfo"><a href='/#/info'>informações</a></li>
+                    <!-- <li>
                       <button v-if="!auth.loggedIn" v-on:click="janitor=!janitor">login</button>
                       <button v-if="auth.loggedIn" v-on:click="logOut()">logout</button>
-                    </li>
+                    </li> -->
                 </ul>
             </nav>
             <!-- <form>
@@ -19,7 +19,7 @@
                 <button type='sumit'>pesquisar</button>
             </form> -->
         </div>
-        <transition name="fadeForm">
+        <!-- <transition name="fadeForm">
           <div class="janitor-login" v-if="janitor">
             <form v-if="!auth.loggedIn" v-on:submit.prevent="login($event)">
               <div class="fields">
@@ -36,7 +36,7 @@
               </div>
               <div class="btns">
                 <button type="submit">entrar</button>
-                <!-- <button type="button" v-if="showOptions">recuperar senha</button> -->
+                <button type="button" v-if="showOptions">recuperar senha</button>
                 <button type="button" class='img-wrapper' title="Informações"
                 v-on:click="showOptions=!showOptions">
                   <img src="@/assets/information.png" alt="Registro/Alterar senha">
@@ -60,7 +60,7 @@
               <a :href="loginFlash.link">{{loginFlash.message}}</a>
             </div>
           </div>
-        </transition>
+        </transition> -->
         <div v-if="marquee"
         class="marquee">
           <p v-on:click="marqueeInput=!marqueeInput">⌨</p>
@@ -193,17 +193,18 @@ export default {
     },
     checkCookies() {
       const consentCookie = this.getCookieValue('cookie_consent_variable');
+      console.log(consentCookie);
       if (consentCookie !== '') {
-        this.cookie_consent = consentCookie;
+        if (consentCookie === 'true') {
+          this.ajaxGtmRequest();
+        }
       } else {
         const date = new Date();
         const expires = new Date(date.getTime() + 365 * 24 * 60 * 60 * 1000).toGMTString();
-        document.cookie = `cookie_consent_variable=true;expires=${expires}`;
-        this.cookie_consent = true;
+        // default track
+        document.cookie = `cookie_consent_variable=true;expires=${expires};path=/`;
+        this.ajaxGtmRequest();
       }
-      window.ua_consent = consentCookie;
-      this.ajaxGtmRequest();
-      return consentCookie;
     },
     async login() {
       fetch(`${this.SERVERurl}/login`, {

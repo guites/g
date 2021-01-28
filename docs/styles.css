@@ -259,6 +259,7 @@ header .inner-header nav ul li:nth-child(1) {
 header .inner-header nav ul li:nth-child(1) img {
   width: 32px;
   margin: 0;
+  cursor: initial;
 }
 
 header .inner-header form {
@@ -1317,8 +1318,27 @@ section#cookies h2 {
   margin: 15px;
 }
 
+section#cookies p {
+  line-height: 1.5;
+}
+
+section#cookies p a {
+  color: #999;
+}
+
+section#cookies p a:visited {
+  color: #888;
+}
+
 section#cookies form {
   margin: 20px;
+}
+
+section#cookies form #cookie-consent {
+  border: 1px solid #444;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
 }
 
 section#register h3 {

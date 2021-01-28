@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- <h2 v-if="auth.loggedIn">HAS USERNAME PROP</h2> -->
      <section class="create-thread">
       <form @submit.prevent="addMessage()">
         <div v-if="error" class='alert-error'>

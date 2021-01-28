@@ -3,8 +3,14 @@
     <h1>informações gerais.</h1>
     <section id="cookies">
       <div id="cookies-text">
-        <p>nosso site coleta dados anônimos,
-        como as páginas mais visitadas e as ações mais frequentes realizadas no site.</p>
+        <p>o <b>gchan</b> usa o
+        <a href="https://twitter.com/googleanalytics" target="_blank"
+        rel="noreferrer">google analytics</a>
+        para contabilizar os acessos e as ações mais frequentes realizadas no site.<br/>
+        a ideia é estimar o que os usuários fazem em quais horários
+        como forma de feedback para melhorar.<br/>
+        Fique à vontade para bloquear a coleta dos dados.
+        </p>
         <p>você pode alterar suas preferências abaixo.</p>
         <form>
           <h2>Sobre o envio de dados anônimos de uso:</h2>
@@ -16,7 +22,7 @@
         </form>
       </div>
     </section>
-    <section id="register">
+    <!-- <section id="register">
       <h3 v-if="!auth.loggedIn">Criar uma conta</h3>
       <h3 v-if="auth.loggedIn">Bem vindo, {{auth.username}}</h3>
       <form v-if="!auth.loggedIn" v-on:submit.prevent="register($event)">
@@ -38,7 +44,7 @@
         {{signUpFlash.text}}
         <a :href="signUpFlash.link">{{signUpFlash.message}}</a>
       </div>
-    </section>
+    </section> -->
   </div>
 </template>
 <script>
@@ -54,7 +60,6 @@ export default {
     },
   },
   data: () => ({
-    cookie_consent: window.ua_consent,
     SERVERurl: 'https://gchan-message-board.herokuapp.com',
     show_pwd_checked: '',
     name: '',
@@ -81,15 +86,16 @@ export default {
   },
   methods: {
     selectCookieConsent(e) {
-      const date = new Date();
-      const expires = new Date(date.getTime() + 365 * 24 * 60 * 60 * 1000).toGMTString();
-      this.cookie_consent = e.target.selectedOptions[0].value;
-      if (this.cookie_consent === 'false') {
-        document.cookie = `_gat_UA-182341584-1=;expires=${new Date(0).toGMTString()}`;
-        document.cookie = `_ga=;expires=${new Date(0).toGMTString()}`;
-        document.cookie = `_gid=;expires=${new Date(0).toGMTString()}`;
+      const domain = window.location.hostname;
+      const expires = new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000).toGMTString();
+      const cookieConsent = e.target.selectedOptions[0].value;
+      if (cookieConsent === 'false') {
+        const date = new Date(0).toGMTString();
+        document.cookie = `_gat_UA-182341584-1=;expires=${date};domain=.${domain};path=/`;
+        document.cookie = `_ga=;expires=${date};domain=.${domain};path=/`;
+        document.cookie = `_gid=;expires=${date};domain=.${domain};path=/`;
       }
-      document.cookie = `cookie_consent_variable=${e.target.value};expires=${expires}`;
+      document.cookie = `cookie_consent_variable=${cookieConsent};expires=${expires};path=/`;
     },
     showPassword() {
       const pwdField = document.querySelector('#password');
