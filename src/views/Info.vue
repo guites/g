@@ -95,7 +95,7 @@ export default {
         document.cookie = `_ga=;expires=${date};domain=.${domain};path=/`;
         document.cookie = `_gid=;expires=${date};domain=.${domain};path=/`;
       }
-      document.cookie = `cookie_consent_variable=${cookieConsent};expires=${expires};path=/`;
+      document.cookie = `cookie_consent_variable=${cookieConsent};expires=${expires};path=/;Secure`;
     },
     showPassword() {
       const pwdField = document.querySelector('#password');

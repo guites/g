@@ -202,7 +202,7 @@ export default {
         const date = new Date();
         const expires = new Date(date.getTime() + 365 * 24 * 60 * 60 * 1000).toGMTString();
         // default track
-        document.cookie = `cookie_consent_variable=true;expires=${expires};path=/`;
+        document.cookie = `cookie_consent_variable=true;expires=${expires};path=/;Secure`;
         this.ajaxGtmRequest();
       }
     },
