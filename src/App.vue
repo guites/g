@@ -5,8 +5,8 @@
             <nav>
                 <ul>
                     <li><p>gchan</p><img src="@/assets/sham.png" alt="gchan logo"></li>
-                    <li v-if="!isHome"><a href='/g'>mensagens</a></li>
-                    <li v-if="!isInfo"><a href='/g#/info'>info/minha conta</a></li>
+                    <li v-if="!isHome"><a href='/'>mensagens</a></li>
+                    <li v-if="!isInfo"><a href='/#/info'>info/minha conta</a></li>
                     <li>
                       <button v-if="!auth.loggedIn" v-on:click="janitor=!janitor">login</button>
                       <button v-if="auth.loggedIn" v-on:click="logOut()">logout</button>
@@ -41,7 +41,7 @@
                 v-on:click="showOptions=!showOptions">
                   <img src="@/assets/information.png" alt="Registro/Alterar senha">
                 </button>
-                <a href='/g#/info' v-if="isHome && showOptions && !this.auth.loggedIn">
+                <a href='/#/info' v-if="isHome && showOptions && !this.auth.loggedIn">
                   criar conta
                 </a>
                 <button v-if="isInfo && showOptions && !this.auth.loggedIn"
@@ -131,6 +131,11 @@
   </div>
 </template>
 <script>
+//  force redirect to https
+const host = 'gchan.com.br';
+if (window.location.host === host && window.location.protocol !== 'https:') {
+  window.location.protocol = 'https:';
+}
 // import Home from '@/views/Home.vue';
 const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
 export default {
@@ -217,7 +222,7 @@ export default {
             this.auth.id = data.id;
             this.loginFlash.type = 'success';
             this.loginFlash.header = 'Parabéns!';
-            this.loginFlash.link = '/g';
+            this.loginFlash.link = '/';
             this.loginFlash.text = 'Login realizado com sucesso!\nVocê já pode postar.\n';
             this.username = '';
             this.password = '';

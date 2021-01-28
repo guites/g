@@ -38,15 +38,15 @@
           <input v-model="message.imageURL" type="url" class="form-control"
           id="imageURL" placeholder="https://~">
           <div class="gif-search-toggle" data-toggle="buttons">
+            <input v-on:change="searchGif" type="radio" name="options" id="option1"
+            autocomplete="off" checked value="giphy">
             <label for ='option1' class="btn btn-primary">
               Giphy
-              <input v-on:change="searchGif" type="radio" name="options" id="option1"
-              autocomplete="off" checked value="giphy">
             </label>
+            <input v-on:change="searchGif" type="radio" name="options" id="option2"
+            autocomplete="off" value="gfycat">
             <label for='option2' class="btn btn-primary">
               gfycat
-              <input v-on:change="searchGif" type="radio" name="options" id="option2"
-              autocomplete="off" value="gfycat">
             </label>
           </div>
           <label for='giphyURL'>Busque um gif</label>

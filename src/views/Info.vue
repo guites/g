@@ -120,7 +120,7 @@ export default {
             e.target.reset();
             this.signUpFlash.type = 'success';
             this.signUpFlash.header = 'Bem vindo!';
-            // this.signUpFlash.link = '/g';
+            // this.signUpFlash.link = '/';
             this.signUpFlash.text = `Cadastro realizado com sucesso, ${this.username}!\nRealizando login...\n`;
             this.signUpFlash.message = 'Aguarde...';
             this.login();
@@ -145,7 +145,7 @@ export default {
             this.auth.username = data.name;
             this.signUpFlash.type = 'success';
             this.signUpFlash.header = 'Parabéns!';
-            this.signUpFlash.link = '/g';
+            this.signUpFlash.link = '/';
             this.signUpFlash.text = 'Login realizado com sucesso!\nVocê já pode postar.\n';
             this.signUpFlash.message = 'Ir para as postagens!';
             this.username = '';
