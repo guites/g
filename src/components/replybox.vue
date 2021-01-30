@@ -191,7 +191,6 @@ export default {
       this.$emit('closeReply');
     },
     addReplyToThread(reply) {
-      console.log(reply);
       this.$emit('addReplyToThread', reply);
     },
     clearReplyForm() {
@@ -212,11 +211,10 @@ export default {
           'content-type': 'application/json',
         },
       }).then((response) => response.json()).then((result) => {
-        const parseResult = JSON.parse(result);
+        const parseResult = result;
         if (parseResult.details) {
           const error = parseResult.details.map((detail) => detail.message).join('.');
           this.error = error;
-          console.log(this.error);
         } else if (parseResult.error) {
           if (parseResult.origin === 'psql') {
             if (parseResult.code === '23505') {
@@ -226,17 +224,12 @@ export default {
         } else {
           this.error = '';
           // aqui tem que disponibilizar o conteúdo do reply na Home.vue
-          // this.addReplyToThread(this.replyMessage);
           this.addReplyToThread(parseResult);
           this.clearReplyForm();
           this.closeReply();
         }
         submitButton.disabled = false;
       });
-    },
-    focusReplyBox(e) {
-      // document.querySelector('#replyForm #username').focus();
-      console.log(e);
     },
   },
 };

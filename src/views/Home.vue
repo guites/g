@@ -13,6 +13,7 @@
           aria-describedby="usernameHelp"
           placeholder="anônimo"
           v-model="message.username"
+          maxlength=30
           required>
           <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
@@ -24,7 +25,9 @@
         <div class="form-group">
           <label for="subject">Assunto</label>
           <input v-model="message.subject" type="text" class="form-control"
-          id="subject" placeholder="assunto" required>
+          id="subject" placeholder="assunto"
+          maxlength=50
+          required>
         </div>
         <div class="form-group">
           <label for="message">Mensagem</label>
@@ -317,7 +320,6 @@ export default {
       } else if (/tenor/.test(this.message.imageURL)) {
         this.message.gif_origin = 'tenor';
       }
-      console.log(this.message.username);
       fetch(apiURL, {
         method: 'POST',
         body: JSON.stringify(this.message),
@@ -325,7 +327,6 @@ export default {
           'content-type': 'application/json',
         },
       }).then((response) => response.json()).then((result) => {
-        console.log(result);
         if (result.details) {
           const error = result.details.map((detail) => detail.message).join('.');
           this.error = error;
@@ -360,10 +361,16 @@ export default {
       this.messageToReplyTo = '';
     },
     addReplyToThread(reply) {
+      let typeCheckedReply;
+      if (typeof reply === 'string') {
+        typeCheckedReply = JSON.parse(reply);
+      } else {
+        typeCheckedReply = reply;
+      }
       const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
-          === parseInt(reply.message_id, 10));
+          === parseInt(typeCheckedReply.message_id, 10));
       if (this.messages[msgIndex].replies === undefined) this.messages[msgIndex].replies = [];
-      this.messages[msgIndex].replies.push(reply);
+      this.messages[msgIndex].replies.push(typeCheckedReply);
     },
     onElementObserved(entries) {
       entries.forEach((entry) => {
@@ -374,7 +381,6 @@ export default {
             if (replies.error) {
               return;
             }
-            console.log(replies);
             const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(entry.target.id, 10));
             this.$set(this.messages[msgIndex], 'replies', replies);
@@ -464,8 +470,7 @@ export default {
                 });
               });
             })
-            .catch((error) => {
-              console.log(error);
+            .catch(() => {
               this.emptyGifResults = 1;
             });
           break;
