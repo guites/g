@@ -4,7 +4,7 @@
         <div class="inner-header">
             <nav>
                 <ul>
-                    <li><p>gchan</p><img src="@/assets/sham.png" alt="gchan logo"></li>
+                    <li><h1>gchan</h1><img src="@/assets/sham.png" alt="gchan logo"></li>
                     <li v-if="!isHome"><a href='/'>mensagens</a></li>
                     <li v-if="!isInfo"><a href='/#/info'>informações</a></li>
                     <!-- <li>
@@ -137,7 +137,7 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
   window.location.protocol = 'https:';
 }
 // import Home from '@/views/Home.vue';
-const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
+const marqueeURL = 'http://localhost:5000/marquee';
 export default {
   name: 'App',
   // components: {
@@ -156,7 +156,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     showOptions: '',
     auth: {
       loggedIn: '',

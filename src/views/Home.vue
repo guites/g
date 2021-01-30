@@ -9,31 +9,32 @@
        </div>
         <div class="form-group">
           <label for="username">Usuário</label>
-          <!-- v-model="message.username" -->
           <input type="text" class="form-control" id="username"
-          aria-describedby="usernameHelp" :value="username"
-          placeholder="Anonymous"
+          aria-describedby="usernameHelp"
+          placeholder="anônimo"
+          v-model="message.username"
           required>
           <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
           </small>
           <small v-else id="usernameHelp" class="form-text text-muted">
-            remember: no use for a name
+            {{smallUsernamePhrase}}
           </small>
         </div>
         <div class="form-group">
           <label for="subject">Assunto</label>
           <input v-model="message.subject" type="text" class="form-control"
-          id="subject" placeholder="subject" required>
+          id="subject" placeholder="assunto" required>
         </div>
         <div class="form-group">
           <label for="message">Mensagem</label>
           <textarea v-model="message.message" class="form-control" id="message" rows="5"
+          placeholder="mensagem"
           required maxlength=250>
           </textarea>
         </div>
         <div class="form-group">
-          <label for="imageURL">image URL</label>
+          <label for="imageURL">URL de uma imagem/gif/vídeo</label>
           <input v-model="message.imageURL" type="url" class="form-control"
           id="imageURL" placeholder="https://~">
           <div class="gif-search-toggle" data-toggle="buttons">
@@ -124,7 +125,7 @@
             </div>
           </div>
           <div class="edit_tab" :data-message-id="message.id">
-            <h4 class='mt-0 mb-1'>{{message.username}}</h4>
+            <p class='mt-0 mb-1 name'>por: {{message.username}}</p>
             <button type="button"
             v-if="message.user_id === auth.id"
             v-on:click="deleteMessage($event)"
@@ -134,7 +135,7 @@
             v-on:click="editMessage($event)"
             class='edit'>editar</button>
             <button type="button"
-            v-if="message.user_id !== auth.id"
+            v-if="message.user_id !== auth.id && false"
             v-on:click="reactMessage($event)"
             class='react'>reagir</button>
             <button type="button"
@@ -142,7 +143,10 @@
             :data-replyTo="message.id"
             class='reply'>responder</button>
           </div>
-          <h5 class="mt-0 mb-1">#{{message.id}} / {{message.subject}}</h5>
+          <p class="mt-0 mb-1 subject">
+            <span class="id">#{{message.id}} / </span>
+            {{message.subject}}
+          </p>
           <p>{{message.message}}</p>
           <br />
           <small>{{message.created}}</small><br />
@@ -192,9 +196,9 @@
 <script>
 import ReplyBox from '../components/replybox.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
   components: {
@@ -224,7 +228,7 @@ export default {
     messages: [],
     gifs: [],
     message: {
-      username: 'Anonymous',
+      username: 'anônimo',
       subject: '',
       message: '',
       imageURL: '',
@@ -258,8 +262,17 @@ export default {
       });
       return result;
     },
-    username() {
-      return this.auth.username || this.message.username;
+    // username() {
+    //   return this.auth.username || this.message.username;
+    // },
+    smallUsernamePhrase() {
+      const phrases = [
+        { quote: 'o que é que há, pois, num nome?', reference: 'https://pt.wikipedia.org/wiki/William_Shakespeare' },
+        { quote: 'remember: no use for a name', reference: 'https://www.youtube.com/watch?v=mEdd1NHnwIE' },
+        { quote: 'o homem é menos ele mesmo quando fala de sua pessoa', reference: 'https://pt.wikipedia.org/wiki/Oscar_Wilde' },
+        { quote: 'o anonimato é a fama do futuro', reference: 'https://pt.wikipedia.org/wiki/John_Boyle' },
+      ];
+      return phrases[Math.floor((phrases.length * Math.random()))].quote;
     },
   },
   mounted() {
@@ -284,7 +297,7 @@ export default {
       return true;
     },
     clearMsgForm() {
-      this.message.username = 'Anonymous';
+      this.message.username = 'anônimo';
       this.message.subject = '';
       this.message.message = '';
       this.message.imageURL = '';
@@ -304,6 +317,7 @@ export default {
       } else if (/tenor/.test(this.message.imageURL)) {
         this.message.gif_origin = 'tenor';
       }
+      console.log(this.message.username);
       fetch(apiURL, {
         method: 'POST',
         body: JSON.stringify(this.message),

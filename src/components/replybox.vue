@@ -46,7 +46,7 @@
 </template>
 
 <script>
-const replyURL = 'https://gchan-message-board.herokuapp.com/replies';
+const replyURL = 'http://localhost:5000/replies';
 export default {
   name: 'ReplyBox',
   props: ['messageToReplyTo'],
@@ -65,7 +65,7 @@ export default {
       dragging: false,
     },
     replyMessage: {
-      username: 'Anonymous',
+      username: 'anônimo',
       content: '',
       imageURL: '',
       message_id: '',
@@ -73,6 +73,13 @@ export default {
     },
     error: '',
   }),
+  watch: {
+    messageToReplyTo(val) {
+      if (val !== '') {
+        setTimeout(() => document.querySelector('#replyForm #username').focus(), 100);
+      }
+    },
+  },
   methods: {
     dragMouseDown(event) {
       event.preventDefault();
@@ -189,7 +196,7 @@ export default {
     },
     clearReplyForm() {
       this.replyMessage.message_id = '';
-      this.replyMessage.username = 'Anonymous';
+      this.replyMessage.username = 'anônimo';
       this.replyMessage.content = '';
       this.replyMessage.imageURL = '';
       this.replyMessage.user_id = 0;
@@ -209,6 +216,7 @@ export default {
         if (parseResult.details) {
           const error = parseResult.details.map((detail) => detail.message).join('.');
           this.error = error;
+          console.log(this.error);
         } else if (parseResult.error) {
           if (parseResult.origin === 'psql') {
             if (parseResult.code === '23505') {
@@ -225,6 +233,10 @@ export default {
         }
         submitButton.disabled = false;
       });
+    },
+    focusReplyBox(e) {
+      // document.querySelector('#replyForm #username').focus();
+      console.log(e);
     },
   },
 };
