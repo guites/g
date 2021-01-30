@@ -196,11 +196,11 @@ header{
               }
               li:nth-child(1){
                   display:flex;
-                  flex-direction:column;
+                  // flex-direction:column;
                   align-items:center;
                   img{
                     width:32px;
-                    margin:0;
+                    margin:0 0 0 5px;
                     cursor:initial;
                   }
               }
@@ -778,6 +778,13 @@ div{
         &.edit_tab{
           width:100%;
           display:flex;
+          p{
+            width:initial;
+            &.name{
+              font-weight:700;
+              font-size:14px;
+            }
+          }
           button{
             margin-left:15px;
             cursor:pointer;
@@ -818,6 +825,15 @@ div{
             &:hover{
               color:#fff;
             }
+          }
+        }
+        p.subject{
+          font-size:16px;
+          font-weight:700;
+          width:initial;
+          span.id{
+            font-size:13px;
+            font-weight:500;
           }
         }
     }

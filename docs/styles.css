@@ -247,10 +247,6 @@ header .inner-header nav ul li:nth-child(1) {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
-  -webkit-box-orient: vertical;
-  -webkit-box-direction: normal;
-      -ms-flex-direction: column;
-          flex-direction: column;
   -webkit-box-align: center;
       -ms-flex-align: center;
           align-items: center;
@@ -258,7 +254,7 @@ header .inner-header nav ul li:nth-child(1) {
 
 header .inner-header nav ul li:nth-child(1) img {
   width: 32px;
-  margin: 0;
+  margin: 0 0 0 5px;
   cursor: initial;
 }
 
@@ -1094,6 +1090,15 @@ div li div.edit_tab {
   display: flex;
 }
 
+div li div.edit_tab p {
+  width: initial;
+}
+
+div li div.edit_tab p.name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
 div li div.edit_tab button {
   margin-left: 15px;
   cursor: pointer;
@@ -1144,6 +1149,17 @@ div li div.edit_tab button.reply:hover {
 
 div li div.edit_tab button:hover {
   color: #fff;
+}
+
+div li div p.subject {
+  font-size: 16px;
+  font-weight: 700;
+  width: initial;
+}
+
+div li div p.subject span.id {
+  font-size: 13px;
+  font-weight: 500;
 }
 
 div li.reply-item img, div li.reply-item video {

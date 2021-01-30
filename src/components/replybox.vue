@@ -26,12 +26,14 @@
         aria-describedby="usernameHelp"
         placeholder="Anonymous"
         v-model="replyMessage.username"
+        maxlength=30
         required>
       </div>
       <div class="form-group">
         <label for="message">Mensagem</label>
         <textarea class="form-control" id="message" rows="5"
         v-model="replyMessage.content"
+        maxlength=250
         required>
         </textarea>
       </div>
@@ -46,7 +48,7 @@
 </template>
 
 <script>
-const replyURL = 'http://localhost:5000/replies';
+const replyURL = 'https://gchan-message-board.herokuapp.com/replies';
 export default {
   name: 'ReplyBox',
   props: ['messageToReplyTo'],
