@@ -288,6 +288,11 @@ export default {
         this.isPreviewing = '';
       }
     },
+    isPreviewing(val) {
+      if (val !== '') {
+        this.isGifBeingSearched = '';
+      }
+    },
   },
   computed: {
     reversedMessages() {
