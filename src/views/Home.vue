@@ -37,7 +37,14 @@
           </textarea>
         </div>
         <div class="form-group">
-          <label for="uploadIMG">Envie uma imagem/gif/vídeo</label>
+          <label for="uploadIMG">
+            Envie uma imagem/gif/vídeo
+            <span
+            title="Esta funcionalidade está em fase de testes! Erros podem ocorrer ¯\_(ツ)_/¯"
+            class='badge beta'>
+              BETA
+            </span>
+          </label>
           <input type="file" name="uploadIMG" id="uploadIMG" @change="handleUpload($event)">
         </div>
         <div class="form-group">
@@ -71,6 +78,7 @@
       muted="true"
       playsinline="true"></video>
       <p v-else>Formato não suportado! ::(</p>
+      <!-- <button type="button"></button> -->
     </div>
     <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
       <div v-if="emptyGifResults" class='emptyGifResults'>
@@ -216,6 +224,9 @@ import ReplyBox from '../components/replybox.vue';
 const apiURL = 'http://localhost:5000/messages';
 const repliesURL = 'http://localhost:5000/replies';
 const handleURL = 'http://localhost:5000/';
+const imgurURLimg = 'https://api.imgur.com/3/image';
+const imgurURLupload = 'https://api.imgur.com/3/upload';
+const proxyURL = 'https://infinite-shore-20037.herokuapp.com/';
 export default {
   name: 'Home',
   components: {
@@ -260,6 +271,16 @@ export default {
       messageID: '',
     },
     isPreviewing: '',
+    allowedUploadVideoFormats: [
+      'video/mp4',
+      'video/webm',
+      'video/x-matroska',
+      'video/quicktime',
+      'video/x-flv',
+      'video/x-msvideo',
+      'video/x-ms-wmv',
+      'video/mpeg',
+    ],
   }),
   watch: {
     isGifBeingSearched(val) {
@@ -327,6 +348,8 @@ export default {
       this.message.message = '';
       this.message.imageURL = '';
       this.message.user_id = 0;
+      this.isPreviewing = '';
+      this.isGifBeingSearched = '';
     },
     addMessage() {
       const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
@@ -545,6 +568,7 @@ export default {
     createVideo(target) {
       const image = target.target;
       const video = document.createElement('video');
+      video.classList.add('img-thumbnail');
       video.src = image.src;
       video.autoplay = true;
       video.loop = true;
@@ -553,6 +577,9 @@ export default {
       image.parentElement.insertBefore(video, image);
       image.style.display = 'none';
       image.error = null;
+      video.addEventListener('click', (e) => {
+        this.fullSize(e);
+      });
       video.onerror = function test(e) {
         e.target.parentElement.querySelector('.img-thumbnail').src = 'http://via.placeholder.com/300?text=erro ao carregar url  :(';
       };
@@ -567,13 +594,42 @@ export default {
         }
       }
     },
-    handleUpload(e) {
+    uploadToImgur(kind, file) {
+      const formData = new FormData();
+      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
+      document.querySelector('.imagePreview').children[0].classList.add('uploading');
+      submitButton.disabled = true;
+      let postURL;
+      if (kind === 'image') {
+        formData.append('image', file);
+        postURL = imgurURLimg;
+      } else {
+        formData.append('type', 'file');
+        formData.append('video', file, 'video');
+        postURL = proxyURL + imgurURLupload;
+      }
+      fetch(postURL, {
+        method: 'POST',
+        body: formData,
+        headers: {
+          Authorization: 'Client-ID 3435e574a9859d1',
+        },
+      }).then((response) => response.json()).then((result) => {
+        if (result.status === 200 && result.success === true) {
+          this.message.imageURL = result.data.link;
+          this.gif_origin = 'imgur';
+        }
+        document.querySelector('.imagePreview').children[0].classList.remove('uploading');
+        submitButton.disabled = false;
+      }).catch((err) => console.log(err));
+    },
+    async handleUpload(e) {
       let imagePreviewDiv;
       const file = e.target.files[0];
       console.log(file);
       if (file.type.startsWith('image/')) {
         this.isPreviewing = 'image';
-        setTimeout(() => {
+        setTimeout(async () => {
           imagePreviewDiv = document.querySelector('.imagePreview');
           const reader = new FileReader();
           reader.onload = (function (aImg) {
@@ -584,14 +640,25 @@ export default {
             };
           }(imagePreviewDiv.children[0]));
           reader.readAsDataURL(file);
+          await this.uploadToImgur('image', file);
         }, 100);
       } else if (file.type.startsWith('video/')) {
-        this.isPreviewing = 'video';
-        setTimeout(() => {
-          imagePreviewDiv = document.querySelector('.imagePreview');
-          imagePreviewDiv.children[0].src = URL.createObjectURL(file);
-          imagePreviewDiv.children[0].load();
-        }, 100);
+        if (this.allowedUploadVideoFormats.includes(file.type)) {
+          this.isPreviewing = 'video';
+          setTimeout(async () => {
+            imagePreviewDiv = document.querySelector('.imagePreview');
+            imagePreviewDiv.children[0].src = URL.createObjectURL(file);
+            imagePreviewDiv.children[0].load();
+            await this.uploadToImgur('video', file);
+          }, 100);
+        } else {
+          this.isPreviewing = 'not';
+          setTimeout(() => {
+            imagePreviewDiv = document.querySelector('.imagePreview');
+            imagePreviewDiv.children[0].innerHTML += `<br/><ul><li>nome: ${file.name}</li><li>formato: ${file.type}</li></ul>`;
+            imagePreviewDiv.children[0].innerHTML += `<br/>Formatos aceitos: ${this.allowedUploadVideoFormats.join(', ')}</ul>`;
+          }, 100);
+        }
       } else {
         this.isPreviewing = 'not';
         setTimeout(() => {
