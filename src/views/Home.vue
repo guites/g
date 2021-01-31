@@ -14,7 +14,10 @@
           placeholder="anônimo"
           v-model="message.username"
           maxlength=30
-          required>
+          required
+          @focus="clearName($event)"
+          @focusout="checkForName($event)"
+          >
           <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
           </small>
@@ -199,9 +202,9 @@
 <script>
 import ReplyBox from '../components/replybox.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
   components: {
@@ -296,6 +299,16 @@ export default {
       });
   },
   methods: {
+    clearName(e) {
+      if (e.target.value === 'anônimo') {
+        e.target.value = '';
+      }
+    },
+    checkForName(e) {
+      if (e.target.value === '') {
+        e.target.value = 'anônimo';
+      }
+    },
     isMyPost() {
       return true;
     },
