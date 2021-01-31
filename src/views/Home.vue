@@ -350,6 +350,7 @@ export default {
       this.message.user_id = 0;
       this.isPreviewing = '';
       this.isGifBeingSearched = '';
+      document.querySelector('#uploadIMG').value = '';
     },
     addMessage() {
       const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
