@@ -37,9 +37,16 @@
           </textarea>
         </div>
         <div class="form-group">
-          <label for="imageURL">URL de uma imagem/gif/vídeo</label>
+          <label for="uploadIMG">Envie uma imagem/gif/vídeo</label>
+          <input type="file" name="uploadIMG" id="uploadIMG" @change="handleUpload($event)">
+        </div>
+        <div class="form-group">
+          <label for="imageURL">ou: digite a URL de uma imagem/gif/vídeo</label>
           <input v-model="message.imageURL" type="url" class="form-control"
           id="imageURL" placeholder="https://~">
+          <label for='giphyURL'>ou: busque um gif</label>
+          <input v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
+          class="form-control" id="giphyURL" placeholder="cats">
           <div class="gif-search-toggle" data-toggle="buttons">
             <input v-on:change="searchGif" type="radio" name="options" id="option1"
             autocomplete="off" checked value="giphy">
@@ -52,12 +59,19 @@
               gfycat
             </label>
           </div>
-          <label for='giphyURL'>Busque um gif</label>
-          <input v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
-          class="form-control" id="giphyURL" placeholder="cats">
         </div>
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
+    <div v-if="isPreviewing" class="imagePreview">
+      <img v-if="isPreviewing === 'image'" src="" alt="pré-visualização de imagem para upload">
+      <video v-else-if="isPreviewing === 'video'"
+      src=""
+      autoplay="true"
+      loop="true"
+      muted="true"
+      playsinline="true"></video>
+      <p v-else>Formato não suportado! ::(</p>
+    </div>
     <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
       <div v-if="emptyGifResults" class='emptyGifResults'>
         <img src="http://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
@@ -199,9 +213,9 @@
 <script>
 import ReplyBox from '../components/replybox.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Home',
   components: {
@@ -245,7 +259,15 @@ export default {
       message: '',
       messageID: '',
     },
+    isPreviewing: '',
   }),
+  watch: {
+    isGifBeingSearched(val) {
+      if (val !== '') {
+        this.isPreviewing = '';
+      }
+    },
+  },
   computed: {
     reversedMessages() {
       return this.messages.slice().reverse();
@@ -543,6 +565,39 @@ export default {
           image.previousElementSibling.remove();
           image.style.display = 'initial';
         }
+      }
+    },
+    handleUpload(e) {
+      let imagePreviewDiv;
+      const file = e.target.files[0];
+      console.log(file);
+      if (file.type.startsWith('image/')) {
+        this.isPreviewing = 'image';
+        setTimeout(() => {
+          imagePreviewDiv = document.querySelector('.imagePreview');
+          const reader = new FileReader();
+          reader.onload = (function (aImg) {
+            return function (x) {
+              const img = aImg;
+              img.src = x.target.result;
+              return img;
+            };
+          }(imagePreviewDiv.children[0]));
+          reader.readAsDataURL(file);
+        }, 100);
+      } else if (file.type.startsWith('video/')) {
+        this.isPreviewing = 'video';
+        setTimeout(() => {
+          imagePreviewDiv = document.querySelector('.imagePreview');
+          imagePreviewDiv.children[0].src = URL.createObjectURL(file);
+          imagePreviewDiv.children[0].load();
+        }, 100);
+      } else {
+        this.isPreviewing = 'not';
+        setTimeout(() => {
+          imagePreviewDiv = document.querySelector('.imagePreview');
+          imagePreviewDiv.children[0].innerHTML += `<br/><ul><li>nome: ${file.name}</li><li>formato: ${file.type}</li></ul>`;
+        }, 100);
       }
     },
   },
