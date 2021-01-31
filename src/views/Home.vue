@@ -318,6 +318,7 @@ export default {
       this.message.message = '';
       this.message.imageURL = '';
       this.message.user_id = 0;
+      this.isGifBeingSearched = '';
     },
     addMessage() {
       const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
@@ -332,6 +333,10 @@ export default {
         this.message.gif_origin = 'gfycat';
       } else if (/tenor/.test(this.message.imageURL)) {
         this.message.gif_origin = 'tenor';
+      } else if (/imgur/.test(this.message.imageURL)) {
+        this.message.gif_origin = 'imgur';
+      } else {
+        this.message.gif_origin = 'outro';
       }
       fetch(apiURL, {
         method: 'POST',
