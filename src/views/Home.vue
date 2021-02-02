@@ -91,7 +91,7 @@
 
     </section>
     <ul class="list-unstyled d-flex flex-column align-items-center"
-    v-for="message in reversedMessages"
+    v-for="message in messages"
     :key="message.id">
       <li class="media" :id="message.id">
         <img
@@ -360,7 +360,7 @@ export default {
           //   parsedResult.imageurl = 'nope';
           // }
           parsedResult.isNew = true;
-          this.messages.push(parsedResult);
+          this.messages.unshift(parsedResult);
           this.clearMsgForm();
         }
         submitButton.disabled = false;
