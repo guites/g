@@ -553,7 +553,6 @@ export default {
         if (this.messages[msgIndex].hasLoaded === true) return;
         this.messages[msgIndex].hasLoaded = true;
         if (this.messages[msgIndex].isNew === true) {
-          console.log('new post! wait a sec');
           await this.sleep(500);
         }
       }
