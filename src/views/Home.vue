@@ -92,7 +92,7 @@
     </section>
     <ul class="list-unstyled d-flex flex-column align-items-center"
     v-for="message in reversedMessages"
-    :key="message._id">
+    :key="message.id">
       <li class="media" :id="message.id">
         <img
         loading="lazy"
@@ -102,7 +102,7 @@
         :alt="message.subject"
         :src="message.imageurl"
         @click="fullSize($event)"
-        @error="createVideo($event)"
+        @error="createVideo($event, message.id)"
         @load="preventVideo($event)"
         >
         <img
@@ -173,7 +173,7 @@
         :data-src="reply.imageurl"
         :src="reply.imageurl"
         @click="fullSize($event)"
-        @error="createVideo($event)"
+        @error="createVideo($event, false)"
         @load="preventVideo($event)"
         alt=""
         >
@@ -288,7 +288,6 @@ export default {
         threshold: 0,
       },
     );
-    // .forEach((li) => this.replyObserver.observe(li));
     fetch(apiURL).then((response) => response.json())
       .then((result) => {
         this.messages = result.results;
@@ -356,7 +355,12 @@ export default {
           }
         } else {
           this.error = '';
-          this.messages.push(JSON.parse(result));
+          const parsedResult = JSON.parse(result);
+          // if (parsedResult.imageurl === '') {
+          //   parsedResult.imageurl = 'nope';
+          // }
+          parsedResult.isNew = true;
+          this.messages.push(parsedResult);
           this.clearMsgForm();
         }
         submitButton.disabled = false;
@@ -538,19 +542,37 @@ export default {
     fullSize(e) {
       e.target.classList.toggle('fullsize');
     },
-    createVideo(target) {
-      const image = target.target;
+    sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+    async createVideo(ev, isPost) {
+      if (isPost) {
+        const messageID = isPost;
+        const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
+                  === parseInt(messageID, 10));
+        if (this.messages[msgIndex].hasLoaded === true) return;
+        this.messages[msgIndex].hasLoaded = true;
+        if (this.messages[msgIndex].isNew === true) {
+          console.log('new post! wait a sec');
+          await this.sleep(500);
+        }
+      }
+      const image = ev.target;
+      const li = isPost ? document.getElementById(isPost) : image.parentElement;
       const video = document.createElement('video');
       video.src = image.src;
       video.autoplay = true;
       video.loop = true;
       video.muted = true;
       video.playsInline = true;
-      image.parentElement.insertBefore(video, image);
+      li.insertBefore(video, image);
       image.style.display = 'none';
       image.error = null;
       video.onerror = function test(e) {
-        e.target.parentElement.querySelector('.img-thumbnail').src = 'http://via.placeholder.com/300?text=erro ao carregar url  :(';
+        const showThisImg = e.target.parentElement.querySelector('.img-thumbnail');
+        showThisImg.src = 'http://via.placeholder.com/300?text=erro :(';
+        showThisImg.style.display = 'initial';
+        e.target.remove();
       };
     },
     preventVideo(target) {
