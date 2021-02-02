@@ -858,6 +858,12 @@ section.create-thread form .form-group input[type="radio"]:checked + label {
   color: #ff0;
 }
 
+section.create-thread form .form-group input[type="radio"]:focus + label {
+  outline: 1px solid #ffa500cc;
+  outline-offset: 1px;
+  outline-style: auto;
+}
+
 section.create-thread form .form-group .gif-search-toggle .btn {
   display: inline-block;
   font-weight: 400;
