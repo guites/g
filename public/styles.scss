@@ -599,6 +599,11 @@ section.create-thread{
               border-color:#ffff00ad;
               color:#ff0;
             }
+            &:focus + label {
+              outline: 1px solid #ffa500cc;
+              outline-offset:1px;
+              outline-style:auto;
+            }
           }
           .gif-search-toggle{
               .btn{
