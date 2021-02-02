@@ -559,6 +559,7 @@ export default {
       const image = ev.target;
       const li = isPost ? document.getElementById(isPost) : image.parentElement;
       const video = document.createElement('video');
+      video.classList.add('img-thumbnail');
       video.src = image.src;
       video.autoplay = true;
       video.loop = true;
@@ -567,8 +568,11 @@ export default {
       li.insertBefore(video, image);
       image.style.display = 'none';
       image.error = null;
+      video.addEventListener('click', (e) => {
+        this.fullSize(e);
+      });
       video.onerror = function test(e) {
-        const showThisImg = e.target.parentElement.querySelector('.img-thumbnail');
+        const showThisImg = e.target.parentElement.querySelector('img');
         showThisImg.src = 'http://via.placeholder.com/300?text=erro :(';
         showThisImg.style.display = 'initial';
         e.target.remove();
