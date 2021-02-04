@@ -97,7 +97,7 @@
   </ul>
 </template>
 <script>
-const handleURL = 'http://localhost:5000/';
+const handleURL = 'https://gchan-message-board.herokuapp.com/';
 export default {
   name: 'Message',
   props: {
