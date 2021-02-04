@@ -2,6 +2,7 @@
 node_modules
 old.docs/
 client-deploy.sh
+package-lock.json
 
 # local env files
 .env.local
