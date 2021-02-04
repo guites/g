@@ -60,7 +60,7 @@ export default {
     },
   },
   data: () => ({
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     show_pwd_checked: '',
     name: '',
     email: '',

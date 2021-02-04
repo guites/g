@@ -60,134 +60,45 @@
           class="form-control" id="giphyURL" placeholder="cats">
         </div>
         <button type="submit" class="btn btn-primary">Enviar</button>
-    </form>
-    <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
-      <div v-if="emptyGifResults" class='emptyGifResults'>
-        <img src="http://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
-      </div>
-      <div v-if="emptyGifResults === ''" class="gifBox">
-        <div v-for="gif in uniqueGifs" :key="gif.id" class="gifBoxGif">
-          <img class="gif-thumb" v-on:click="selectGif"
-          :data-original="gif.originalUrl" :src="gif.thumbUrl">
+      </form>
+      <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
+        <div v-if="emptyGifResults" class='emptyGifResults'>
+          <img src="http://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
         </div>
-        <div class="gif-attribute">
-          <a href="https://giphy.com/" v-if="this.apiRoute === 'giphy'"
-          title="Visitar giphy.com" target="_blank">
-            <img src="@/assets/giphy-attr.png" alt="Powered by GIPHY">
-          </a>
-        </div>
-      </div>
-      <div class='paginate-arrows'>
-        <ul v-if='hasPag' class="pagination">
-          <div>
-            <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
-            class="page-item" :class="{ 'active' : currPage == index}">
-              <p class="page-link">{{index}}</p>
-            </li>
+        <div v-if="emptyGifResults === ''" class="gifBox">
+          <div v-for="gif in uniqueGifs" :key="gif.id" class="gifBoxGif">
+            <img class="gif-thumb" v-on:click="selectGif"
+            :data-original="gif.originalUrl" :src="gif.thumbUrl">
           </div>
-        </ul>
-      </div>
-    </div>
-
-    </section>
-    <ul class="list-unstyled d-flex flex-column align-items-center"
-    v-for="message in messages"
-    :key="message.id">
-      <li class="media" :id="message.id">
-        <img
-        loading="lazy"
-        v-if="message.imageurl"
-        class="img-thumbnail"
-        :data-src="message.imageurl"
-        :alt="message.subject"
-        :src="message.imageurl"
-        @click="fullSize($event)"
-        @error="createVideo($event, message.id)"
-        @load="preventVideo($event)"
-        >
-        <img
-        loading="lazy"
-        v-else
-        class="img-thumbnail"
-        src="http://via.placeholder.com/300?text=:("
-        alt="post sem imagem"
-        >
-        <div class="align-self-center media-body">
-          <div class="flash"
-          :class="messageFlash.type"
-          v-if="messageFlash.header && messageFlash.messageID === message.id">
-            <button class='flash-btn'
-            type="button"
-            v-on:click="messageFlash.header = ''">x</button>
-            <strong>{{messageFlash.header}}</strong>
-            {{messageFlash.text}}
-            <a :href="messageFlash.link">{{messageFlash.message}}</a>
-            <div class="opt-btns">
-              <button type="button"
-              v-on:click="handleMessage(message.id,'delete',$event)">
-                Deletar
-              </button>
-              <!-- <button type="button">pensando bem...</button> -->
+          <div class="gif-attribute">
+            <a href="https://giphy.com/" v-if="this.apiRoute === 'giphy'"
+            title="Visitar giphy.com" target="_blank">
+              <img src="@/assets/giphy-attr.png" alt="Powered by GIPHY">
+            </a>
+          </div>
+        </div>
+        <div class='paginate-arrows'>
+          <ul v-if='hasPag' class="pagination">
+            <div>
+              <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
+              class="page-item" :class="{ 'active' : currPage == index}">
+                <p class="page-link">{{index}}</p>
+              </li>
             </div>
-          </div>
-          <div class="edit_tab" :data-message-id="message.id">
-            <p class='mt-0 mb-1 name'>por: {{message.username}}</p>
-            <button type="button"
-            v-if="message.user_id === auth.id"
-            v-on:click="deleteMessage($event)"
-            class='delete'>deletar</button>
-            <button type="button"
-            v-if="message.user_id === auth.id"
-            v-on:click="editMessage($event)"
-            class='edit'>editar</button>
-            <button type="button"
-            v-if="message.user_id !== auth.id && false"
-            v-on:click="reactMessage($event)"
-            class='react'>reagir</button>
-            <button type="button"
-            @click="replyMessage($event)"
-            :data-replyTo="message.id"
-            class='reply'>responder</button>
-          </div>
-          <p class="mt-0 mb-1 subject">
-            <span class="id">#{{message.id}} / </span>
-            {{message.subject}}
-          </p>
-          <p>{{message.message}}</p>
-          <br />
-          <small>{{message.created}}</small><br />
-          <img v-if="message.gif_origin == 'giphy'"
-          alt='powered by GIPHY'
-          class="gif_origin"
-          src="@/assets/giphy-attr1.png">
+          </ul>
         </div>
-      </li>
-      <li class="media reply-item"
-      v-for="reply of message.replies"
-      v-bind:key="reply.id"
-      >
-        <img
-        loading="lazy"
-        v-if="reply.imageurl"
-        class="img-thumbnail"
-        :data-src="reply.imageurl"
-        :src="reply.imageurl"
-        @click="fullSize($event)"
-        @error="createVideo($event, false)"
-        @load="preventVideo($event)"
-        alt=""
-        >
-        <div class="align-self-center media-body">
-          <div class="edit_tab">
-            <p class="mt-0 mb-1">{{reply.username}}</p>
-          </div>
-            <p class="mt-0 mb-1">#{{reply.id}}</p>
-            <p>{{reply.content}}</p><br />
-            <small>{{reply.created}}</small><br />
-        </div>
-      </li>
-      <hr>
-    </ul>
+      </div>
+    </section>
+    <Message
+    v-for="message in messages"
+    v-bind:message="message"
+    v-bind:auth="auth"
+    v-bind:replies="message.replies"
+    @replyMessage="replyMessage"
+    @update="message = $event"
+    v-bind:key="message.id"
+    >
+    </Message>
     <template>
       <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
@@ -201,14 +112,15 @@
 
 <script>
 import ReplyBox from '../components/replybox.vue';
+import Message from '../components/message.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
 export default {
   name: 'Home',
   components: {
     ReplyBox,
+    Message,
   },
   props: {
     auth: {
@@ -221,6 +133,7 @@ export default {
     },
   },
   data: () => ({
+    messages: [],
     replyObserver: null,
     messageToReplyTo: '',
     gifsPerPage: 4,
@@ -231,7 +144,6 @@ export default {
     isGifBeingSearched: '',
     emptyGifResults: '',
     hasPag: '',
-    messages: [],
     gifs: [],
     message: {
       username: 'anônimo',
@@ -240,13 +152,6 @@ export default {
       imageURL: '',
       user_id: 0,
       gif_origin: 'none',
-    },
-    messageFlash: {
-      type: '',
-      header: '',
-      text: '',
-      message: '',
-      messageID: '',
     },
   }),
   computed: {
@@ -376,8 +281,8 @@ export default {
     reactMessage() {
       alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
     },
-    replyMessage(e) {
-      this.messageToReplyTo = e.target.getAttribute('data-replyto');
+    replyMessage(reply) {
+      this.messageToReplyTo = reply;
     },
     closeReply() {
       this.messageToReplyTo = '';
@@ -407,43 +312,6 @@ export default {
           === parseInt(entry.target.id, 10));
             this.$set(this.messages[msgIndex], 'replies', replies);
           });
-      });
-    },
-    handleMessage(messageID, action, e) {
-      e.target.disabled = true;
-      let method;
-      let body;
-      let headers;
-      let url;
-      let finalizeFunction;
-      switch (action) {
-        case 'delete':
-          method = 'DELETE';
-          body = JSON.stringify('');
-          headers = {
-            'content-type': 'text/plain',
-          };
-          url = `message/${messageID}`;
-          finalizeFunction = (id) => this.messages.filter((message) => message.id !== id);
-          break;
-        default:
-          method = 'POST';
-          headers = {
-            'content-type': 'application/json',
-          };
-      }
-      fetch(`${handleURL}${url}`, {
-        method,
-        headers,
-        body,
-        credentials: 'include',
-      }).then((response) => response.json()).then((result) => {
-        if (!result) {
-          e.target.disabled = false;
-          this.msgFlash('error', messageID, 'Ocorreu um erro!', 'Tente deletar sua mensagem novamente.', 'Atualizar a página pode resolver o problema!');
-        } else {
-          this.messages = finalizeFunction(messageID);
-        }
       });
     },
     msgFlash(type, messageID, header, text, message) {
@@ -539,54 +407,8 @@ export default {
       this.currPage = e.target.innerText;
       this.searchGif(e);
     },
-    fullSize(e) {
-      e.target.classList.toggle('fullsize');
-    },
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
-    },
-    async createVideo(ev, isPost) {
-      if (isPost) {
-        const messageID = isPost;
-        const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
-                  === parseInt(messageID, 10));
-        if (this.messages[msgIndex].hasLoaded === true) return;
-        this.messages[msgIndex].hasLoaded = true;
-        if (this.messages[msgIndex].isNew === true) {
-          await this.sleep(500);
-        }
-      }
-      const image = ev.target;
-      const li = isPost ? document.getElementById(isPost) : image.parentElement;
-      const video = document.createElement('video');
-      video.classList.add('img-thumbnail');
-      video.src = image.src;
-      video.autoplay = true;
-      video.loop = true;
-      video.muted = true;
-      video.playsInline = true;
-      li.insertBefore(video, image);
-      image.style.display = 'none';
-      image.error = null;
-      video.addEventListener('click', (e) => {
-        this.fullSize(e);
-      });
-      video.onerror = function test(e) {
-        const showThisImg = e.target.parentElement.querySelector('img');
-        showThisImg.src = 'http://via.placeholder.com/300?text=erro :(';
-        showThisImg.style.display = 'initial';
-        e.target.remove();
-      };
-    },
-    preventVideo(target) {
-      const image = target.target;
-      const prevSibling = image.previousElementSibling;
-      if (prevSibling) {
-        if (prevSibling.tagName === 'VIDEO') {
-          image.previousElementSibling.remove();
-          image.style.display = 'initial';
-        }
-      }
     },
   },
 };
