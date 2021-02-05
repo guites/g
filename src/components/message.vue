@@ -15,8 +15,8 @@
       <img
       loading="lazy"
       v-else
-      class="img-thumbnail"
-      src="http://via.placeholder.com/300?text=:("
+      class="img-thumbnail placeholder"
+      src="http://localhost:5000/placeholders"
       alt="post sem imagem"
       >
       <div class="align-self-center media-body">
@@ -97,7 +97,7 @@
   </ul>
 </template>
 <script>
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Message',
   props: {
@@ -174,9 +174,12 @@ export default {
         this.fullSize(e);
       });
       video.onerror = function test(e) {
-        const showThisImg = e.target.parentElement.querySelector('img');
-        showThisImg.src = 'http://via.placeholder.com/300?text=erro :(';
+        const parent = e.target.parentElement;
+        const showThisImg = parent.querySelector('img');
+        showThisImg.src = 'http://localhost:5000/placeholders';
         showThisImg.style.display = 'initial';
+        showThisImg.classList.add('placeholder');
+        showThisImg.onclick = null;
         e.target.remove();
       };
     },
