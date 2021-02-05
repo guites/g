@@ -581,6 +581,15 @@ section.create-thread{
           display:flex;
           flex-direction:column;
           max-width: 500px;
+          .form-subject{
+            display:flex;
+            align-items:center;
+            input[type="checkbox"]{
+              min-height:0;
+              width:initial;
+              height:initial;
+            }
+          }
           label{
               margin: 5px 15px 5px 0;
           }

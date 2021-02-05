@@ -119,8 +119,8 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const apiURL = 'http://localhost:5000/messages';
-const repliesURL = 'http://localhost:5000/replies';
+const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
+const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
 export default {
   name: 'Home',
   components: {
