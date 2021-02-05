@@ -26,9 +26,14 @@
           </small>
         </div>
         <div class="form-group">
-          <label for="subject">Assunto</label>
+          <div class="form-subject">
+            <label for="tem-assunto">colocar assunto?</label>
+            <input type="checkbox" name="tem-assunto"
+            id="tem-assunto" @change="toggleSubject">
+          </div>
           <input v-model="message.subject" type="text" class="form-control"
           id="subject" placeholder="assunto"
+          v-if="this.hasSubject === true"
           maxlength=50
           required>
         </div>
@@ -43,6 +48,9 @@
           <label for="imageURL">URL de uma imagem/gif/vídeo</label>
           <input v-model="message.imageURL" type="url" class="form-control"
           id="imageURL" placeholder="https://~">
+          <label for='giphyURL'>ou: Busque um gif</label>
+          <input v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
+          class="form-control" id="giphyURL" placeholder="cats">
           <div class="gif-search-toggle" data-toggle="buttons">
             <input v-on:change="searchGif" type="radio" name="options" id="option1"
             autocomplete="off" checked value="giphy">
@@ -55,9 +63,6 @@
               gfycat
             </label>
           </div>
-          <label for='giphyURL'>Busque um gif</label>
-          <input v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
-          class="form-control" id="giphyURL" placeholder="cats">
         </div>
         <button type="submit" class="btn btn-primary">Enviar</button>
       </form>
@@ -114,8 +119,8 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
 export default {
   name: 'Home',
   components: {
@@ -145,6 +150,7 @@ export default {
     emptyGifResults: '',
     hasPag: '',
     gifs: [],
+    hasSubject: false,
     message: {
       username: 'anônimo',
       subject: '',
@@ -203,6 +209,9 @@ export default {
       });
   },
   methods: {
+    toggleSubject() {
+      this.hasSubject = !this.hasSubject;
+    },
     clearName(e) {
       if (e.target.value === 'anônimo') {
         e.target.value = '';
