@@ -1059,6 +1059,14 @@ div li img.img-thumbnail, div li video.img-thumbnail {
      object-fit: contain;
 }
 
+div li img.placeholder, div li video.placeholder {
+  width: 150px;
+  max-width: 150px;
+  height: auto;
+  min-height: 0;
+  cursor: initial;
+}
+
 div li img:hover, div li video:hover {
   -webkit-filter: none;
           filter: none;

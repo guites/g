@@ -757,6 +757,13 @@ div{
           min-height:200px;
           object-fit:contain;
         }
+        &.placeholder{
+          width:150px;
+          max-width:150px;
+          height:auto;
+          min-height:0;
+          cursor:initial;
+        }
         &:hover{
             filter:none;
         }
