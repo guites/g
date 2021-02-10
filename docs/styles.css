@@ -834,6 +834,21 @@ section.create-thread form .form-group {
   max-width: 500px;
 }
 
+section.create-thread form .form-group .form-subject {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+}
+
+section.create-thread form .form-group .form-subject input[type="checkbox"] {
+  min-height: 0;
+  width: initial;
+  height: initial;
+}
+
 section.create-thread form .form-group label {
   margin: 5px 15px 5px 0;
 }
@@ -856,6 +871,12 @@ section.create-thread form .form-group input[type="radio"]:checked + label {
   background-color: #313131;
   border-color: #ffff00ad;
   color: #ff0;
+}
+
+section.create-thread form .form-group input[type="radio"]:focus + label {
+  outline: 1px solid #ffa500cc;
+  outline-offset: 1px;
+  outline-style: auto;
 }
 
 section.create-thread form .form-group .gif-search-toggle .btn {
@@ -1051,6 +1072,14 @@ div li img.img-thumbnail, div li video.img-thumbnail {
   min-height: 200px;
   -o-object-fit: contain;
      object-fit: contain;
+}
+
+div li img.placeholder, div li video.placeholder {
+  width: 150px;
+  max-width: 150px;
+  height: auto;
+  min-height: 0;
+  cursor: initial;
 }
 
 div li img:hover, div li video:hover {

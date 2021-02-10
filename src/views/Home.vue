@@ -14,7 +14,10 @@
           placeholder="anônimo"
           v-model="message.username"
           maxlength=30
-          required>
+          required
+          @focus="clearName($event)"
+          @focusout="checkForName($event)"
+          >
           <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
           </small>
@@ -23,9 +26,14 @@
           </small>
         </div>
         <div class="form-group">
-          <label for="subject">Assunto</label>
+          <div class="form-subject">
+            <label for="tem-assunto">colocar assunto?</label>
+            <input type="checkbox" name="tem-assunto"
+            id="tem-assunto" @change="toggleSubject">
+          </div>
           <input v-model="message.subject" type="text" class="form-control"
           id="subject" placeholder="assunto"
+          v-if="this.hasSubject === true"
           maxlength=50
           required>
         </div>
@@ -51,26 +59,33 @@
           <label for="imageURL">ou: digite a URL de uma imagem/gif/vídeo</label>
           <input v-model="message.imageURL" type="url" class="form-control"
           id="imageURL" placeholder="https://~">
-          <label for='giphyURL'>ou: busque um gif</label>
-          <input v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
-          class="form-control" id="giphyURL" placeholder="cats">
-          <div class="gif-search-toggle" data-toggle="buttons">
-            <input v-on:change="searchGif" type="radio" name="options" id="option1"
-            autocomplete="off" checked value="giphy">
-            <label for ='option1' class="btn btn-primary">
-              Giphy
-            </label>
-            <input v-on:change="searchGif" type="radio" name="options" id="option2"
-            autocomplete="off" value="gfycat">
-            <label for='option2' class="btn btn-primary">
-              gfycat
-            </label>
-          </div>
+          <transition name="fade">
+            <div class="searchgifstuffs">
+              <label v-if='!this.optUpload' for='giphyURL'>ou: Busque um gif</label>
+              <input v-if='!this.optUpload'
+              v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
+              class="form-control" id="giphyURL" placeholder="cats">
+              <div v-if='!this.optUpload' class="gif-search-toggle" data-toggle="buttons">
+                <input v-on:change="searchGif" type="radio" name="options" id="option1"
+                autocomplete="off" checked value="giphy">
+                <label for ='option1' class="btn btn-primary">
+                  Giphy
+                </label>
+                <input v-on:change="searchGif" type="radio" name="options" id="option2"
+                autocomplete="off" value="gfycat">
+                <label for='option2' class="btn btn-primary">
+                  gfycat
+                </label>
+              </div>
+            </div>
+          </transition>
         </div>
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
     <div v-if="isPreviewing" class="imagePreview">
-      <img v-if="isPreviewing === 'image'" src="" alt="pré-visualização de imagem para upload">
+      <button type='button' v-if='this.optUpload'>Remover</button>
+      <img v-if="isPreviewing === 'image'" src="" id="imageToUpload"
+      alt="pré-visualização de imagem para upload">
       <video v-else-if="isPreviewing === 'video'"
       src=""
       autoplay="true"
@@ -95,118 +110,29 @@
             <img src="@/assets/giphy-attr.png" alt="Powered by GIPHY">
           </a>
         </div>
-      </div>
-      <div class='paginate-arrows'>
-        <ul v-if='hasPag' class="pagination">
-          <div>
-            <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
-            class="page-item" :class="{ 'active' : currPage == index}">
-              <p class="page-link">{{index}}</p>
-            </li>
-          </div>
-        </ul>
+        <div class='paginate-arrows'>
+          <ul v-if='hasPag' class="pagination">
+            <div>
+              <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
+              class="page-item" :class="{ 'active' : currPage == index}">
+                <p class="page-link">{{index}}</p>
+              </li>
+            </div>
+          </ul>
+        </div>
       </div>
     </div>
-
     </section>
-    <ul class="list-unstyled d-flex flex-column align-items-center"
-    v-for="message in reversedMessages"
-    :key="message._id">
-      <li class="media" :id="message.id">
-        <img
-        loading="lazy"
-        v-if="message.imageurl"
-        class="img-thumbnail"
-        :data-src="message.imageurl"
-        :alt="message.subject"
-        :src="message.imageurl"
-        @click="fullSize($event)"
-        @error="createVideo($event)"
-        @load="preventVideo($event)"
-        >
-        <img
-        loading="lazy"
-        v-else
-        class="img-thumbnail"
-        src="http://via.placeholder.com/300?text=:("
-        alt="post sem imagem"
-        >
-        <div class="align-self-center media-body">
-          <div class="flash"
-          :class="messageFlash.type"
-          v-if="messageFlash.header && messageFlash.messageID === message.id">
-            <button class='flash-btn'
-            type="button"
-            v-on:click="messageFlash.header = ''">x</button>
-            <strong>{{messageFlash.header}}</strong>
-            {{messageFlash.text}}
-            <a :href="messageFlash.link">{{messageFlash.message}}</a>
-            <div class="opt-btns">
-              <button type="button"
-              v-on:click="handleMessage(message.id,'delete',$event)">
-                Deletar
-              </button>
-              <!-- <button type="button">pensando bem...</button> -->
-            </div>
-          </div>
-          <div class="edit_tab" :data-message-id="message.id">
-            <p class='mt-0 mb-1 name'>por: {{message.username}}</p>
-            <button type="button"
-            v-if="message.user_id === auth.id"
-            v-on:click="deleteMessage($event)"
-            class='delete'>deletar</button>
-            <button type="button"
-            v-if="message.user_id === auth.id"
-            v-on:click="editMessage($event)"
-            class='edit'>editar</button>
-            <button type="button"
-            v-if="message.user_id !== auth.id && false"
-            v-on:click="reactMessage($event)"
-            class='react'>reagir</button>
-            <button type="button"
-            @click="replyMessage($event)"
-            :data-replyTo="message.id"
-            class='reply'>responder</button>
-          </div>
-          <p class="mt-0 mb-1 subject">
-            <span class="id">#{{message.id}} / </span>
-            {{message.subject}}
-          </p>
-          <p>{{message.message}}</p>
-          <br />
-          <small>{{message.created}}</small><br />
-          <img v-if="message.gif_origin == 'giphy'"
-          alt='powered by GIPHY'
-          class="gif_origin"
-          src="@/assets/giphy-attr1.png">
-        </div>
-      </li>
-      <li class="media reply-item"
-      v-for="reply of message.replies"
-      v-bind:key="reply.id"
-      >
-        <img
-        loading="lazy"
-        v-if="reply.imageurl"
-        class="img-thumbnail"
-        :data-src="reply.imageurl"
-        :src="reply.imageurl"
-        @click="fullSize($event)"
-        @error="createVideo($event)"
-        @load="preventVideo($event)"
-        alt=""
-        >
-        <div class="align-self-center media-body">
-          <div class="edit_tab">
-            <p class="mt-0 mb-1">{{reply.username}}</p>
-          </div>
-            <p class="mt-0 mb-1">#{{reply.id}}</p>
-            <p>{{reply.content}}</p><br />
-            <small>{{reply.created}}</small><br />
-        </div>
-      </li>
-      <hr>
-    </ul>
+    <Message
+    v-for="message in messages"
+    v-bind:message="message"
+    v-bind:auth="auth"
+    v-bind:replies="message.replies"
+    @replyMessage="replyMessage"
+    @update="message = $event"
+    v-bind:key="message.id"
+    >
+    </Message>
     <template>
       <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
@@ -220,17 +146,18 @@
 
 <script>
 import ReplyBox from '../components/replybox.vue';
+import Message from '../components/message.vue';
 
 const apiURL = 'http://localhost:5000/messages';
 const repliesURL = 'http://localhost:5000/replies';
-const handleURL = 'http://localhost:5000/';
-const imgurURLimg = 'https://api.imgur.com/3/image';
+const imgurURLimg = 'http://localhost:5000/imgur';
 const imgurURLupload = 'https://api.imgur.com/3/upload';
 const proxyURL = 'https://infinite-shore-20037.herokuapp.com/';
 export default {
   name: 'Home',
   components: {
     ReplyBox,
+    Message,
   },
   props: {
     auth: {
@@ -243,6 +170,8 @@ export default {
     },
   },
   data: () => ({
+    optUpload: '',
+    messages: [],
     replyObserver: null,
     messageToReplyTo: '',
     gifsPerPage: 4,
@@ -253,8 +182,8 @@ export default {
     isGifBeingSearched: '',
     emptyGifResults: '',
     hasPag: '',
-    messages: [],
     gifs: [],
+    hasSubject: false,
     message: {
       username: 'anônimo',
       subject: '',
@@ -262,13 +191,6 @@ export default {
       imageURL: '',
       user_id: 0,
       gif_origin: 'none',
-    },
-    messageFlash: {
-      type: '',
-      header: '',
-      text: '',
-      message: '',
-      messageID: '',
     },
     isPreviewing: '',
     allowedUploadVideoFormats: [
@@ -322,6 +244,7 @@ export default {
         { quote: 'remember: no use for a name', reference: 'https://www.youtube.com/watch?v=mEdd1NHnwIE' },
         { quote: 'o homem é menos ele mesmo quando fala de sua pessoa', reference: 'https://pt.wikipedia.org/wiki/Oscar_Wilde' },
         { quote: 'o anonimato é a fama do futuro', reference: 'https://pt.wikipedia.org/wiki/John_Boyle' },
+        { quote: 'a vingança nunca é plena, mata a alma e a envenena', reference: 'https://pt.wikiquote.org/wiki/Seu_Madruga' },
       ];
       return phrases[Math.floor((phrases.length * Math.random()))].quote;
     },
@@ -333,7 +256,6 @@ export default {
         threshold: 0,
       },
     );
-    // .forEach((li) => this.replyObserver.observe(li));
     fetch(apiURL).then((response) => response.json())
       .then((result) => {
         this.messages = result.results;
@@ -344,6 +266,19 @@ export default {
       });
   },
   methods: {
+    toggleSubject() {
+      this.hasSubject = !this.hasSubject;
+    },
+    clearName(e) {
+      if (e.target.value === 'anônimo') {
+        e.target.value = '';
+      }
+    },
+    checkForName(e) {
+      if (e.target.value === '') {
+        e.target.value = 'anônimo';
+      }
+    },
     isMyPost() {
       return true;
     },
@@ -356,6 +291,7 @@ export default {
       this.isPreviewing = '';
       this.isGifBeingSearched = '';
       document.querySelector('#uploadIMG').value = '';
+      this.optUpload = '';
     },
     addMessage() {
       const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
@@ -370,6 +306,10 @@ export default {
         this.message.gif_origin = 'gfycat';
       } else if (/tenor/.test(this.message.imageURL)) {
         this.message.gif_origin = 'tenor';
+      } else if (/imgur/.test(this.message.imageURL)) {
+        this.message.gif_origin = 'imgur';
+      } else {
+        this.message.gif_origin = 'outro';
       }
       fetch(apiURL, {
         method: 'POST',
@@ -389,7 +329,12 @@ export default {
           }
         } else {
           this.error = '';
-          this.messages.push(JSON.parse(result));
+          const parsedResult = JSON.parse(result);
+          // if (parsedResult.imageurl === '') {
+          //   parsedResult.imageurl = 'nope';
+          // }
+          parsedResult.isNew = true;
+          this.messages.unshift(parsedResult);
           this.clearMsgForm();
         }
         submitButton.disabled = false;
@@ -405,8 +350,8 @@ export default {
     reactMessage() {
       alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
     },
-    replyMessage(e) {
-      this.messageToReplyTo = e.target.getAttribute('data-replyto');
+    replyMessage(reply) {
+      this.messageToReplyTo = reply;
     },
     closeReply() {
       this.messageToReplyTo = '';
@@ -436,43 +381,6 @@ export default {
           === parseInt(entry.target.id, 10));
             this.$set(this.messages[msgIndex], 'replies', replies);
           });
-      });
-    },
-    handleMessage(messageID, action, e) {
-      e.target.disabled = true;
-      let method;
-      let body;
-      let headers;
-      let url;
-      let finalizeFunction;
-      switch (action) {
-        case 'delete':
-          method = 'DELETE';
-          body = JSON.stringify('');
-          headers = {
-            'content-type': 'text/plain',
-          };
-          url = `message/${messageID}`;
-          finalizeFunction = (id) => this.messages.filter((message) => message.id !== id);
-          break;
-        default:
-          method = 'POST';
-          headers = {
-            'content-type': 'application/json',
-          };
-      }
-      fetch(`${handleURL}${url}`, {
-        method,
-        headers,
-        body,
-        credentials: 'include',
-      }).then((response) => response.json()).then((result) => {
-        if (!result) {
-          e.target.disabled = false;
-          this.msgFlash('error', messageID, 'Ocorreu um erro!', 'Tente deletar sua mensagem novamente.', 'Atualizar a página pode resolver o problema!');
-        } else {
-          this.messages = finalizeFunction(messageID);
-        }
       });
     },
     msgFlash(type, messageID, header, text, message) {
@@ -600,34 +508,62 @@ export default {
         }
       }
     },
-    uploadToImgur(kind, file) {
-      const formData = new FormData();
-      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
+    sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+    async uploadToImgur(kind) {
       document.querySelector('.imagePreview').children[0].classList.add('uploading');
+      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
       submitButton.disabled = true;
+      // blank line
       let postURL;
+      const formData = new FormData();
       if (kind === 'image') {
-        formData.append('image', file);
+        const file = document.querySelector('#imageToUpload').src;
+        const base64result = file.split(',')[1];
         postURL = imgurURLimg;
+        formData.append('image', base64result);
       } else {
-        formData.append('type', 'file');
-        formData.append('video', file, 'video');
+        // formData.append('type', 'file');
+        // formData.append('video', file, 'video');
         postURL = proxyURL + imgurURLupload;
       }
-      fetch(postURL, {
+      const requestOptions = {
         method: 'POST',
         body: formData,
-        headers: {
-          Authorization: 'Client-ID 3435e574a9859d1',
-        },
-      }).then((response) => response.json()).then((result) => {
-        if (result.status === 200 && result.success === true) {
-          this.message.imageURL = result.data.link;
-          this.gif_origin = 'imgur';
-        }
-        document.querySelector('.imagePreview').children[0].classList.remove('uploading');
-        submitButton.disabled = false;
-      }).catch((err) => console.log(err));
+        redirect: 'follow',
+      };
+      fetch(postURL, requestOptions)
+        .then((response) => response.json())
+        .then((result) => {
+          if (result.status === 200 && result.success === true) {
+            this.message.imageURL = result.data.link;
+            this.gif_origin = 'imgur';
+            // impede que a pessoa mexa na URL após subir o arquivo
+            document.querySelector('#imageURL').readOnly = true;
+            document.querySelector('#imageURL').previousElementSibling.innerText = 'Upload Concluído!';
+            // remove a pesquisa por gifs
+            this.optUpload = true;
+          }
+          document.querySelector('.imagePreview').children[0].classList.remove('uploading');
+          submitButton.disabled = false;
+        })
+        .catch((error) => console.log('error', error));
+    },
+    readAsDataURL(file, img) {
+      return new Promise((resolve) => {
+        const fileReader = new FileReader();
+        fileReader.onload = function () {
+          const setImg = img;
+          setImg.src = fileReader.result;
+          return resolve(
+            {
+              data: fileReader.result, name: file.name, size: file.size, type: file.type,
+            },
+          );
+        };
+        fileReader.readAsDataURL(file);
+      });
     },
     async handleUpload(e) {
       let imagePreviewDiv;
@@ -635,19 +571,10 @@ export default {
       console.log(file);
       if (file.type.startsWith('image/')) {
         this.isPreviewing = 'image';
-        setTimeout(async () => {
-          imagePreviewDiv = document.querySelector('.imagePreview');
-          const reader = new FileReader();
-          reader.onload = (function (aImg) {
-            return function (x) {
-              const img = aImg;
-              img.src = x.target.result;
-              return img;
-            };
-          }(imagePreviewDiv.children[0]));
-          reader.readAsDataURL(file);
-          await this.uploadToImgur('image', file);
-        }, 100);
+        await this.sleep(100);
+        imagePreviewDiv = document.querySelector('.imagePreview');
+        await this.readAsDataURL(file, imagePreviewDiv.children[0]);
+        await this.uploadToImgur('image');
       } else if (file.type.startsWith('video/')) {
         if (this.allowedUploadVideoFormats.includes(file.type)) {
           this.isPreviewing = 'video';

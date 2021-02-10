@@ -581,6 +581,15 @@ section.create-thread{
           display:flex;
           flex-direction:column;
           max-width: 500px;
+          .form-subject{
+            display:flex;
+            align-items:center;
+            input[type="checkbox"]{
+              min-height:0;
+              width:initial;
+              height:initial;
+            }
+          }
           label{
               margin: 5px 15px 5px 0;
           }
@@ -598,6 +607,11 @@ section.create-thread{
               background-color:#313131;
               border-color:#ffff00ad;
               color:#ff0;
+            }
+            &:focus + label {
+              outline: 1px solid #ffa500cc;
+              outline-offset:1px;
+              outline-style:auto;
             }
           }
           .gif-search-toggle{
@@ -751,6 +765,13 @@ div{
         &.img-thumbnail{
           min-height:200px;
           object-fit:contain;
+        }
+        &.placeholder{
+          width:150px;
+          max-width:150px;
+          height:auto;
+          min-height:0;
+          cursor:initial;
         }
         &:hover{
             filter:none;
