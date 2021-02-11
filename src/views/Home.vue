@@ -48,17 +48,24 @@
           <label for="uploadIMG">
             Envie uma imagem/gif/vídeo
             <span
-            title="Esta funcionalidade está em fase de testes! Erros podem ocorrer ¯\_(ツ)_/¯"
+            title="Erros podem ocorrer ¯\_(ツ)_/¯"
             class='badge beta'>
               BETA
             </span>
           </label>
-          <input type="file" name="uploadIMG" id="uploadIMG" @change="handleUpload($event)">
+          <input type="file" name="uploadIMG" id="uploadIMG"
+          :disabled="this.optUpload === true"
+          @change="handleUpload($event)">
         </div>
         <div class="form-group">
-          <label for="imageURL">ou: digite a URL de uma imagem/gif/vídeo</label>
+          <label for="imageURL" v-if="!this.optUpload">
+            ou: digite a URL de uma imagem/gif/vídeo</label>
+          <label for="imageURL" class='upload-concluido'
+          v-else>Upload Concluído!</label>
           <input v-model="message.imageURL" type="url" class="form-control"
-          id="imageURL" placeholder="https://~">
+          id="imageURL" placeholder="https://~"
+          :readonly="this.optUpload === true"
+          >
           <transition name="fade">
             <div class="searchgifstuffs">
               <label v-if='!this.optUpload' for='giphyURL'>ou: Busque um gif</label>
@@ -83,10 +90,11 @@
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
     <div v-if="isPreviewing" class="imagePreview">
-      <button type='button' v-if='this.optUpload'>Remover</button>
+      <button type='button' v-if='this.optUpload'>Cancelar</button>
       <img v-if="isPreviewing === 'image'" src="" id="imageToUpload"
       alt="pré-visualização de imagem para upload">
       <video v-else-if="isPreviewing === 'video'"
+      id="videoToUpload"
       src=""
       autoplay="true"
       loop="true"
@@ -150,9 +158,9 @@ import Message from '../components/message.vue';
 
 const apiURL = 'http://localhost:5000/messages';
 const repliesURL = 'http://localhost:5000/replies';
-const imgurURLimg = 'http://localhost:5000/imgur';
-const imgurURLupload = 'https://api.imgur.com/3/upload';
-const proxyURL = 'https://infinite-shore-20037.herokuapp.com/';
+const imgurURLimg = 'http://localhost:5000/imgupload';
+// const imgurURLupload = 'https://api.imgur.com/3/upload';
+const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'Home',
   components: {
@@ -524,9 +532,10 @@ export default {
         postURL = imgurURLimg;
         formData.append('image', base64result);
       } else {
-        // formData.append('type', 'file');
-        // formData.append('video', file, 'video');
-        postURL = proxyURL + imgurURLupload;
+        const file = document.querySelector('#videoToUpload').src;
+        const base64result = file.split(',')[1];
+        formData.append('video', base64result);
+        postURL = imgurURLupload;
       }
       const requestOptions = {
         method: 'POST',
@@ -536,16 +545,29 @@ export default {
       fetch(postURL, requestOptions)
         .then((response) => response.json())
         .then((result) => {
-          if (result.status === 200 && result.success === true) {
+          console.log(result);
+          const mediaDiv = document.querySelector('.imagePreview');
+          const mediaInUse = mediaDiv.children[0];
+          if (result.status === 200
+          && result.success === true) {
             this.message.imageURL = result.data.link;
             this.gif_origin = 'imgur';
-            // impede que a pessoa mexa na URL após subir o arquivo
-            document.querySelector('#imageURL').readOnly = true;
-            document.querySelector('#imageURL').previousElementSibling.innerText = 'Upload Concluído!';
             // remove a pesquisa por gifs
             this.optUpload = true;
+            mediaInUse.src = result.data.link;
+            mediaInUse.classList.remove('uploading');
+          } else if (result.data.error) {
+            mediaDiv.innerHTML = `
+              <div class="error-wrap">
+                <p>Ocorreu um erro ao salvar sua imagem :(</p>
+                <p>${result.data.error}</p><p>Faça o upload do seu arquivo em outro lugar e poste usando a URL!</p>
+                <a href="https://imgur.com/upload" target="_blank">Ir para o imgur</a>
+              </div>`;
+          } else {
+            mediaDiv.innerHTML = '<div class="error-wrap><br/><p>Ocorreu um erro ao salvar sua imagem :(</p>';
+            mediaDiv.innerHTML += '<p>Faça o upload do seu arquivo em outro lugar e poste usando a URL!</p>';
+            mediaDiv.innerHTML += '<a href="https://imgur.com/upload" target="_blank">Ir para o imgur</a></div>';
           }
-          document.querySelector('.imagePreview').children[0].classList.remove('uploading');
           submitButton.disabled = false;
         })
         .catch((error) => console.log('error', error));
@@ -568,7 +590,6 @@ export default {
     async handleUpload(e) {
       let imagePreviewDiv;
       const file = e.target.files[0];
-      console.log(file);
       if (file.type.startsWith('image/')) {
         this.isPreviewing = 'image';
         await this.sleep(100);
@@ -578,12 +599,10 @@ export default {
       } else if (file.type.startsWith('video/')) {
         if (this.allowedUploadVideoFormats.includes(file.type)) {
           this.isPreviewing = 'video';
-          setTimeout(async () => {
-            imagePreviewDiv = document.querySelector('.imagePreview');
-            imagePreviewDiv.children[0].src = URL.createObjectURL(file);
-            imagePreviewDiv.children[0].load();
-            await this.uploadToImgur('video', file);
-          }, 100);
+          await this.sleep(100);
+          imagePreviewDiv = document.querySelector('.imagePreview');
+          await this.readAsDataURL(file, imagePreviewDiv.children[0]);
+          await this.uploadToImgur('video');
         } else {
           this.isPreviewing = 'not';
           setTimeout(() => {

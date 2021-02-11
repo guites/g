@@ -879,6 +879,11 @@ section.create-thread form .form-group label, section.create-thread form .search
   margin: 5px 15px 5px 0;
 }
 
+section.create-thread form .form-group label.upload-concluido, section.create-thread form .searchgifstuffs label.upload-concluido {
+  color: #00bc8c;
+  font-weight: 600;
+}
+
 section.create-thread form .form-group input:not([type="file"]), section.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs input:not([type="file"]), section.create-thread form .searchgifstuffs textarea {
   background-color: #e6e6e6;
   min-height: 26px;
@@ -931,6 +936,10 @@ section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
   max-width: 480px;
   height: 480px;
   position: relative;
+}
+
+section.create-thread .gifBoxWrapper div.error-wrap a, section.create-thread .imagePreview div.error-wrap a {
+  padding: 10px;
 }
 
 section.create-thread .gifBoxWrapper .paginate-arrows, section.create-thread .imagePreview .paginate-arrows {
@@ -1082,6 +1091,28 @@ section.create-thread .imagePreview {
   -webkit-box-pack: center;
       -ms-flex-pack: center;
           justify-content: center;
+}
+
+section.create-thread .imagePreview button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #e74c3c;
+  border-color: #e74c3c;
+  border: 1px solid transparent;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  z-index: 1;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+section.create-thread .imagePreview button:hover {
+  background-color: #e12e1c;
+  border-color: #d62c1a;
 }
 
 section.create-thread .imagePreview p {
@@ -1614,8 +1645,9 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
             align-items: center;
     margin-bottom: 50px;
   }
-  section.create-thread .gifBoxWrapper {
+  section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
     width: 100%;
+    height: initial;
   }
   #replybox {
     left: 0;

@@ -612,6 +612,10 @@ section.create-thread{
           }
           label{
               margin: 5px 15px 5px 0;
+              &.upload-concluido {
+                color: #00bc8c;
+                font-weight: 600;
+              }
           }
           input:not([type="file"]),textarea{
               background-color:#e6e6e6;
@@ -656,6 +660,11 @@ section.create-thread{
       }
   }
   .gifBoxWrapper, .imagePreview{
+    div.error-wrap{
+      a{
+        padding:10px;
+      }
+    }
     width:calc(100% - 500px);
     max-width: 480px;
     height:480px;
@@ -772,6 +781,26 @@ section.create-thread{
     display: flex;
     align-items: center;
     justify-content: center;
+    button {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background-color: #e74c3c;
+      border-color: #e74c3c;
+      border: 1px solid transparent;
+      color: #fff;
+      padding: 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.5;
+      z-index: 1;
+      cursor: pointer;
+      font-weight: bold;
+      &:hover{
+        background-color: #e12e1c;
+        border-color: #d62c1a;
+      }
+    }
     p{
       padding:10px;
       font-weight:bold;
@@ -1169,8 +1198,9 @@ position:relative;
       height:auto;
       align-items:center;
       margin-bottom:50px;
-      .gifBoxWrapper{
+      .gifBoxWrapper, .imagePreview{
           width:100%;
+          height:initial;
       }
   }
   #replybox{
