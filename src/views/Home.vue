@@ -90,7 +90,8 @@
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
     <div v-if="isPreviewing" class="imagePreview">
-      <button type='button' v-if='this.optUpload'>Cancelar</button>
+      <button type='button' v-if='this.optUpload'
+      @click="removeUpload($event)">Cancelar</button>
       <img v-if="isPreviewing === 'image'" src="" id="imageToUpload"
       alt="pré-visualização de imagem para upload">
       <video v-else-if="isPreviewing === 'video'"
@@ -159,7 +160,6 @@ import Message from '../components/message.vue';
 const apiURL = 'http://localhost:5000/messages';
 const repliesURL = 'http://localhost:5000/replies';
 const imgurURLimg = 'http://localhost:5000/imgupload';
-// const imgurURLupload = 'https://api.imgur.com/3/upload';
 const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'Home',
@@ -531,10 +531,12 @@ export default {
         const base64result = file.split(',')[1];
         postURL = imgurURLimg;
         formData.append('image', base64result);
+        console.log(base64result);
       } else {
-        const file = document.querySelector('#videoToUpload').src;
-        const base64result = file.split(',')[1];
-        formData.append('video', base64result);
+        // const file = document.querySelector('#videoToUpload').src;
+        // const base64result = file.split(',')[1];
+        // console.log(base64result);
+        formData.append('video', kind.file);
         postURL = imgurURLupload;
       }
       const requestOptions = {
@@ -544,7 +546,7 @@ export default {
       };
       fetch(postURL, requestOptions)
         .then((response) => response.json())
-        .then((result) => {
+        .then(async (result) => {
           console.log(result);
           const mediaDiv = document.querySelector('.imagePreview');
           const mediaInUse = mediaDiv.children[0];
@@ -554,8 +556,18 @@ export default {
             this.gif_origin = 'imgur';
             // remove a pesquisa por gifs
             this.optUpload = true;
-            mediaInUse.src = result.data.link;
+            await this.sleep(100);
+            if (result.data.type.startsWith('video/')) {
+              mediaInUse.innerHTML = `
+                <source src="${result.data.link}"
+                type="${result.data.type}">
+              `;
+            } else {
+              mediaInUse.src = result.data.link;
+            }
             mediaInUse.classList.remove('uploading');
+            const removeBtn = mediaDiv.querySelector('button');
+            removeBtn.setAttribute('data-deletehash', result.data.deletehash);
           } else if (result.data.error) {
             mediaDiv.innerHTML = `
               <div class="error-wrap">
@@ -601,12 +613,15 @@ export default {
           this.isPreviewing = 'video';
           await this.sleep(100);
           imagePreviewDiv = document.querySelector('.imagePreview');
-          await this.readAsDataURL(file, imagePreviewDiv.children[0]);
-          await this.uploadToImgur('video');
+          // await this.readAsDataURL(file, imagePreviewDiv.children[0]);
+          const objUrl = URL.createObjectURL(file);
+          imagePreviewDiv.children[0].src = objUrl;
+          await this.uploadToImgur({ file });
         } else {
           this.isPreviewing = 'not';
           setTimeout(() => {
             imagePreviewDiv = document.querySelector('.imagePreview');
+            imagePreviewDiv.querySelectorAll('ul').forEach((ul) => ul.remove());
             imagePreviewDiv.children[0].innerHTML += `<br/><ul><li>nome: ${file.name}</li><li>formato: ${file.type}</li></ul>`;
             imagePreviewDiv.children[0].innerHTML += `<br/>Formatos aceitos: ${this.allowedUploadVideoFormats.join(', ')}</ul>`;
           }, 100);
@@ -615,9 +630,23 @@ export default {
         this.isPreviewing = 'not';
         setTimeout(() => {
           imagePreviewDiv = document.querySelector('.imagePreview');
+          imagePreviewDiv.querySelectorAll('ul').forEach((ul) => ul.remove());
           imagePreviewDiv.children[0].innerHTML += `<br/><ul><li>nome: ${file.name}</li><li>formato: ${file.type}</li></ul>`;
         }, 100);
       }
+    },
+    removeUpload(e) {
+      const deleteHash = e.target.getAttribute('data-deletehash').trim();
+      console.log(deleteHash);
+      fetch(`https://api.imgur.com/3/image/${deleteHash}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: 'Client-ID 3435e574a9859d1',
+        },
+        redirect: 'follow',
+      })
+        .then((response) => response.json())
+        .then((r) => console.log(r));
     },
   },
 };
