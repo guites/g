@@ -530,7 +530,8 @@ export default {
       let postURL;
       const formData = new FormData();
       if (kind === 'image') {
-        if (arquivo.type === 'image/gif') {
+        if (true) {
+        // if (arquivo.type === 'image/gif') {
           formData.append('image', arquivo);
           postURL = imgurURLgif;
         } else {

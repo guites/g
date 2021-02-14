@@ -307,7 +307,8 @@ export default {
       // blank line
       const formData = new FormData();
       if (kind === 'image') {
-        if (file.type === 'image/gif') {
+        // if (file.type === 'image/gif') {
+        if (true) {
           formData.append('image', file);
           await this.postImgGif(formData, imgurURLgif);
         } else {
