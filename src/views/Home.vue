@@ -145,6 +145,7 @@
     <template>
       <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
+      :allowedUploadVideoFormats="this.allowedUploadVideoFormats"
       @closeReply="this.closeReply"
       @addReplyToThread="this.addReplyToThread"
       >
@@ -160,6 +161,7 @@ import Message from '../components/message.vue';
 const apiURL = 'http://localhost:5000/messages';
 const repliesURL = 'http://localhost:5000/replies';
 const imgurURLimg = 'http://localhost:5000/imgupload';
+const imgurURLgif = 'http://localhost:5000/gifupload';
 const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'Home',
@@ -253,6 +255,7 @@ export default {
         { quote: 'o homem é menos ele mesmo quando fala de sua pessoa', reference: 'https://pt.wikipedia.org/wiki/Oscar_Wilde' },
         { quote: 'o anonimato é a fama do futuro', reference: 'https://pt.wikipedia.org/wiki/John_Boyle' },
         { quote: 'a vingança nunca é plena, mata a alma e a envenena', reference: 'https://pt.wikiquote.org/wiki/Seu_Madruga' },
+        { quote: 'Ski-bi dibby dib yo da dub dub', reference: 'https://www.youtube.com/watch?v=Hy8kmNEo1i8' },
       ];
       return phrases[Math.floor((phrases.length * Math.random()))].quote;
     },
@@ -519,7 +522,7 @@ export default {
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
-    async uploadToImgur(kind) {
+    async uploadToImgur(kind, arquivo) {
       document.querySelector('.imagePreview').children[0].classList.add('uploading');
       const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
       submitButton.disabled = true;
@@ -527,16 +530,17 @@ export default {
       let postURL;
       const formData = new FormData();
       if (kind === 'image') {
-        const file = document.querySelector('#imageToUpload').src;
-        const base64result = file.split(',')[1];
-        postURL = imgurURLimg;
-        formData.append('image', base64result);
-        console.log(base64result);
+        if (arquivo.type === 'image/gif') {
+          formData.append('image', arquivo);
+          postURL = imgurURLgif;
+        } else {
+          const file = document.querySelector('#imageToUpload').src;
+          const base64result = file.split(',')[1];
+          postURL = imgurURLimg;
+          formData.append('image', base64result);
+        }
       } else {
-        // const file = document.querySelector('#videoToUpload').src;
-        // const base64result = file.split(',')[1];
-        // console.log(base64result);
-        formData.append('video', kind.file);
+        formData.append('video', arquivo);
         postURL = imgurURLupload;
       }
       const requestOptions = {
@@ -569,16 +573,17 @@ export default {
             const removeBtn = mediaDiv.querySelector('button');
             removeBtn.setAttribute('data-deletehash', result.data.deletehash);
           } else if (result.data.error) {
-            mediaDiv.innerHTML = `
-              <div class="error-wrap">
-                <p>Ocorreu um erro ao salvar sua imagem :(</p>
-                <p>${result.data.error}</p><p>Faça o upload do seu arquivo em outro lugar e poste usando a URL!</p>
-                <a href="https://imgur.com/upload" target="_blank">Ir para o imgur</a>
-              </div>`;
+            this.error = `
+              Aceitamos apenas imagens no formato\n
+              JPEG, PNG, GIF, APNG e TIFF!
+            `;
+            this.isPreviewing = '';
           } else {
-            mediaDiv.innerHTML = '<div class="error-wrap><br/><p>Ocorreu um erro ao salvar sua imagem :(</p>';
-            mediaDiv.innerHTML += '<p>Faça o upload do seu arquivo em outro lugar e poste usando a URL!</p>';
-            mediaDiv.innerHTML += '<a href="https://imgur.com/upload" target="_blank">Ir para o imgur</a></div>';
+            this.error = `
+              Ocorreu um erro ao salvar sua imagem :(\n
+              Faça o upload do seu arquivo <a href="https://imgur.com/upload" target="_blank">Ir para o imgur</a>\n
+              e poste usando a URL!
+            `;
           }
           submitButton.disabled = false;
         })
@@ -602,12 +607,13 @@ export default {
     async handleUpload(e) {
       let imagePreviewDiv;
       const file = e.target.files[0];
+      const input = document.querySelector('#uploadIMG');
       if (file.type.startsWith('image/')) {
         this.isPreviewing = 'image';
         await this.sleep(100);
         imagePreviewDiv = document.querySelector('.imagePreview');
         await this.readAsDataURL(file, imagePreviewDiv.children[0]);
-        await this.uploadToImgur('image');
+        await this.uploadToImgur('image', file);
       } else if (file.type.startsWith('video/')) {
         if (this.allowedUploadVideoFormats.includes(file.type)) {
           this.isPreviewing = 'video';
@@ -616,29 +622,27 @@ export default {
           // await this.readAsDataURL(file, imagePreviewDiv.children[0]);
           const objUrl = URL.createObjectURL(file);
           imagePreviewDiv.children[0].src = objUrl;
-          await this.uploadToImgur({ file });
+          await this.uploadToImgur('video', file);
         } else {
-          this.isPreviewing = 'not';
-          setTimeout(() => {
-            imagePreviewDiv = document.querySelector('.imagePreview');
-            imagePreviewDiv.querySelectorAll('ul').forEach((ul) => ul.remove());
-            imagePreviewDiv.children[0].innerHTML += `<br/><ul><li>nome: ${file.name}</li><li>formato: ${file.type}</li></ul>`;
-            imagePreviewDiv.children[0].innerHTML += `<br/>Formatos aceitos: ${this.allowedUploadVideoFormats.join(', ')}</ul>`;
-          }, 100);
+          this.error = `
+            Formato de vídeo não aceito!\n
+            Funciona apenas com os formatos abaixo:\n
+            ${this.allowedUploadVideoFormats.join(', ')}
+          `;
+          input.value = '';
         }
       } else {
-        this.isPreviewing = 'not';
-        setTimeout(() => {
-          imagePreviewDiv = document.querySelector('.imagePreview');
-          imagePreviewDiv.querySelectorAll('ul').forEach((ul) => ul.remove());
-          imagePreviewDiv.children[0].innerHTML += `<br/><ul><li>nome: ${file.name}</li><li>formato: ${file.type}</li></ul>`;
-        }, 100);
+        this.error = `
+          Aceitamos apenas imagens,\n
+          gifs e vídeos!
+        `;
+        input.value = '';
       }
     },
     removeUpload(e) {
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
       console.log(deleteHash);
-      fetch(`https://api.imgur.com/3/image/${deleteHash}`, {
+      fetch(`http://localhost:5000/imgur/${deleteHash}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Client-ID 3435e574a9859d1',
@@ -646,7 +650,15 @@ export default {
         redirect: 'follow',
       })
         .then((response) => response.json())
-        .then((r) => console.log(r));
+        .then((r) => {
+          console.log(r);
+          if (r.data === true && r.success === true) {
+            this.optUpload = false;
+            this.isPreviewing = '';
+            this.message.imageURL = '';
+            document.querySelector('input[name=uploadIMG]').value = '';
+          }
+        });
     },
   },
 };

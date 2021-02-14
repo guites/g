@@ -38,9 +38,27 @@
         </textarea>
       </div>
       <div class="form-group">
-        <label for="imageURL">image URL</label>
+        <label for="replyIMG">
+          Envie uma imagem/gif/vídeo
+          <span
+          title="Erros podem ocorrer ¯\_(ツ)_/¯"
+          class='badge beta'>
+            BETA
+          </span>
+        </label>
+        <input type="file" name="replyIMG" id="replyIMG"
+        :disabled="this.optUpload === true"
+        @change="handleUpload($event)">
+      </div>
+      <div class="form-group">
+        <label for="imageURL" v-if="!this.optUpload">
+          ou: digite a URL de uma imagem/gif/vídeo</label>
+        <label for="imageURL" class='upload-concluido'
+        v-else>Upload Concluído!</label>
         <input v-model="replyMessage.imageURL" type="url" class="form-control"
-        id="imageURL" placeholder="https://~">
+        id="imageURL" placeholder="https://~"
+        :readonly="this.optUpload === true"
+        >
       </div>
       <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
@@ -49,9 +67,12 @@
 
 <script>
 const replyURL = 'http://localhost:5000/replies';
+const imgurURLimg = 'http://localhost:5000/imgupload';
+const imgurURLgif = 'http://localhost:5000/gifupload';
+const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'ReplyBox',
-  props: ['messageToReplyTo'],
+  props: ['messageToReplyTo', 'allowedUploadVideoFormats'],
   data: () => ({
     replyTo: {
       message_id: '',
@@ -74,6 +95,7 @@ export default {
       user_id: 0,
     },
     error: '',
+    optUpload: false,
   }),
   watch: {
     messageToReplyTo(val) {
@@ -201,6 +223,8 @@ export default {
       this.replyMessage.content = '';
       this.replyMessage.imageURL = '';
       this.replyMessage.user_id = 0;
+      document.querySelector('#replyIMG').value = '';
+      this.optUpload = false;
     },
     addReply() {
       const submitButton = document.querySelector('#replybox form button[type="submit"]');
@@ -232,6 +256,89 @@ export default {
         }
         submitButton.disabled = false;
       });
+    },
+    async handleUpload(e) {
+      const file = e.target.files[0];
+      if (file.type.startsWith('image/')) {
+        await this.uploadToImgur('image', file);
+      } else if (file.type.startsWith('video/')) {
+        if (this.allowedUploadVideoFormats.includes(file.type)) {
+          await this.uploadToImgur('video', file);
+        } else {
+          this.error = `
+            Formato de vídeo não aceito!\n
+            Funciona apenas com os formatos abaixo:\n
+            ${this.allowedUploadVideoFormats.join(', ')}
+          `;
+        }
+      } else {
+        this.error = `
+          Aceitamos apenas imagens,\n
+          gifs e vídeos!
+        `;
+      }
+    },
+    async postImgGif(formData, url) {
+      const submitButton = document.querySelector('#replyForm button');
+      return fetch(url, {
+        method: 'POST',
+        body: formData,
+        redirect: 'follow',
+      })
+        .then((response) => response.json())
+        .then((result) => {
+          if (result.status === 200 && result.success === true) {
+            this.replyMessage.imageURL = result.data.link;
+            // trava o input file e deixa o campo de URL como read only
+            this.optUpload = true;
+          } else {
+            this.error = `
+            Aceitamos apenas imagens no formato\n
+            JPEG, PNG, GIF, APNG e TIFF!
+            `;
+          }
+          // libera o botão de enviar
+          submitButton.disabled = false;
+        });
+    },
+    async uploadToImgur(kind, file) {
+      const submitButton = document.querySelector('#replyForm button');
+      submitButton.disabled = true;
+      // blank line
+      const formData = new FormData();
+      if (kind === 'image') {
+        if (file.type === 'image/gif') {
+          formData.append('image', file);
+          await this.postImgGif(formData, imgurURLgif);
+        } else {
+          const reader = new FileReader();
+          reader.onload = async () => {
+            const base64result = reader.result.split(',')[1];
+            formData.append('image', base64result);
+            await this.postImgGif(formData, imgurURLimg);
+          };
+          reader.readAsDataURL(file);
+        }
+      } else {
+        formData.append('video', file);
+        fetch(imgurURLupload, {
+          method: 'POST',
+          body: formData,
+          redirect: 'follow',
+        })
+          .then((response) => response.json())
+          .then((result) => {
+            if (result.status === 200 && result.success === true) {
+              this.replyMessage.imageURL = result.data.link;
+              // libera o botão de enviar
+              submitButton.disabled = false;
+              // trava o input file e deixa o campo de URL como read only
+              this.optUpload = true;
+            } else {
+              console.log('handle video upload error');
+            }
+          });
+      }
     },
   },
 };
