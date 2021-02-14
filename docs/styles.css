@@ -21,6 +21,15 @@ body {
   max-height: 0px;
 }
 
+.fade-enter-active, .fade-leave-active {
+  -webkit-transition: opacity .5s;
+  transition: opacity .5s;
+}
+
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
 .alert-error {
   position: absolute;
   background-color: #e74c3c;
@@ -62,6 +71,23 @@ body {
   opacity: 0.95;
 }
 
+.badge {
+  display: inline-block;
+  padding: 0.25em 0.4em;
+  font-size: 75%;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  border-radius: 0.25rem;
+}
+
+.badge.beta {
+  background-color: #6f42c1;
+  color: white;
+}
+
 .noselect {
   -webkit-touch-callout: none;
   /* iOS Safari */
@@ -85,6 +111,10 @@ body.isdragging {
 body.isdragging #replybox #replybox-head span {
   cursor: -webkit-grabbing;
   cursor: grabbing;
+}
+
+form#replyForm div {
+  padding: 10px 0;
 }
 
 form textarea, form input[type="email"], form input[type="password"], form input[type="text"], form input[type="url"] {
@@ -823,7 +853,7 @@ section.create-thread form {
   width: 100%;
 }
 
-section.create-thread form .form-group {
+section.create-thread form .form-group, section.create-thread form .searchgifstuffs {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -834,7 +864,7 @@ section.create-thread form .form-group {
   max-width: 500px;
 }
 
-section.create-thread form .form-group .form-subject {
+section.create-thread form .form-group .form-subject, section.create-thread form .searchgifstuffs .form-subject {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
@@ -843,43 +873,48 @@ section.create-thread form .form-group .form-subject {
           align-items: center;
 }
 
-section.create-thread form .form-group .form-subject input[type="checkbox"] {
+section.create-thread form .form-group .form-subject input[type="checkbox"], section.create-thread form .searchgifstuffs .form-subject input[type="checkbox"] {
   min-height: 0;
   width: initial;
   height: initial;
 }
 
-section.create-thread form .form-group label {
+section.create-thread form .form-group label, section.create-thread form .searchgifstuffs label {
   margin: 5px 15px 5px 0;
 }
 
-section.create-thread form .form-group input, section.create-thread form .form-group textarea {
+section.create-thread form .form-group label.upload-concluido, section.create-thread form .searchgifstuffs label.upload-concluido {
+  color: #00bc8c;
+  font-weight: 600;
+}
+
+section.create-thread form .form-group input:not([type="file"]), section.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs input:not([type="file"]), section.create-thread form .searchgifstuffs textarea {
   background-color: #e6e6e6;
   min-height: 26px;
 }
 
-section.create-thread form .form-group textarea {
+section.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs textarea {
   max-width: 100%;
 }
 
-section.create-thread form .form-group input[type="radio"] {
+section.create-thread form .form-group input[type="radio"], section.create-thread form .searchgifstuffs input[type="radio"] {
   opacity: 0;
   position: absolute;
 }
 
-section.create-thread form .form-group input[type="radio"]:checked + label {
+section.create-thread form .form-group input[type="radio"]:checked + label, section.create-thread form .searchgifstuffs input[type="radio"]:checked + label {
   background-color: #313131;
   border-color: #ffff00ad;
   color: #ff0;
 }
 
-section.create-thread form .form-group input[type="radio"]:focus + label {
+section.create-thread form .form-group input[type="radio"]:focus + label, section.create-thread form .searchgifstuffs input[type="radio"]:focus + label {
   outline: 1px solid #ffa500cc;
   outline-offset: 1px;
   outline-style: auto;
 }
 
-section.create-thread form .form-group .gif-search-toggle .btn {
+section.create-thread form .form-group .gif-search-toggle .btn, section.create-thread form .searchgifstuffs .gif-search-toggle .btn {
   display: inline-block;
   font-weight: 400;
   text-align: center;
@@ -895,19 +930,23 @@ section.create-thread form .form-group .gif-search-toggle .btn {
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;
 }
 
-section.create-thread form .form-group .gif-search-toggle .btn-primary {
+section.create-thread form .form-group .gif-search-toggle .btn-primary, section.create-thread form .searchgifstuffs .gif-search-toggle .btn-primary {
   color: #fff;
   border-color: #444;
 }
 
-section.create-thread .gifBoxWrapper {
+section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
   width: calc(100% - 500px);
   max-width: 480px;
   height: 480px;
   position: relative;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows {
+section.create-thread .gifBoxWrapper div.error-wrap a, section.create-thread .imagePreview div.error-wrap a {
+  padding: 10px;
+}
+
+section.create-thread .gifBoxWrapper .paginate-arrows, section.create-thread .imagePreview .paginate-arrows {
   position: absolute;
   bottom: 0%;
   left: 50%;
@@ -915,32 +954,32 @@ section.create-thread .gifBoxWrapper .paginate-arrows {
           transform: translate(-50%, 0);
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul {
+section.create-thread .gifBoxWrapper .paginate-arrows ul, section.create-thread .imagePreview .paginate-arrows ul {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
   list-style: none;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul div {
+section.create-thread .gifBoxWrapper .paginate-arrows ul div, section.create-thread .imagePreview .paginate-arrows ul div {
   display: -webkit-box;
   display: -ms-flexbox;
   display: flex;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:nth-child(1) a {
+section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:nth-child(1) a, section.create-thread .imagePreview .paginate-arrows ul li.page-item:nth-child(1) a {
   border-radius: 4px;
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:last-child a {
+section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:last-child a, section.create-thread .imagePreview .paginate-arrows ul li.page-item:last-child a {
   border-radius: 4px;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item p.page-link {
+section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item p.page-link {
   color: #fff;
   cursor: pointer;
   background-color: #444;
@@ -951,19 +990,19 @@ section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item p.page-lin
   text-decoration: none;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.disabled p.page-link {
+section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.disabled p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item.disabled p.page-link {
   background-color: #007053;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.active p.page-link {
+section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.active p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item.active p.page-link {
   background-color: #313131;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:hover p.page-link {
+section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:hover p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item:hover p.page-link {
   background-color: #313131;
 }
 
-section.create-thread .gifBoxWrapper .paginate-arrows .paginate-next, section.create-thread .gifBoxWrapper .paginate-arrows .paginate-prev {
+section.create-thread .gifBoxWrapper .paginate-arrows .paginate-next, section.create-thread .gifBoxWrapper .paginate-arrows .paginate-prev, section.create-thread .imagePreview .paginate-arrows .paginate-next, section.create-thread .imagePreview .paginate-arrows .paginate-prev {
   width: 40px;
   height: 40px;
   display: -webkit-box;
@@ -982,19 +1021,19 @@ section.create-thread .gifBoxWrapper .paginate-arrows .paginate-next, section.cr
   cursor: pointer;
 }
 
-section.create-thread .gifBoxWrapper .emptyGifResults {
+section.create-thread .gifBoxWrapper .emptyGifResults, section.create-thread .imagePreview .emptyGifResults {
   border: 2px solid gray;
   border-radius: 4px;
   width: 100%;
   height: 100%;
 }
 
-section.create-thread .gifBoxWrapper .emptyGifResults img {
+section.create-thread .gifBoxWrapper .emptyGifResults img, section.create-thread .imagePreview .emptyGifResults img {
   width: 100%;
   height: 100%;
 }
 
-section.create-thread .gifBoxWrapper .gifBox {
+section.create-thread .gifBoxWrapper .gifBox, section.create-thread .imagePreview .gifBox {
   width: 100%;
   height: 100%;
   display: -webkit-box;
@@ -1006,7 +1045,7 @@ section.create-thread .gifBoxWrapper .gifBox {
   border-radius: 4px;
 }
 
-section.create-thread .gifBoxWrapper .gifBox .gifBoxGif {
+section.create-thread .gifBoxWrapper .gifBox .gifBoxGif, section.create-thread .imagePreview .gifBox .gifBoxGif {
   border: 1px solid gray;
   width: 50%;
   height: 50%;
@@ -1023,25 +1062,84 @@ section.create-thread .gifBoxWrapper .gifBox .gifBoxGif {
   transition: all 300ms ease;
 }
 
-section.create-thread .gifBoxWrapper .gifBox .gifBoxGif:hover {
+section.create-thread .gifBoxWrapper .gifBox .gifBoxGif:hover, section.create-thread .imagePreview .gifBox .gifBoxGif:hover {
   border-color: #fff;
   cursor: pointer;
 }
 
-section.create-thread .gifBoxWrapper .gifBox .gifBoxGif img {
+section.create-thread .gifBoxWrapper .gifBox .gifBoxGif img, section.create-thread .imagePreview .gifBox .gifBoxGif img {
   width: 100%;
   height: 100%;
   -o-object-fit: cover;
      object-fit: cover;
 }
 
-section.create-thread .gifBoxWrapper .gifBox .gif-attribute {
+section.create-thread .gifBoxWrapper .gifBox .gif-attribute, section.create-thread .imagePreview .gifBox .gif-attribute {
   position: absolute;
   bottom: -40px;
   left: 50%;
   -webkit-transform: translateX(-50%);
           transform: translateX(-50%);
   padding-top: 5px;
+}
+
+section.create-thread .imagePreview {
+  border: 2px solid gray;
+  border-radius: 4px;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+}
+
+section.create-thread .imagePreview button {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  background-color: #e74c3c;
+  border-color: #e74c3c;
+  border: 1px solid transparent;
+  color: #fff;
+  padding: 5px;
+  border-radius: 4px;
+  font-size: 12px;
+  line-height: 1.5;
+  z-index: 1;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+section.create-thread .imagePreview button:hover {
+  background-color: #e12e1c;
+  border-color: #d62c1a;
+}
+
+section.create-thread .imagePreview p {
+  padding: 10px;
+  font-weight: bold;
+}
+
+section.create-thread .imagePreview p ul {
+  font-weight: initial;
+  margin: 5px;
+}
+
+section.create-thread .imagePreview video, section.create-thread .imagePreview img {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+section.create-thread .imagePreview video.uploading, section.create-thread .imagePreview img.uploading {
+  -webkit-filter: blur(5px);
+          filter: blur(5px);
 }
 
 div li {
@@ -1551,8 +1649,9 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
             align-items: center;
     margin-bottom: 50px;
   }
-  section.create-thread .gifBoxWrapper {
+  section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
     width: 100%;
+    height: initial;
   }
   #replybox {
     left: 0;
