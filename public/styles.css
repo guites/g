@@ -1274,6 +1274,15 @@ div li div.edit_tab button.reply:hover {
   background-color: #444;
 }
 
+div li div.edit_tab button.link a {
+  color: #00bc8c;
+  text-decoration: none;
+}
+
+div li div.edit_tab button.link:hover a {
+  text-decoration: underline;
+}
+
 div li div.edit_tab button:hover {
   color: #fff;
 }

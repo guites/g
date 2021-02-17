@@ -920,6 +920,17 @@ div{
                 background-color:#444;
               }
             }
+            &.link{
+              a{
+                color:#00bc8c;
+                text-decoration:none;
+              }
+              &:hover{
+                a{
+                  text-decoration:underline;
+                }
+              }
+            }
             &:hover{
               color:#fff;
             }
