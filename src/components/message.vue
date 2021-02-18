@@ -56,11 +56,16 @@
           :data-replyTo="message.id"
           class='reply'>responder</button>
           <button type="button" class='link'
-          v-if="replies && replies.length > 2">
+          v-if="replyCount && replyCount > 2 && isHome">
             <a :href="'/#/post/' + message.id">
-              ver discussão
+              ver respostas
             </a>
           </button>
+        </div>
+        <div class="reply_count"
+        v-if="isHome && replyCount && replyCount > 2"
+        >
+        <small>Este post possui {{replyCount}} respostas!</small>
         </div>
         <p class="mt-0 mb-1 subject">
           <span class="id">#{{message.id}} / </span>
@@ -110,6 +115,7 @@ export default {
   props: {
     message: {},
     replies: {},
+    replyCount: Number,
     auth: {},
   },
   data: () => ({
@@ -208,6 +214,17 @@ export default {
     },
     update(e) {
       console.log(e);
+    },
+  },
+  computed: {
+    isHome() {
+      return this.$route.name === 'Home';
+    },
+    filteredReplies() {
+      if (this.replies) {
+        return this.replies.slice(Math.max(this.replies.length - 2, 1));
+      }
+      return this.replies;
     },
   },
 };

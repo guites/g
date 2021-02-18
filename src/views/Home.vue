@@ -137,6 +137,7 @@
     v-bind:message="message"
     v-bind:auth="auth"
     v-bind:replies="message.replies"
+    v-bind:replyCount="message.replyCount"
     @replyMessage="replyMessage"
     @update="message = $event"
     v-bind:key="message.id"
@@ -390,7 +391,8 @@ export default {
             }
             const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(entry.target.id, 10));
-            this.$set(this.messages[msgIndex], 'replies', replies);
+            this.$set(this.messages[msgIndex], 'replyCount', replies.length);
+            this.$set(this.messages[msgIndex], 'replies', replies.slice(Math.max(replies.length - 2, 1)));
           });
       });
     },

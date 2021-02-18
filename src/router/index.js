@@ -31,6 +31,10 @@ const routes = [
     path: '/post/:id',
     name: 'Post',
     component: Post,
+    props: (route) => {
+      const id = Number.parseInt(route.params.id, 10);
+      return { id };
+    },
   },
 ];
 
