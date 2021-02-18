@@ -66,12 +66,8 @@ export default {
       .then((result) => {
         if (result.results) {
           this.message = result.results.shift();
-          fetch(`${repliesURL}/${this.id}`).then((response) => {
-            console.log(response);
-            return response.json();
-          })
+          fetch(`${repliesURL}/${this.id}`).then((response) => response.json())
             .then((replies) => {
-              console.log(replies);
               if (replies.error) {
                 return;
               }
