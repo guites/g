@@ -159,11 +159,11 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const apiURL = 'http://localhost:5000/messages';
-const repliesURL = 'http://localhost:5000/replies';
-const imgurURLimg = 'http://localhost:5000/imgupload';
-const imgurURLgif = 'http://localhost:5000/gifupload';
-const imgurURLupload = 'http://localhost:5000/videoupload';
+const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
+const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
+const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
+const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
 export default {
   name: 'Home',
   components: {
@@ -649,7 +649,7 @@ export default {
     removeUpload(e) {
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
       console.log(deleteHash);
-      fetch(`http://localhost:5000/imgur/${deleteHash}`, {
+      fetch(`https://gchan-message-board.herokuapp.com/imgur/${deleteHash}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Client-ID 3435e574a9859d1',

@@ -1274,8 +1274,36 @@ div li div.edit_tab button.reply:hover {
   background-color: #444;
 }
 
+div li div.edit_tab button.link {
+  padding: 0;
+}
+
+div li div.edit_tab button.link a {
+  width: 100%;
+  height: 100%;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+      -ms-flex-align: center;
+          align-items: center;
+  -webkit-box-pack: center;
+      -ms-flex-pack: center;
+          justify-content: center;
+  color: #00bc8c;
+  text-decoration: none;
+}
+
+div li div.edit_tab button.link:hover a {
+  text-decoration: underline;
+}
+
 div li div.edit_tab button:hover {
   color: #fff;
+}
+
+div li div.reply_count small {
+  color: #f39c12;
 }
 
 div li div p.subject {
