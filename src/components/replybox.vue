@@ -66,10 +66,10 @@
 </template>
 
 <script>
-const replyURL = 'http://localhost:5000/replies';
-const imgurURLimg = 'http://localhost:5000/imgupload';
-const imgurURLgif = 'http://localhost:5000/gifupload';
-const imgurURLupload = 'http://localhost:5000/videoupload';
+const replyURL = 'https://gchan-message-board.herokuapp.com/replies';
+const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
+const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
+const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
 export default {
   name: 'ReplyBox',
   props: ['messageToReplyTo', 'allowedUploadVideoFormats'],
