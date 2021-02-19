@@ -1028,9 +1028,15 @@ div{
   }
 }
 .about{
+  max-width:980px;
+  margin:0 auto;
+
   h1{
     text-align:center;
     margin:20px;
+  }
+  img{
+    width:100%;
   }
 }
 section#cookie_consent{
@@ -1077,7 +1083,7 @@ section#cookie_consent{
   }
 }
 section#cookies{
-text-align:center;
+text-align:left;
 h2{
   font-size:28px;
   margin:15px;

@@ -1,19 +1,17 @@
 <template>
   <div class="about">
-    <h1>informações gerais.</h1>
+    <h1>Bem-vindo ao gchan!</h1>
+    <img src="@/assets/gchan_hero.jpg" alt="poste no gchan">
     <section id="cookies">
       <div id="cookies-text">
         <p>o <b>gchan</b> usa o
         <a href="https://twitter.com/googleanalytics" target="_blank"
         rel="noreferrer">google analytics</a>
         para contabilizar os acessos e as ações mais frequentes realizadas no site.<br/>
-        a ideia é estimar o que os usuários fazem em quais horários
-        como forma de feedback para melhorar.<br/>
         Fique à vontade para bloquear a coleta dos dados.
         </p>
         <p>você pode alterar suas preferências abaixo.</p>
         <form>
-          <h2>Sobre o envio de dados anônimos de uso:</h2>
           <select name="cookie-consent" id="cookie-consent"
           @change="selectCookieConsent($event)" v-model="cookie_consent_computed">
             <option value="true">aceito a coleta de dados</option>
@@ -60,7 +58,7 @@ export default {
     },
   },
   data: () => ({
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     show_pwd_checked: '',
     name: '',
     email: '',
