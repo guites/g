@@ -1407,9 +1407,18 @@ div hr {
   max-height: calc(100vh - 305px);
 }
 
+.about {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
 .about h1 {
   text-align: center;
   margin: 20px;
+}
+
+.about img {
+  width: 100%;
 }
 
 section#cookie_consent {
@@ -1481,7 +1490,7 @@ section#cookie_consent .cookie_consent_wrapper .cookie-btns .cookie_btn_wrapper 
 }
 
 section#cookies {
-  text-align: center;
+  text-align: left;
 }
 
 section#cookies h2 {
