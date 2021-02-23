@@ -159,11 +159,11 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
+const apiURL = 'http://localhost:5000/messages';
+const repliesURL = 'http://localhost:5000/replies';
+const imgurURLimg = 'http://localhost:5000/imgupload';
+const imgurURLgif = 'http://localhost:5000/gifupload';
+const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'Home',
   components: {
@@ -580,18 +580,22 @@ export default {
             mediaInUse.classList.remove('uploading');
             const removeBtn = mediaDiv.querySelector('button');
             removeBtn.setAttribute('data-deletehash', result.data.deletehash);
-          } else if (result.data.error) {
+          } else if (result.status === 500 && result.success === false) {
+            this.error = `
+              Erro no servidor de upload! :(\n
+              Tente subir sua imagem em outro lugar\n
+              e poste usando o link!\n
+              (https://postimages.org/,\n
+              https://imgur.com/upload,\n
+              https://giphy.com/upload,\n etc)
+              `;
+            this.isPreviewing = '';
+          } else {
             this.error = `
               Aceitamos apenas imagens no formato\n
               JPEG, PNG, GIF, APNG e TIFF!
             `;
             this.isPreviewing = '';
-          } else {
-            this.error = `
-              Ocorreu um erro ao salvar sua imagem :(\n
-              Faça o upload do seu arquivo <a href="https://imgur.com/upload" target="_blank">Ir para o imgur</a>\n
-              e poste usando a URL!
-            `;
           }
           submitButton.disabled = false;
         })
@@ -650,7 +654,7 @@ export default {
     removeUpload(e) {
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
       console.log(deleteHash);
-      fetch(`https://gchan-message-board.herokuapp.com/imgur/${deleteHash}`, {
+      fetch(`http://localhost:5000/imgur/${deleteHash}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Client-ID 3435e574a9859d1',
