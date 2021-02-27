@@ -74,7 +74,7 @@ export default {
               this.$set(this.message, 'replies', replies);
             });
         } else {
-          window.location.href = 'http://localhost:8080/';
+          window.location.href = 'https://gchan.com.br/';
         }
       });
   },

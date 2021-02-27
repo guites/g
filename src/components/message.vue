@@ -182,7 +182,7 @@ export default {
       videoWrap.className = 'video-wrap';
       const video = document.createElement('video');
       const controls = document.createElement('button');
-      controls.innerHTML = '<img src="http://localhost:8080/volume-off.png" alt="Volume">';
+      controls.innerHTML = '<img src="https://gchan.com.br/volume-off.png" alt="Volume">';
       controls.className = 'volume';
       controls.type = 'button';
       video.classList.add('img-thumbnail');
@@ -207,9 +207,9 @@ export default {
             }
             video.muted = !video.muted;
             if (video.muted) {
-              audioBtn.src = 'http://localhost:8080/volume-off.png';
+              audioBtn.src = 'https://gchan.com.br/volume-off.png';
             } else {
-              audioBtn.src = 'http://localhost:8080/volume-high.png';
+              audioBtn.src = 'https://gchan.com.br/volume-high.png';
             }
           });
         } else {
