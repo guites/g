@@ -16,7 +16,7 @@
       loading="lazy"
       v-else
       class="img-thumbnail placeholder"
-      src="https://gchan-message-board.herokuapp.com/placeholders"
+      src="http://localhost:5000/placeholders"
       alt="post sem imagem"
       >
       <div class="align-self-center media-body">
@@ -109,7 +109,7 @@
   </ul>
 </template>
 <script>
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Message',
   props: {
@@ -170,26 +170,60 @@ export default {
         }
       });
     },
+    hasAudio(video) {
+      return video.mozHasAudio
+      || Boolean(video.webkitAudioDecodedByteCount)
+      || Boolean(video.audioTracks && video.audioTracks.length);
+    },
     async createVideo(ev, isPost) {
       const image = ev.target;
       const li = isPost ? document.getElementById(isPost) : image.parentElement;
+      const videoWrap = document.createElement('div');
+      videoWrap.className = 'video-wrap';
       const video = document.createElement('video');
+      const controls = document.createElement('button');
+      controls.innerHTML = '<img src="http://localhost:8080/volume-off.png" alt="Volume">';
+      controls.className = 'volume';
+      controls.type = 'button';
       video.classList.add('img-thumbnail');
       video.src = image.src;
       video.autoplay = true;
       video.loop = true;
       video.muted = true;
       video.playsInline = true;
-      li.insertBefore(video, image);
+      videoWrap.appendChild(video);
+      videoWrap.appendChild(controls);
+      li.insertBefore(videoWrap, image);
       image.style.display = 'none';
       image.error = null;
+      video.addEventListener('loadeddata', (eve) => {
+        if (this.hasAudio(eve.target)) {
+          controls.addEventListener('click', (e) => {
+            let audioBtn;
+            if (e.target.tagName === 'BUTTON') {
+              [audioBtn] = e.target.children;
+            } else {
+              audioBtn = e.target;
+            }
+            video.muted = !video.muted;
+            if (video.muted) {
+              audioBtn.src = 'http://localhost:8080/volume-off.png';
+            } else {
+              audioBtn.src = 'http://localhost:8080/volume-high.png';
+            }
+          });
+        } else {
+          controls.classList.add('no-audio');
+        }
+      });
       video.addEventListener('click', (e) => {
+        this.fullSizeDiv(e.target.parentElement);
         this.fullSize(e);
       });
       video.onerror = function test(e) {
         const parent = e.target.parentElement;
         const showThisImg = parent.querySelector('img');
-        showThisImg.src = 'https://gchan-message-board.herokuapp.com/placeholders';
+        showThisImg.src = 'http://localhost:5000/placeholders';
         showThisImg.style.display = 'initial';
         showThisImg.classList.add('placeholder');
         showThisImg.onclick = null;
@@ -205,6 +239,9 @@ export default {
           image.style.display = 'initial';
         }
       }
+    },
+    fullSizeDiv(div) {
+      div.classList.toggle('fullsize');
     },
     fullSize(e) {
       e.target.classList.toggle('fullsize');

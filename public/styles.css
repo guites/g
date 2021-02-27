@@ -1142,6 +1142,27 @@ section.create-thread .imagePreview video.uploading, section.create-thread .imag
           filter: blur(5px);
 }
 
+section.create-thread .imagePreview .video-wrap {
+  position: relative;
+}
+
+section.create-thread .imagePreview .video-wrap video {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+section.create-thread .imagePreview .video-wrap video.uploading {
+  -webkit-filter: blur(5px);
+          filter: blur(5px);
+}
+
+section.create-thread .imagePreview .video-wrap button {
+  position: absolute;
+}
+
 div li {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1154,6 +1175,53 @@ div li {
   -webkit-box-align: start;
       -ms-flex-align: start;
           align-items: start;
+}
+
+div li .video-wrap {
+  width: 300px;
+  position: relative;
+  margin-right: 15px;
+}
+
+div li .video-wrap button.volume {
+  width: 100%;
+  height: 30px;
+  position: absolute;
+  left: 5px;
+  bottom: 5px;
+  background: transparent;
+  border: none;
+  color: transparent;
+  opacity: 0;
+  text-decoration: line-through;
+  -webkit-transition: all 200ms ease;
+  transition: all 200ms ease;
+}
+
+div li .video-wrap button.volume.no-audio {
+  display: none;
+}
+
+div li .video-wrap button.volume img {
+  width: 36px;
+  height: 36px;
+}
+
+div li .video-wrap:hover button.volume {
+  opacity: 1;
+}
+
+div li .video-wrap:focus-within button.volume, div li .video-wrap :focus-visible button.volume {
+  opacity: 1;
+}
+
+div li .video-wrap:focus-within button.volume:focus-within img, div li .video-wrap:focus-within button.volume :focus-visible img, div li .video-wrap :focus-visible button.volume:focus-within img, div li .video-wrap :focus-visible button.volume :focus-visible img {
+  -webkit-filter: none;
+          filter: none;
+}
+
+div li .video-wrap.fullsize {
+  width: 100%;
 }
 
 div li img, div li video {
@@ -1324,6 +1392,27 @@ div li.reply-item img, div li.reply-item video {
 
 div li.reply-item img.fullsize, div li.reply-item video.fullsize {
   width: 100%;
+}
+
+div li.reply-item .video-wrap {
+  position: relative;
+}
+
+div li.reply-item .video-wrap video {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+  -o-object-fit: contain;
+     object-fit: contain;
+}
+
+div li.reply-item .video-wrap video.uploading {
+  -webkit-filter: blur(5px);
+          filter: blur(5px);
+}
+
+div li.reply-item .video-wrap button {
+  position: absolute;
 }
 
 div li.reply-item > div {
@@ -1763,6 +1852,12 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
             align-items: start;
   }
   div li div {
+    width: 100%;
+  }
+  div li .video-wrap {
+    width: 75%;
+  }
+  div li .video-wrap video {
     width: 100%;
   }
   div li img {

@@ -823,6 +823,21 @@ section.create-thread{
         filter:blur(5px);
       }
     }
+    .video-wrap {
+      position:relative;
+      video {
+        width:100%;
+        height:auto;
+        max-height:100%;
+        object-fit:contain;
+        &.uploading{
+          filter:blur(5px);
+        }
+      }
+      button {
+        position:absolute;
+      }
+    }
   }
 }
 div{
@@ -832,6 +847,49 @@ div{
     max-width:980px;
     justify-content:flex-start;
     align-items:start;
+    .video-wrap {
+      width:300px;
+      position:relative;
+      margin-right:15px;
+      button.volume {
+        width:100%;
+        height:30px;
+        position: absolute;
+        left: 5px;
+        bottom: 5px;
+        background: transparent;
+        border: none;
+        color: transparent;
+        opacity: 0;
+        text-decoration: line-through;
+        transition: all 200ms ease;
+        &.no-audio {
+          display: none;
+        }
+        img {
+          width:36px;
+          height:36px;
+        } 
+      }
+      &:hover {
+        button.volume {
+          opacity: 1;
+        }
+      }
+      &:focus-within,:focus-visible {
+        button.volume {
+          opacity: 1;
+          &:focus-within,:focus-visible {
+            img {
+              filter:none;
+            }
+          }
+        }
+      }
+      &.fullsize {
+        width:100%;
+      }
+    }
     img, video{
         filter:brightness(75%);
         width:300px;
@@ -963,6 +1021,21 @@ div{
         min-height:initial;
         &.fullsize{
           width:100%;
+        }
+      }
+      .video-wrap {
+        position:relative;
+        video {
+          width:100%;
+          height:auto;
+          max-height:100%;
+          object-fit:contain;
+          &.uploading{
+            filter:blur(5px);
+          }
+        }
+        button {
+          position:absolute;
         }
       }
       > div{
@@ -1299,7 +1372,13 @@ header{
           div{
            width:100%;
           }
-          img{
+          .video-wrap {
+            width: 75%;
+            video {
+              width: 100%;
+            }
+          }
+          img {
              width:75%;
           }
           &.reply-item{
