@@ -137,7 +137,7 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
   window.location.protocol = 'https:';
 }
 // import Home from '@/views/Home.vue';
-const marqueeURL = 'http://localhost:5000/marquee';
+const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
 export default {
   name: 'App',
   // components: {
@@ -156,7 +156,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    SERVERurl: 'http://localhost:5000',
+    SERVERurl: 'https://gchan-message-board.herokuapp.com',
     showOptions: '',
     auth: {
       loggedIn: '',
