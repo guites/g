@@ -25,8 +25,8 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const messageURL = 'https://gchan-message-board.herokuapp.com/message/';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+const messageURL = 'http://localhost:5000/message/';
+const repliesURL = 'http://localhost:5000/replies';
 export default {
   name: 'Post',
   components: {
@@ -74,7 +74,7 @@ export default {
               this.$set(this.message, 'replies', replies);
             });
         } else {
-          window.location.href = 'https://gchan.com.br/';
+          window.location.href = 'http://localhost:8080/';
         }
       });
   },

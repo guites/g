@@ -159,11 +159,12 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
+// const apiURL = 'http://localhost:5000/messages';
+const apiURL = 'http://localhost:5000/messages/';
+const repliesURL = 'http://localhost:5000/replies';
+const imgurURLimg = 'http://localhost:5000/imgupload';
+const imgurURLgif = 'http://localhost:5000/gifupload';
+const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'Home',
   components: {
@@ -214,6 +215,8 @@ export default {
       'video/x-ms-wmv',
       'video/mpeg',
     ],
+    offset: 0,
+    messagesBatchSize: 15,
   }),
   watch: {
     isGifBeingSearched(val) {
@@ -269,16 +272,57 @@ export default {
         threshold: 0,
       },
     );
-    fetch(apiURL).then((response) => response.json())
+    this.lazyLoadObserver = new IntersectionObserver(
+      this.setNextBatch,
+      {
+        threshold: 0,
+      },
+    );
+    fetch(`${apiURL}${this.offset}`).then((response) => response.json())
       .then((result) => {
         this.messages = result.results;
       })
       .then(() => {
         document.querySelectorAll('.list-unstyled li.media')
-          .forEach((li) => this.replyObserver.observe(li));
+          .forEach((li, index) => {
+            this.replyObserver.observe(li);
+            if (index === this.messagesBatchSize - 1) {
+              this.offset += 15;
+              li.setAttribute('data-offset', this.offset);
+              this.lazyLoadObserver.observe(li);
+            }
+          });
       });
   },
   methods: {
+    setNextBatch(entries) {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        this.lazyLoadObserver.unobserve(entry.target);
+        fetch(`${apiURL}${this.offset}`).then((response) => response.json())
+          .then((result) => {
+            if (!result.results) return;
+            result.results.forEach((res) => {
+              this.messages.push(res);
+            });
+          })
+          .then(() => {
+            const messages = document.querySelector('div.container').children;
+            for (let i = 0; i < this.messagesBatchSize; i += 1) {
+              if (!messages[i + this.offset]) {
+                console.log('chegou no fim! yey');
+                return;
+              }
+              this.replyObserver.observe(messages[i + this.offset].children[0]);
+              if (i === this.messagesBatchSize - 1) {
+                this.lazyLoadObserver.observe(messages[i + this.offset].children[0]);
+                this.offset += 15;
+                messages[i].setAttribute('data-offset', this.offset);
+              }
+            }
+          });
+      });
+    },
     toggleSubject() {
       this.hasSubject = !this.hasSubject;
     },
@@ -559,7 +603,6 @@ export default {
       fetch(postURL, requestOptions)
         .then((response) => response.json())
         .then(async (result) => {
-          console.log(result);
           const mediaDiv = document.querySelector('.imagePreview');
           const mediaInUse = mediaDiv.children[0];
           if (result.status === 200
@@ -653,8 +696,7 @@ export default {
     },
     removeUpload(e) {
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
-      console.log(deleteHash);
-      fetch(`https://gchan-message-board.herokuapp.com/imgur/${deleteHash}`, {
+      fetch(`http://localhost:5000/imgur/${deleteHash}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Client-ID 3435e574a9859d1',
@@ -663,7 +705,6 @@ export default {
       })
         .then((response) => response.json())
         .then((r) => {
-          console.log(r);
           if (r.data === true && r.success === true) {
             this.optUpload = false;
             this.isPreviewing = '';
