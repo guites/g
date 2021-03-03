@@ -5,6 +5,7 @@
     v-bind:auth="auth"
     v-bind:replies="message.replies"
     @replyMessage="replyMessage"
+    @adcQuote="adcQuote"
     @update="message = $event"
     v-bind:key="message.id"
     >
@@ -15,6 +16,7 @@
       :allowedUploadVideoFormats="this.allowedUploadVideoFormats"
       @closeReply="this.closeReply"
       @addReplyToThread="this.addReplyToThread"
+      :quotesToAdd="this.quotesToAdd"
       >
       </ReplyBox>
     </template>
@@ -25,8 +27,8 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const messageURL = 'https://gchan-message-board.herokuapp.com/message/';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+const messageURL = 'http://localhost:5000/message/';
+const repliesURL = 'http://localhost:5000/replies';
 export default {
   name: 'Post',
   components: {
@@ -49,6 +51,7 @@ export default {
   },
   data: () => ({
     message: '',
+    quotesToAdd: '',
     messageToReplyTo: '',
     allowedUploadVideoFormats: [
       'video/mp4',
@@ -74,13 +77,16 @@ export default {
               this.$set(this.message, 'replies', replies);
             });
         } else {
-          window.location.href = 'https://gchan.com.br/';
+          window.location.href = 'http://localhost:8080/';
         }
       });
   },
   methods: {
     replyMessage(reply) {
       this.messageToReplyTo = reply;
+    },
+    adcQuote(quote) {
+      this.quotesToAdd = quote;
     },
     closeReply() {
       this.messageToReplyTo = '';
@@ -121,7 +127,7 @@ export default {
         },
         {
           property: 'og:url',
-          content: `https://gchan.com.br/#/post/${this.message.id}`,
+          content: `http://localhost:8080/#/post/${this.message.id}`,
         },
         {
           property: 'og:image',
@@ -133,7 +139,7 @@ export default {
         },
         {
           name: 'twitter:site',
-          content: 'https://gchan.com.br',
+          content: 'http://localhost:8080',
         },
         {
           name: 'twitter:creator',

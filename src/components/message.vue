@@ -16,7 +16,7 @@
       loading="lazy"
       v-else
       class="img-thumbnail placeholder"
-      src="https://gchan-message-board.herokuapp.com/placeholders"
+      src="http://localhost:5000/placeholders"
       alt="post sem imagem"
       >
       <div class="align-self-center media-body">
@@ -113,7 +113,7 @@
   </ul>
 </template>
 <script>
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Message',
   props: {
@@ -186,11 +186,15 @@ export default {
       videoWrap.className = 'video-wrap';
       const video = document.createElement('video');
       const controls = document.createElement('button');
-      controls.innerHTML = '<img src="https://gchan.com.br/volume-off.png" alt="Volume">';
+      controls.innerHTML = '<img src="http://localhost:8080/volume-off.png" alt="Volume">';
       controls.className = 'volume';
       controls.type = 'button';
       video.classList.add('img-thumbnail');
-      video.src = image.src;
+      // video.innerHTML += `<source src="${image.src}" type="video/mp4;
+      // codecs=&quot;av01.0.00M.08, opus&quot;">`;
+      video.innerHTML += `<source src="${image.src}" type="video/mp4;">`;
+      // video.innerHTML += `<source src="${image.src}"
+      // type="video/webm; codecs=&quot;vp9, opus&quot;">`;
       video.autoplay = true;
       video.loop = true;
       video.muted = true;
@@ -211,9 +215,9 @@ export default {
             }
             video.muted = !video.muted;
             if (video.muted) {
-              audioBtn.src = 'https://gchan.com.br/volume-off.png';
+              audioBtn.src = 'http://localhost:8080/volume-off.png';
             } else {
-              audioBtn.src = 'https://gchan.com.br/volume-high.png';
+              audioBtn.src = 'http://localhost:8080/volume-high.png';
             }
           });
         } else {
@@ -228,7 +232,7 @@ export default {
         const parent = e.target.parentElement.parentElement;
         const videoWrapper = parent.querySelector('div.video-wrap');
         const showThisImg = parent.querySelector('img.img-thumbnail');
-        showThisImg.src = 'https://gchan-message-board.herokuapp.com/placeholders';
+        showThisImg.src = 'http://localhost:5000/placeholders';
         showThisImg.style.display = 'initial';
         showThisImg.classList.add('placeholder');
         showThisImg.onclick = null;
