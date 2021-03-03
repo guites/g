@@ -16,7 +16,7 @@
       loading="lazy"
       v-else
       class="img-thumbnail placeholder"
-      src="https://gchan-message-board.herokuapp.com/placeholders"
+      src="http://localhost:5000/placeholders"
       alt="post sem imagem"
       >
       <div class="align-self-center media-body">
@@ -99,8 +99,12 @@
       <div class="align-self-center media-body">
         <div class="edit_tab">
           <p class="mt-0 mb-1">{{reply.username}}</p>
+          <button type='button' class='link link-reply' :data-quoteid="reply.id"
+          title='citar esta resposta'
+          @click="adcQuote($event)">
+            #{{reply.id}}
+          </button>
         </div>
-          <p class="mt-0 mb-1">#{{reply.id}}</p>
           <p>{{reply.content}}</p><br />
           <small>{{reply.created}}</small><br />
       </div>
@@ -109,7 +113,7 @@
   </ul>
 </template>
 <script>
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
+const handleURL = 'http://localhost:5000/';
 export default {
   name: 'Message',
   props: {
@@ -182,7 +186,7 @@ export default {
       videoWrap.className = 'video-wrap';
       const video = document.createElement('video');
       const controls = document.createElement('button');
-      controls.innerHTML = '<img src="https://gchan.com.br/volume-off.png" alt="Volume">';
+      controls.innerHTML = '<img src="http://localhost:8080/volume-off.png" alt="Volume">';
       controls.className = 'volume';
       controls.type = 'button';
       video.classList.add('img-thumbnail');
@@ -207,9 +211,9 @@ export default {
             }
             video.muted = !video.muted;
             if (video.muted) {
-              audioBtn.src = 'https://gchan.com.br/volume-off.png';
+              audioBtn.src = 'http://localhost:8080/volume-off.png';
             } else {
-              audioBtn.src = 'https://gchan.com.br/volume-high.png';
+              audioBtn.src = 'http://localhost:8080/volume-high.png';
             }
           });
         } else {
@@ -224,7 +228,7 @@ export default {
         const parent = e.target.parentElement.parentElement;
         const videoWrapper = parent.querySelector('div.video-wrap');
         const showThisImg = parent.querySelector('img.img-thumbnail');
-        showThisImg.src = 'https://gchan-message-board.herokuapp.com/placeholders';
+        showThisImg.src = 'http://localhost:5000/placeholders';
         showThisImg.style.display = 'initial';
         showThisImg.classList.add('placeholder');
         showThisImg.onclick = null;
@@ -250,6 +254,9 @@ export default {
     },
     replyMessage(reply) {
       this.$emit('replyMessage', reply.target.getAttribute('data-replyto'));
+    },
+    adcQuote(quote) {
+      this.$emit('adcQuote', quote.target.getAttribute('data-quoteid'));
     },
     update(e) {
       console.log(e);

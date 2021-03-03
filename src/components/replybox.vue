@@ -66,13 +66,13 @@
 </template>
 
 <script>
-const replyURL = 'https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
+const replyURL = 'http://localhost:5000/replies';
+const imgurURLimg = 'http://localhost:5000/imgupload';
+const imgurURLgif = 'http://localhost:5000/gifupload';
+const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'ReplyBox',
-  props: ['messageToReplyTo', 'allowedUploadVideoFormats'],
+  props: ['messageToReplyTo', 'allowedUploadVideoFormats', 'quotesToAdd'],
   data: () => ({
     replyTo: {
       message_id: '',
@@ -101,6 +101,13 @@ export default {
     messageToReplyTo(val) {
       if (val !== '') {
         setTimeout(() => document.querySelector('#replyForm #username').focus(), 100);
+      }
+    },
+    quotesToAdd(val) {
+      if (val !== '') {
+        const replyTextArea = document.querySelector('#replybox textarea#message');
+        replyTextArea.value += `>>${val}\n`;
+        replyTextArea.focus();
       }
     },
   },
