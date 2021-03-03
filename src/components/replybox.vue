@@ -105,9 +105,20 @@ export default {
     },
     quotesToAdd(val) {
       if (val !== '') {
-        const replyTextArea = document.querySelector('#replybox textarea#message');
-        replyTextArea.value += `>>${val}\n`;
-        replyTextArea.focus();
+        let replyTextArea = document.querySelector('#replybox textarea#message');
+        if (!replyTextArea) {
+          const liToQuote = document.querySelector(`[data-quoteid="${val}"]`);
+          // this.$emit('messageToReplyTo', liToQuote.closest('ul').children[0].id);
+          document.querySelector(`[data-replyto="${liToQuote.closest('ul').children[0].id}"]`).click();
+          setTimeout(() => {
+            replyTextArea = document.querySelector('#replybox textarea#message');
+            replyTextArea.value += `>>${val}\n`;
+            replyTextArea.focus();
+          }, 200);
+        } else {
+          replyTextArea.value += `>>${val}\n`;
+          replyTextArea.focus();
+        }
       }
     },
   },

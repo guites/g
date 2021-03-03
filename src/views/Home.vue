@@ -411,7 +411,6 @@ export default {
       alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
     },
     replyMessage(reply) {
-      console.log(reply);
       this.messageToReplyTo = reply;
     },
     adcQuote(quote) {
