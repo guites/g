@@ -137,7 +137,7 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
   window.location.protocol = 'https:';
 }
 // import Home from '@/views/Home.vue';
-const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
+const marqueeURL = 'http://localhost:5000/marquee';
 export default {
   name: 'App',
   // components: {
@@ -156,7 +156,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     showOptions: '',
     auth: {
       loggedIn: '',
@@ -333,6 +333,61 @@ export default {
     isInfo() {
       return this.$route.name === 'Info';
     },
+  },
+  metaInfo() {
+    return {
+      title: 'gchan: special ed da internet',
+      meta: [
+        {
+          name: 'description',
+          content: 'gchan: poste o que estiver pensando ou trabalhando.reaja ao que os outros estão falando. um lugar para amigos',
+        },
+        {
+          property: 'og:title',
+          content: 'gchan: special ed da internet',
+        },
+        {
+          property: 'og:site_name',
+          content: 'gchan',
+        },
+        {
+          property: 'og:type',
+          content: 'website',
+        },
+        {
+          property: 'og:image',
+          content: 'https://gchan.com.br/gchan_embbed.jpg',
+        },
+        {
+          name: 'robots',
+          content: 'index,follow',
+        },
+        {
+          name: 'twitter:card',
+          content: 'summary',
+        },
+        {
+          name: 'twitter:site',
+          content: 'https://gchan.com.br',
+        },
+        {
+          name: 'twitter:creator',
+          content: '@gchan_board',
+        },
+        {
+          name: 'twitter:description',
+          content: 'gchan: poste o que estiver pensando ou trabalhando.reaja ao que os outros estão falando. um lugar para amigos',
+        },
+        {
+          name: 'twitter:title',
+          content: 'gchan: special ed da internet',
+        },
+        {
+          name: 'twitter:image',
+          content: 'https://gchan.com.br/gchan_twitter.jpg',
+        },
+      ],
+    };
   },
 };
 </script>
