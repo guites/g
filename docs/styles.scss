@@ -978,6 +978,17 @@ div{
                 background-color:#444;
               }
             }
+            &.link-reply {
+              color:#00bc8c;
+              border-width:1px;
+              border-color:transparent;
+              min-width:50px;
+              &:hover{
+                color:#00bc8c;
+                background-color:#444;
+                border-color:#00bc8c;
+              }
+            }
             &.link{
               padding:0;
               a{

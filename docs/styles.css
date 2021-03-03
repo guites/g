@@ -1342,6 +1342,19 @@ div li div.edit_tab button.reply:hover {
   background-color: #444;
 }
 
+div li div.edit_tab button.link-reply {
+  color: #00bc8c;
+  border-width: 1px;
+  border-color: transparent;
+  min-width: 50px;
+}
+
+div li div.edit_tab button.link-reply:hover {
+  color: #00bc8c;
+  background-color: #444;
+  border-color: #00bc8c;
+}
+
 div li div.edit_tab button.link {
   padding: 0;
 }
