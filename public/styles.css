@@ -1267,9 +1267,37 @@ div li div p {
   width: 95%;
 }
 
+div li div p a {
+  position: relative;
+  display: inline-block;
+  color: #3498db;
+}
+
+div li div p a:hover {
+  color: #e12e1c;
+}
+
+div li div p img.yt-thumb {
+  width: 250px;
+  position: absolute;
+  top: calc(50%);
+  left: calc(100% + 10px);
+  pointer-events: none;
+  -webkit-transform: translateY(-50%);
+          transform: translateY(-50%);
+}
+
 div li div img {
   width: 50px;
   border: none;
+}
+
+div li div div.iframe-wrapper {
+  display: none;
+}
+
+div li div div.iframe-wrapper.open {
+  display: initial;
 }
 
 div li div small {

@@ -921,10 +921,32 @@ div{
           white-space: pre-line;
           overflow-wrap: break-word;
           width:95%;
+          a {
+            position:relative;
+            display:inline-block;
+            color:#3498db;
+            &:hover {
+              color:#e12e1c;
+            }
+          }
+          img.yt-thumb {
+            width: 250px;
+            position: absolute;
+            top: calc(50%);
+            left: calc(100% + 10px);
+            pointer-events: none;
+            transform: translateY(-50%);
+          }
         }
         img{
           width:50px;
           border:none;
+        }
+        div.iframe-wrapper {
+          display:none;
+          &.open {
+            display:initial;
+          }
         }
         small{
           display:block;

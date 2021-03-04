@@ -1,6 +1,6 @@
 <template>
   <ul class="list-unstyled d-flex flex-column align-items-center">
-    <li class="media" :id="message.id">
+    <li class="media" :id="'li_' + message.id">
       <img
       loading="lazy"
       v-if="message.imageurl"
@@ -267,6 +267,9 @@ export default {
     },
   },
   computed: {
+    filterMessageText() {
+      return 'messageText';
+    },
     isHome() {
       return this.$route.name === 'Home';
     },
