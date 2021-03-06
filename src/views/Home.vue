@@ -435,13 +435,14 @@ export default {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         this.replyObserver.unobserve(entry.target);
-        fetch(`${repliesURL}/${entry.target.id}`).then((response) => response.json())
+        const postId = entry.target.id.replace('li_', '');
+        fetch(`${repliesURL}/${postId}`).then((response) => response.json())
           .then((replies) => {
             if (replies.error) {
               return;
             }
             const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
-          === parseInt(entry.target.id, 10));
+          === parseInt(postId, 10));
             this.$set(this.messages[msgIndex], 'replyCount', replies.length);
             if (replies.length > 2) {
               this.$set(this.messages[msgIndex], 'replies', replies.slice(Math.max(replies.length - 2, 1)));

@@ -181,10 +181,11 @@ export default {
     },
     async createVideo(ev, isPost) {
       const image = ev.target;
-      const li = isPost ? document.getElementById(isPost) : image.parentElement;
+      const li = isPost ? document.getElementById(`li_${isPost}`) : image.parentElement;
       const videoWrap = document.createElement('div');
       videoWrap.className = 'video-wrap';
       const video = document.createElement('video');
+      video.src = image.src;
       const controls = document.createElement('button');
       controls.innerHTML = '<img src="http://localhost:8080/volume-off.png" alt="Volume">';
       controls.className = 'volume';
@@ -192,7 +193,7 @@ export default {
       video.classList.add('img-thumbnail');
       // video.innerHTML += `<source src="${image.src}" type="video/mp4;
       // codecs=&quot;av01.0.00M.08, opus&quot;">`;
-      video.innerHTML += `<source src="${image.src}" type="video/mp4;">`;
+      // video.innerHTML += `<source src="${image.src}" type="video/mp4;">`;
       // video.innerHTML += `<source src="${image.src}"
       // type="video/webm; codecs=&quot;vp9, opus&quot;">`;
       video.autoplay = true;
