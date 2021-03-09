@@ -72,7 +72,7 @@
           <span v-if="message.subject">{{message.subject}}</span>
           <span class="id" v-else>gchan post</span>
         </p>
-        <p>{{message.message}}</p>
+        <p v-html="message.message"></p>
         <br />
         <small>{{message.created}}</small><br />
         <img v-if="message.gif_origin == 'giphy'"
@@ -266,6 +266,42 @@ export default {
     update(e) {
       console.log(e);
     },
+    async filterMessage(message) {
+      const theMessage = message;
+      // eslint-disable-next-line
+      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
+      const string = theMessage.message;
+      const matches = string.match(rgx);
+      console.log(matches);
+      if (matches.length > 0) {
+        await this.sleep(100);
+        console.log(`#li_${this.message.id} small`);
+        const smallTag = document.querySelector(`#li_${this.message.id} small`);
+        const pTag = document.querySelector(`#li_${this.message.id} p:not(.mt-0)`);
+        const iframeWrapper = document.createElement('div');
+        iframeWrapper.className = 'iframe-wrapper';
+        const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
+        matches.forEach((match) => {
+          console.log(match);
+          // const filteredString =
+          // string.replace(match, `[<a data-link="${match}" href="javascript:;">youtube</a>]`);
+          pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
+          // theMessage.message = filteredString;
+          fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
+            .then((response) => response.json())
+            .then((result) => {
+              const aTag = document.querySelector(`[data-link="${match}"]`);
+              aTag.children[0].src = result.thumbnail_url;
+              // aTag.setAttribute('data-thumb', result.thumbnail_url);
+              aTag.addEventListener('mouseover', this.showThumbImg, false);
+              aTag.addEventListener('mouseout', this.hideThumbImg, false);
+              aTag.addEventListener('click', this.toggleYoutubeFrame, false);
+              insertedNode.innerHTML = result.html;
+            });
+        });
+      }
+      return theMessage;
+    },
   },
   computed: {
     filterMessageText() {
@@ -280,6 +316,9 @@ export default {
       }
       return this.replies;
     },
+  },
+  mounted() {
+
   },
 };
 </script>

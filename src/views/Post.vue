@@ -105,7 +105,7 @@ export default {
           console.log(match);
           // const filteredString =
           // string.replace(match, `[<a data-link="${match}" href="javascript:;">youtube</a>]`);
-          pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
+          pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">youtube:mostrar<img class="yt-thumb" style="display:none;"></a>]`);
           // theMessage.message = filteredString;
           fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
             .then((response) => response.json())
@@ -142,10 +142,10 @@ export default {
         iframe.height = iframe.width / 2 + 20;
       }
       iframeWrapper.classList.toggle('open');
-      if (button.innerText === 'mostrar') {
-        button.innerHTML = button.innerHTML.replace('mostrar', 'esconder');
+      if (button.innerText === 'youtube:mostrar') {
+        button.innerHTML = button.innerHTML.replace('youtube:mostrar', 'esconder');
       } else {
-        button.innerHTML = button.innerHTML.replace('esconder', 'mostrar');
+        button.innerHTML = button.innerHTML.replace('esconder', 'youtube:mostrar');
       }
     },
     replyMessage(reply) {

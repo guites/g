@@ -234,9 +234,15 @@ export default {
     },
   },
   computed: {
-    reversedMessages() {
-      return this.messages.slice().reverse();
-    },
+    // async reversedMessages() {
+    //   // return this.messages.slice().reverse();
+    //   const filteredMessages = [];
+    //   for (let i = 0; i < this.messages.length; i += 1) {
+    //     filteredMessages.push(await this.filterMessage(this.messages[i]));
+    //   }
+    //   console.log(filteredMessages);
+    //   return filteredMessages;
+    // },
     uniqueGifs() {
       const result = [];
       const map = new Map();
@@ -283,7 +289,7 @@ export default {
     );
     fetch(`${apiURL}${this.offset}`).then((response) => response.json())
       .then((result) => {
-        this.messages = result.results;
+        this.messages = this.sanitizedMessages(result.results);
       })
       .then(() => {
         document.querySelectorAll('.list-unstyled li.media')
@@ -298,6 +304,44 @@ export default {
       });
   },
   methods: {
+    sanitizedMessages(messagesArray) {
+      // transforma todas as < e > em texto
+      const sanitized = [];
+      messagesArray.forEach((message) => {
+        const thisIterationMsg = message;
+        thisIterationMsg.message = message.message.replace(/</g, '&lt;');
+        thisIterationMsg.message = message.message.replace(/>/g, '&gt;');
+        sanitized.push(thisIterationMsg);
+      });
+      return sanitized;
+    },
+    async filterMessage(index) {
+      // eslint-disable-next-line
+      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
+      const string = this.messages[index].message;
+      const matches = string.match(rgx);
+      console.log(matches);
+      if (matches !== null) {
+        if (matches.length > 0) {
+          matches.forEach((match, idx) => {
+            console.log(match);
+            this.messages[index].message = this.messages[index].message.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
+            fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
+              .then((response) => response.json())
+              .then((result) => {
+                const ytThumbs = [];
+                this.$set(this.messages[index], 'yt_thumbnails', ytThumbs);
+                this.messages[index].yt_thumbnails[idx] = result.thumbnail_url;
+                // aTag.setAttribute('data-thumb', result.thumbnail_url);
+                // aTag.addEventListener('mouseover', this.showThumbImg, false);
+                // aTag.addEventListener('mouseout', this.hideThumbImg, false);
+                // aTag.addEventListener('click', this.toggleYoutubeFrame, false);
+                // insertedNode.innerHTML = result.html;
+              });
+          });
+        }
+      }
+    },
     setNextBatch(entries) {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
@@ -436,13 +480,15 @@ export default {
         if (!entry.isIntersecting) return;
         this.replyObserver.unobserve(entry.target);
         const postId = entry.target.id.replace('li_', '');
+        // this.filterMessage(entry);
+        const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
+          === parseInt(postId, 10));
+        this.filterMessage(msgIndex);
         fetch(`${repliesURL}/${postId}`).then((response) => response.json())
           .then((replies) => {
             if (replies.error) {
               return;
             }
-            const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
-          === parseInt(postId, 10));
             this.$set(this.messages[msgIndex], 'replyCount', replies.length);
             if (replies.length > 2) {
               this.$set(this.messages[msgIndex], 'replies', replies.slice(Math.max(replies.length - 2, 1)));
