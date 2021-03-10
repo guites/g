@@ -4,6 +4,7 @@ import VueMeta from 'vue-meta';
 import Home from '../views/Home.vue';
 import Info from '../views/Info.vue';
 import Post from '../views/Post.vue';
+import New from '../views/New.vue';
 
 Vue.use(VueRouter);
 Vue.use(VueMeta);
@@ -37,6 +38,11 @@ const routes = [
       const id = Number.parseInt(route.params.id, 10);
       return { id };
     },
+  },
+  {
+    path: '/new',
+    name: 'New post',
+    component: New,
   },
 ];
 
