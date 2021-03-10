@@ -79,11 +79,11 @@
 
 <script>
 // const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const apiURL = 'https://cors-anywhere.herokuapp.com/https://gchan-message-board.herokuapp.com/messages/';
-const repliesURL = 'https://cors-anywhere.herokuapp.com/https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://cors-anywhere.herokuapp.com/https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://cors-anywhere.herokuapp.com/https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://cors-anywhere.herokuapp.com/https://gchan-message-board.herokuapp.com/videoupload';
+const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
+const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
+const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
+const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
 export default {
   name: 'Home',
   props: {
