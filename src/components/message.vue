@@ -74,6 +74,13 @@
         </p>
         <p v-html="message.message"></p>
         <br />
+        <div v-if="message.yt_iframes"
+        class="iframe-wrapper"
+        ref="yt_iframes">
+          <div v-html="yt_iframe" v-for="yt_iframe in message.yt_iframes" :key="yt_iframe">
+
+          </div>
+        </div>
         <small>{{message.created}}</small><br />
         <img v-if="message.gif_origin == 'giphy'"
         alt='powered by GIPHY'
@@ -318,7 +325,14 @@ export default {
     },
   },
   mounted() {
-
+    // console.log(this.$refs);
+    this.$nextTick(() => {
+      console.log(this.$refs);
+    });
+    // console.log(this.$refs.yt_frames);
+    // this.$refs.yt_iframes.querySelectorAll('iframe').forEach((ytFrame) => {
+    //   console.log(ytFrame);
+    // });
   },
 };
 </script>

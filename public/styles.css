@@ -1293,11 +1293,15 @@ div li div img {
 }
 
 div li div div.iframe-wrapper {
+  display: initial;
+}
+
+div li div div.iframe-wrapper div {
   display: none;
 }
 
-div li div div.iframe-wrapper.open {
-  display: initial;
+div li div div.iframe-wrapper div.open {
+  display: block;
 }
 
 div li div small {

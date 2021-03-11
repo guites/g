@@ -109,7 +109,8 @@ export default {
         if (!replyTextArea) {
           const liToQuote = document.querySelector(`[data-quoteid="${val}"]`);
           // this.$emit('messageToReplyTo', liToQuote.closest('ul').children[0].id);
-          document.querySelector(`[data-replyto="${liToQuote.closest('ul').children[0].id}"]`).click();
+          const replyToId = liToQuote.closest('ul').children[0].id.replace('li_', '');
+          document.querySelector(`[data-replyto="${replyToId}"]`).click();
           setTimeout(() => {
             replyTextArea = document.querySelector('#replybox textarea#message');
             replyTextArea.value += `>>${val}\n`;

@@ -943,9 +943,15 @@ div{
           border:none;
         }
         div.iframe-wrapper {
-          display:none;
-          &.open {
-            display:initial;
+          display:initial;
+          // &.open {
+          //   display:initial;
+          // }
+          div {
+            display:none;
+            &.open {
+              display:block;
+            }
           }
         }
         small{

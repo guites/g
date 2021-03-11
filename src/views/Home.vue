@@ -167,6 +167,11 @@ const repliesURL = 'http://localhost:5000/replies';
 const imgurURLimg = 'http://localhost:5000/imgupload';
 const imgurURLgif = 'http://localhost:5000/gifupload';
 const imgurURLupload = 'http://localhost:5000/videoupload';
+// eslint-disable-next-line
+function showThumbImg(e) {
+  if (window.innerWidth < 767) return;
+  e.target.children[0].style = 'display:block;';
+}
 export default {
   name: 'Home',
   components: {
@@ -323,24 +328,32 @@ export default {
       console.log(matches);
       if (matches !== null) {
         if (matches.length > 0) {
-          matches.forEach((match, idx) => {
-            console.log(match);
-            this.messages[index].message = this.messages[index].message.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
-            fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
+          this.$set(this.messages[index], 'yt_thumbnails', []);
+          this.$set(this.messages[index], 'yt_iframes', []);
+          for (let i = 0; i < matches.length; i += 1) {
+          // matches.forEach(async (match, idx) => {
+            console.log(i);
+            fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
               .then((response) => response.json())
               .then((result) => {
-                const ytThumbs = [];
-                this.$set(this.messages[index], 'yt_thumbnails', ytThumbs);
-                this.messages[index].yt_thumbnails[idx] = result.thumbnail_url;
+                this.messages[index].message = this.messages[index].message.replace(matches[i], `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="this.closest('li').querySelectorAll('iframe')[${i}].parentElement.classList.toggle('open'); this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`);
+                // const ytThumbs = [];
+                // this.messages[index].yt_thumbnails.push(result.thumbnail_url);
                 // aTag.setAttribute('data-thumb', result.thumbnail_url);
                 // aTag.addEventListener('mouseover', this.showThumbImg, false);
                 // aTag.addEventListener('mouseout', this.hideThumbImg, false);
                 // aTag.addEventListener('click', this.toggleYoutubeFrame, false);
+                this.messages[index].yt_iframes.push(result.html.replace(/"/g, '\''));
+                // console.log(result.html);
+                // console.log(result.html.replace(/\\/g, ''));
                 // insertedNode.innerHTML = result.html;
               });
-          });
+          }
         }
       }
+    },
+    adjustYtIframe() {
+
     },
     setNextBatch(entries) {
       entries.forEach((entry) => {
