@@ -47,8 +47,6 @@
         <div class="form-group">
           <label for="imageURL" v-if="!this.optUpload">
             URL da imagem/gif/vídeo</label>
-          <label for="imageURL" class='upload-concluido'
-          v-else>Upload Concluído!</label>
           <input v-model="message.imageURL" type="url" class="form-control"
           id="imageURL" placeholder="https://~"
           :readonly="this.optUpload === true"
@@ -58,32 +56,33 @@
         <button type="submit" class="btn btn-primary">Enviar</button>
     </form>
     <div v-if="this.$route.query.mediaUrl" class="imagePreview">
-      <button type='button' v-if='this.optUpload'
-      @click="removeUpload($event)">Cancelar</button>
       <img v-if="this.$route.query.type === 'image'" :src="this.$route.query.mediaUrl"
       id="imageToUpload"
       alt="pré-visualização de imagem para upload">
-      <iframe v-else-if="this.$route.query.type === 'video'"
-      id="videoToUpload"
-      :src="this.$route.query.mediaUrl"
-      autoplay="true"
-      loop="true"
-      muted="true"
-      playsinline="true"></iframe>
+      <div class="video-wrap"
+      v-else-if="this.$route.query.type === 'video'">
+        <video
+        id="videoToUpload"
+        :src="this.$route.query.mediaUrl"
+        autoplay="true"
+        loop="true"
+        muted="true"
+        playsinline="true"
+        class="videoPreview"
+        >
+        </video>
+        <button @click="toggleAudioOnClick" type="button" class="volume">
+          <img src="https://gchan.com.br/volume-off.png" alt="Volume">
+        </button>
+      </div>
       <p v-else>Formato não suportado! ::(</p>
-      <!-- <button type="button"></button> -->
     </div>
     </section>
   </div>
 </template>
 
 <script>
-// const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
 const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
 export default {
   name: 'Home',
   props: {
@@ -134,40 +133,7 @@ export default {
     offset: 0,
     messagesBatchSize: 15,
   }),
-  watch: {
-    isGifBeingSearched(val) {
-      if (val !== '') {
-        this.isPreviewing = '';
-      }
-    },
-    isPreviewing(val) {
-      if (val !== '') {
-        this.isGifBeingSearched = '';
-      }
-    },
-  },
   computed: {
-    reversedMessages() {
-      return this.messages.slice().reverse();
-    },
-    uniqueGifs() {
-      const result = [];
-      const map = new Map();
-      this.gifs.forEach((el) => {
-        if (!map.has(el.id)) {
-          map.set(el.id, true);
-          result.push({
-            id: el.id,
-            thumbUrl: el.thumbUrl,
-            originalUrl: el.originalUrl,
-          });
-        }
-      });
-      return result;
-    },
-    // username() {
-    //   return this.auth.username || this.message.username;
-    // },
     smallUsernamePhrase() {
       const phrases = [
         { quote: 'o que é que há, pois, num nome?', reference: 'https://pt.wikipedia.org/wiki/William_Shakespeare' },
@@ -182,51 +148,34 @@ export default {
     },
   },
   mounted() {
-    this.replyObserver = new IntersectionObserver(
-      this.onElementObserved,
-      {
-        threshold: 0,
-      },
-    );
-    this.lazyLoadObserver = new IntersectionObserver(
-      this.setNextBatch,
-      {
-        threshold: 0,
-      },
-    );
-
     if (this.$route.query.mediaUrl) {
       this.message.imageURL = this.$route.query.mediaUrl;
     }
   },
   methods: {
-    setNextBatch(entries) {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        this.lazyLoadObserver.unobserve(entry.target);
-        fetch(`${apiURL}${this.offset}`).then((response) => response.json())
-          .then((result) => {
-            if (!result.results) return;
-            result.results.forEach((res) => {
-              this.messages.push(res);
-            });
-          })
-          .then(() => {
-            const messages = document.querySelector('div.container').children;
-            for (let i = 0; i < this.messagesBatchSize; i += 1) {
-              if (!messages[i + this.offset]) {
-                console.log('chegou no fim! yey');
-                return;
-              }
-              this.replyObserver.observe(messages[i + this.offset].children[0]);
-              if (i === this.messagesBatchSize - 1) {
-                this.lazyLoadObserver.observe(messages[i + this.offset].children[0]);
-                this.offset += 15;
-                messages[i].setAttribute('data-offset', this.offset);
-              }
-            }
-          });
-      });
+    hasAudio(video) {
+      return video.mozHasAudio
+      || Boolean(video.webkitAudioDecodedByteCount)
+      || Boolean(video.audioTracks && video.audioTracks.length);
+    },
+    toggleAudioOnClick(e) {
+      const clickedOn = e.target;
+      let video;
+      let audioImg;
+      if (clickedOn.tagName === 'BUTTON') {
+        video = clickedOn.previousElementSibling;
+        audioImg = clickedOn.children.shift();
+      } else if (clickedOn.tagName === 'IMG') {
+        video = clickedOn.parentElement.previousElementSibling;
+        audioImg = clickedOn;
+      }
+      console.log(video);
+      video.muted = !video.muted;
+      if (video.muted) {
+        audioImg.src = 'https://gchan.com.br/volume-off.png';
+      } else {
+        audioImg.src = 'https://gchan.com.br/volume-high.png';
+      }
     },
     toggleSubject() {
       this.hasSubject = !this.hasSubject;
@@ -243,17 +192,6 @@ export default {
     },
     isMyPost() {
       return true;
-    },
-    clearMsgForm() {
-      this.message.username = 'anônimo';
-      this.message.subject = '';
-      this.message.message = '';
-      this.message.imageURL = '';
-      this.message.user_id = 0;
-      this.isPreviewing = '';
-      this.isGifBeingSearched = '';
-      document.querySelector('#uploadIMG').value = '';
-      this.optUpload = '';
     },
     addMessage() {
       const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
@@ -295,153 +233,6 @@ export default {
         submitButton.disabled = false;
       });
     },
-    deleteMessage(e) {
-      const messageID = e.target.parentElement.getAttribute('data-message-id');
-      this.msgFlash('error', messageID, 'Deletar mensagem', 'Tem certa que deseja deletar esta mensagem? ):', 'ela não ofendeu ninguém');
-    },
-    editMessage() {
-      alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
-    },
-    reactMessage() {
-      alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
-    },
-    replyMessage(reply) {
-      this.messageToReplyTo = reply;
-    },
-    adcQuote(quote) {
-      this.quotesToAdd = quote;
-    },
-    closeReply() {
-      this.messageToReplyTo = '';
-    },
-    addReplyToThread(reply) {
-      let typeCheckedReply;
-      if (typeof reply === 'string') {
-        typeCheckedReply = JSON.parse(reply);
-      } else {
-        typeCheckedReply = reply;
-      }
-      const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
-          === parseInt(typeCheckedReply.message_id, 10));
-      if (this.messages[msgIndex].replies === undefined) this.messages[msgIndex].replies = [];
-      this.messages[msgIndex].replies.push(typeCheckedReply);
-    },
-    onElementObserved(entries) {
-      entries.forEach((entry) => {
-        if (!entry.isIntersecting) return;
-        this.replyObserver.unobserve(entry.target);
-        fetch(`${repliesURL}/${entry.target.id}`).then((response) => response.json())
-          .then((replies) => {
-            if (replies.error) {
-              return;
-            }
-            const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
-          === parseInt(entry.target.id, 10));
-            this.$set(this.messages[msgIndex], 'replyCount', replies.length);
-            if (replies.length > 2) {
-              this.$set(this.messages[msgIndex], 'replies', replies.slice(Math.max(replies.length - 2, 1)));
-            } else {
-              this.$set(this.messages[msgIndex], 'replies', replies);
-            }
-          });
-      });
-    },
-    msgFlash(type, messageID, header, text, message) {
-      this.messageFlash.type = type;
-      this.messageFlash.header = header;
-      this.messageFlash.text = text;
-      this.messageFlash.message = message;
-      this.messageFlash.messageID = parseInt(messageID, 10);
-    },
-    searchGif(e) {
-      let searchString;
-
-      if (e.target.id === 'giphyURL') {
-        searchString = e.target.value;
-        if (searchString === '') {
-          this.isGifBeingSearched = '';
-        } else {
-          this.isGifBeingSearched = 1;
-        }
-      } else {
-        searchString = document.querySelector('#giphyURL').value;
-      }
-      if (searchString === '') {
-        this.hasPag = '';
-      } else {
-        this.hasPag = '1';
-      }
-      switch (document.querySelector("input[type='radio']:checked").value) {
-        default:
-          this.apiRoute = 'giphy';
-          fetch(`https://api.giphy.com/v1/gifs/search?api_key=5KnNW5U9nJ2Xjnas3lugKxMIXVdCsrqF&q=${searchString}&limit=${this.gifsPerPage}&offset=${(this.currPage - 1) * this.gifsPerPage}`)
-            .then((response) => response.json())
-            .then((result) => {
-              const obj = result.data;
-              if (obj.length === 0) {
-                this.emptyGifResults = 1;
-              } else {
-                this.emptyGifResults = '';
-              }
-              this.gifs = [];
-              obj.forEach((el) => {
-                this.gifs.push({
-                  id: el.id,
-                  thumbUrl: el.images.preview_webp.url,
-                  originalUrl: el.images.original.webp,
-                });
-              });
-            })
-            .catch(() => {
-              this.emptyGifResults = 1;
-            });
-          break;
-        case 'gfycat':
-          this.apiRoute = 'gfycat';
-          fetch(`https://api.gfycat.com/v1/gfycats/search?count=${this.gifsPerPage * this.numPages}&search_text='${searchString}`)
-            .then((response) => response.json())
-            .then((result) => {
-              const obj = result.gfycats;
-              this.gfycatCursor = result.cursor;
-              if (obj.length === 0) {
-                this.emptyGifResults = 1;
-              } else {
-                this.emptyGifResults = '';
-              }
-              const startingPoint = (this.currPage - 1) * this.gifsPerPage;
-              const endingPoint = startingPoint + this.gifsPerPage;
-              this.gifs = [];
-              let counter = 0;
-              obj.forEach((el) => {
-                if (counter >= startingPoint && counter < endingPoint) {
-                  this.gifs.push({
-                    id: el.gfyId,
-                    thumbUrl: el.max1mbGif,
-                    originalUrl: el.webpUrl,
-                  });
-                }
-                counter += 1;
-              });
-            })
-            .catch((error) => {
-              console.error(error);
-              this.emptyGifResults = 1;
-            });
-          break;
-      }
-    },
-    selectGif(e) {
-      const originalUrl = e.target.getAttribute('data-original');
-      document.querySelector('#imageURL').value = originalUrl;
-      this.message.imageURL = originalUrl;
-    },
-    paginateGif(e) {
-      this.currPage = e.target.innerText;
-      this.searchGif(e);
-    },
-    fullSize(e) {
-      e.target.classList.toggle('fullsize');
-    },
     createVideo(target) {
       const image = target.target;
       const video = document.createElement('video');
@@ -474,77 +265,6 @@ export default {
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
-    async uploadToImgur(kind, arquivo) {
-      document.querySelector('.imagePreview').children[0].classList.add('uploading');
-      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
-      submitButton.disabled = true;
-      // blank line
-      let postURL;
-      const formData = new FormData();
-      if (kind === 'image') {
-        if (true) {
-        // if (arquivo.type === 'image/gif') {
-          formData.append('image', arquivo);
-          postURL = imgurURLgif;
-        } else {
-          const file = document.querySelector('#imageToUpload').src;
-          const base64result = file.split(',')[1];
-          postURL = imgurURLimg;
-          formData.append('image', base64result);
-        }
-      } else {
-        formData.append('video', arquivo);
-        postURL = imgurURLupload;
-      }
-      const requestOptions = {
-        method: 'POST',
-        body: formData,
-        redirect: 'follow',
-      };
-      fetch(postURL, requestOptions)
-        .then((response) => response.json())
-        .then(async (result) => {
-          const mediaDiv = document.querySelector('.imagePreview');
-          const mediaInUse = mediaDiv.children[0];
-          if (result.status === 200
-          && result.success === true) {
-            this.message.imageURL = result.data.link;
-            this.gif_origin = 'imgur';
-            // remove a pesquisa por gifs
-            this.optUpload = true;
-            await this.sleep(100);
-            if (result.data.type.startsWith('video/')) {
-              mediaInUse.innerHTML = `
-                <source src="${result.data.link}"
-                type="${result.data.type}">
-              `;
-            } else {
-              mediaInUse.src = result.data.link;
-            }
-            mediaInUse.classList.remove('uploading');
-            const removeBtn = mediaDiv.querySelector('button');
-            removeBtn.setAttribute('data-deletehash', result.data.deletehash);
-          } else if (result.status === 500 && result.success === false) {
-            this.error = `
-              Erro no servidor de upload! :(\n
-              Tente subir sua imagem em outro lugar\n
-              e poste usando o link!\n
-              (https://postimages.org/,\n
-              https://imgur.com/upload,\n
-              https://giphy.com/upload,\n etc)
-              `;
-            this.isPreviewing = '';
-          } else {
-            this.error = `
-              Aceitamos apenas imagens no formato\n
-              JPEG, PNG, GIF, APNG e TIFF!
-            `;
-            this.isPreviewing = '';
-          }
-          submitButton.disabled = false;
-        })
-        .catch((error) => console.log('error', error));
-    },
     readAsDataURL(file, img) {
       return new Promise((resolve) => {
         const fileReader = new FileReader();
@@ -559,60 +279,6 @@ export default {
         };
         fileReader.readAsDataURL(file);
       });
-    },
-    async handleUpload(e) {
-      let imagePreviewDiv;
-      const file = e.target.files[0];
-      const input = document.querySelector('#uploadIMG');
-      if (file.type.startsWith('image/')) {
-        this.isPreviewing = 'image';
-        await this.sleep(100);
-        imagePreviewDiv = document.querySelector('.imagePreview');
-        await this.readAsDataURL(file, imagePreviewDiv.children[0]);
-        await this.uploadToImgur('image', file);
-      } else if (file.type.startsWith('video/')) {
-        if (this.allowedUploadVideoFormats.includes(file.type)) {
-          this.isPreviewing = 'video';
-          await this.sleep(100);
-          imagePreviewDiv = document.querySelector('.imagePreview');
-          // await this.readAsDataURL(file, imagePreviewDiv.children[0]);
-          const objUrl = URL.createObjectURL(file);
-          imagePreviewDiv.children[0].src = objUrl;
-          await this.uploadToImgur('video', file);
-        } else {
-          this.error = `
-            Formato de vídeo não aceito!\n
-            Funciona apenas com os formatos abaixo:\n
-            ${this.allowedUploadVideoFormats.join(', ')}
-          `;
-          input.value = '';
-        }
-      } else {
-        this.error = `
-          Aceitamos apenas imagens,\n
-          gifs e vídeos!
-        `;
-        input.value = '';
-      }
-    },
-    removeUpload(e) {
-      const deleteHash = e.target.getAttribute('data-deletehash').trim();
-      fetch(`https://gchan-message-board.herokuapp.com/imgur/${deleteHash}`, {
-        method: 'DELETE',
-        headers: {
-          Authorization: 'Client-ID 3435e574a9859d1',
-        },
-        redirect: 'follow',
-      })
-        .then((response) => response.json())
-        .then((r) => {
-          if (r.data === true && r.success === true) {
-            this.optUpload = false;
-            this.isPreviewing = '';
-            this.message.imageURL = '';
-            document.querySelector('input[name=uploadIMG]').value = '';
-          }
-        });
     },
   },
 };
