@@ -99,6 +99,9 @@ form{
       padding:10px 0;
     }
   }
+  textarea {
+    resize:vertical;
+  }
 textarea, input[type="email"],input[type="password"],input[type="text"],input[type="url"]{
   height:36.5px;
   border:1px solid #222;
@@ -197,14 +200,15 @@ header{
               li{
                   padding:10px 5px;
                   a{
-                      padding:10px 5px;
-                      opacity:0.6;
-                      color:white;
-                      text-decoration:none;
-                      transition:all 300ms ease;
-                      &:hover{
-                          opacity:0.75;
-                      }
+                    display:flex;
+                    padding:10px 5px;
+                    opacity:0.6;
+                    color:white;
+                    text-decoration:none;
+                    transition:all 300ms ease;
+                    &:hover{
+                        opacity:0.75;
+                    }
                   }
                   button{
                     height: 36.5px;
@@ -226,7 +230,6 @@ header{
                   img{
                     width:32px;
                     margin:0 0 0 5px;
-                    cursor:initial;
                   }
               }
           }
@@ -385,7 +388,7 @@ header{
       font-size:27px;
       &:nth-child(1){
         left: 0;
-        font-size: 52px;
+        font-size: 30px;
       }
       &:hover{
         color:red;
@@ -1393,7 +1396,6 @@ header{
                       img{
                           width:32px;
                           margin:0;
-                          cursor:initial;
                       }
                   }
               }

@@ -14,9 +14,6 @@
           placeholder="anônimo"
           v-model="message.username"
           maxlength=30
-          required
-          @focus="clearName($event)"
-          @focusout="checkForName($event)"
           >
           <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
@@ -161,12 +158,12 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-// const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
+// const apiURL = 'http://localhost:5000/messages';
+const apiURL = 'http://localhost:5000/messages/';
+const repliesURL = 'http://localhost:5000/replies';
+const imgurURLimg = 'http://localhost:5000/imgupload';
+const imgurURLgif = 'http://localhost:5000/gifupload';
+const imgurURLupload = 'http://localhost:5000/videoupload';
 export default {
   name: 'Home',
   components: {
@@ -200,7 +197,7 @@ export default {
     gifs: [],
     hasSubject: false,
     message: {
-      username: 'anônimo',
+      username: '',
       subject: '',
       message: '',
       imageURL: '',
@@ -328,16 +325,6 @@ export default {
     },
     toggleSubject() {
       this.hasSubject = !this.hasSubject;
-    },
-    clearName(e) {
-      if (e.target.value === 'anônimo') {
-        e.target.value = '';
-      }
-    },
-    checkForName(e) {
-      if (e.target.value === '') {
-        e.target.value = 'anônimo';
-      }
     },
     isMyPost() {
       return true;
@@ -702,7 +689,7 @@ export default {
     },
     removeUpload(e) {
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
-      fetch(`https://gchan-message-board.herokuapp.com/imgur/${deleteHash}`, {
+      fetch(`http://localhost:5000/imgur/${deleteHash}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Client-ID 3435e574a9859d1',
