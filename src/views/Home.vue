@@ -337,19 +337,39 @@ export default {
       return sanitized;
     },
     async filterMessage(index) {
+      const isReply = typeof index === 'object' && index !== null;
+      let replyIndex;
+      let messageIndexForReplies;
       // eslint-disable-next-line
       const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
-      const string = this.messages[index].message;
+      // se for um objeto, estou passando uma reply como argumento da função
+      let string;
+      if (isReply) {
+        string = index.content;
+      } else {
+        string = this.messages[index].message;
+      }
       const matches = string.match(rgx);
       if (matches !== null) {
         if (matches.length > 0) {
-          this.$set(this.messages[index], 'yt_thumbnails', []);
-          this.$set(this.messages[index], 'yt_iframes', []);
+          if (isReply) {
+            console.log('isReply', isReply);
+            console.log('message_id', index.message_id);
+            messageIndexForReplies = this.messages.findIndex((el) => parseInt(el.id, 10)
+            === parseInt(index.message_id, 10));
+            // eslint-disable-next-line
+            replyIndex = this.messages[messageIndexForReplies].replies.findIndex((el) => parseInt(el.id, 10) === parseInt(index.id, 10));
+            console.log('replyIndex', replyIndex);
+            this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'yt_iframes', []);
+          } else {
+            this.$set(this.messages[index], 'yt_thumbnails', []);
+            this.$set(this.messages[index], 'yt_iframes', []);
+          }
           for (let i = 0; i < matches.length; i += 1) {
             fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
               .then((response) => response.json())
               .then((result) => {
-                this.messages[index].message = this.messages[index].message.replace(matches[i], `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
+                const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
                 this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
                 const current_li = this.closest('li');
                 // seleciona, se existir, o iframe que estiver carregado
@@ -367,7 +387,14 @@ export default {
                   current_frame.remove();
                 }
                 this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
-                ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`);
+                ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`;
+                if (isReply) {
+                  // eslint-disable-next-line
+                  this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
+                } else {
+                  this.messages[index].message = this.messages[index].message
+                    .replace(matches[i], htmlString);
+                }
               });
           }
         }
@@ -527,6 +554,16 @@ export default {
             } else {
               this.$set(this.messages[msgIndex], 'replies', this.sanitizedMessages(replies));
             }
+            console.log(this.messages[msgIndex].replies);
+            this.messages[msgIndex].replies.forEach((rep) => {
+              this.filterMessage(rep);
+            });
+            // const filteredReplies = [];
+            // replies.forEach((rep) => {
+            //   console.log(rep);
+            // filteredReplies.push(this.filterMessage(this.sanitizeSingleMessage(rep)));
+            // console.log(rep.constructor === Array);
+            // });
           });
       });
     },

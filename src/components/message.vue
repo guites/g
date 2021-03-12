@@ -113,6 +113,7 @@
           </button>
         </div>
           <p v-html="reply.content"></p><br />
+          <div class="iframe-wrapper"></div>
           <small>{{reply.created}}</small><br />
       </div>
     </li>
@@ -326,9 +327,9 @@ export default {
   },
   mounted() {
     // console.log(this.$refs);
-    this.$nextTick(() => {
-      console.log(this.$refs);
-    });
+    // this.$nextTick(() => {
+    //   console.log(this.$refs);
+    // });
     // console.log(this.$refs.yt_frames);
     // this.$refs.yt_iframes.querySelectorAll('iframe').forEach((ytFrame) => {
     //   console.log(ytFrame);

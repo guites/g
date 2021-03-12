@@ -1300,6 +1300,7 @@ div li div div.iframe-wrapper {
 }
 
 div li div div.iframe-wrapper div {
+  width: 100%;
   display: block;
 }
 
@@ -1308,6 +1309,7 @@ div li div div.iframe-wrapper div.open {
 }
 
 div li div div.iframe-wrapper div iframe {
+  max-width: 100%;
   width: 640px;
   height: 360px;
 }
