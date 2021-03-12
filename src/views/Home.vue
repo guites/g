@@ -309,13 +309,29 @@ export default {
       });
   },
   methods: {
+    sanitizeSingleMessage(message) {
+      const sanitized = message;
+      if (message.message) {
+        sanitized.message = message.message.replace(/</g, '&lt;');
+        sanitized.message = message.message.replace(/>/g, '&gt;');
+      } else {
+        sanitized.content = message.content.replace(/</g, '&lt;');
+        sanitized.content = message.content.replace(/>/g, '&gt;');
+      }
+      return sanitized;
+    },
     sanitizedMessages(messagesArray) {
       // transforma todas as < e > em texto
       const sanitized = [];
       messagesArray.forEach((message) => {
         const thisIterationMsg = message;
-        thisIterationMsg.message = message.message.replace(/</g, '&lt;');
-        thisIterationMsg.message = message.message.replace(/>/g, '&gt;');
+        if (message.message) {
+          thisIterationMsg.message = message.message.replace(/</g, '&lt;');
+          thisIterationMsg.message = message.message.replace(/>/g, '&gt;');
+        } else {
+          thisIterationMsg.content = message.content.replace(/</g, '&lt;');
+          thisIterationMsg.content = message.content.replace(/>/g, '&gt;');
+        }
         sanitized.push(thisIterationMsg);
       });
       return sanitized;
@@ -325,7 +341,6 @@ export default {
       const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
       const string = this.messages[index].message;
       const matches = string.match(rgx);
-      console.log(matches);
       if (matches !== null) {
         if (matches.length > 0) {
           this.$set(this.messages[index], 'yt_thumbnails', []);
@@ -455,7 +470,7 @@ export default {
           //   parsedResult.imageurl = 'nope';
           // }
           parsedResult.isNew = true;
-          this.messages.unshift(parsedResult);
+          this.messages.unshift(this.sanitizeSingleMessage(parsedResult));
           this.clearMsgForm();
         }
         submitButton.disabled = false;
@@ -490,7 +505,7 @@ export default {
       const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(typeCheckedReply.message_id, 10));
       if (this.messages[msgIndex].replies === undefined) this.messages[msgIndex].replies = [];
-      this.messages[msgIndex].replies.push(typeCheckedReply);
+      this.messages[msgIndex].replies.push(this.sanitizeSingleMessage(typeCheckedReply));
     },
     onElementObserved(entries) {
       entries.forEach((entry) => {
@@ -508,9 +523,9 @@ export default {
             }
             this.$set(this.messages[msgIndex], 'replyCount', replies.length);
             if (replies.length > 2) {
-              this.$set(this.messages[msgIndex], 'replies', replies.slice(Math.max(replies.length - 2, 1)));
+              this.$set(this.messages[msgIndex], 'replies', this.sanitizedMessages(replies.slice(Math.max(replies.length - 2, 1))));
             } else {
-              this.$set(this.messages[msgIndex], 'replies', replies);
+              this.$set(this.messages[msgIndex], 'replies', this.sanitizedMessages(replies));
             }
           });
       });

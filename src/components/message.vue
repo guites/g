@@ -112,7 +112,7 @@
             #{{reply.id}}
           </button>
         </div>
-          <p>{{reply.content}}</p><br />
+          <p v-html="reply.content"></p><br />
           <small>{{reply.created}}</small><br />
       </div>
     </li>
