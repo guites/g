@@ -331,22 +331,28 @@ export default {
           this.$set(this.messages[index], 'yt_thumbnails', []);
           this.$set(this.messages[index], 'yt_iframes', []);
           for (let i = 0; i < matches.length; i += 1) {
-          // matches.forEach(async (match, idx) => {
-            console.log(i);
             fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
               .then((response) => response.json())
               .then((result) => {
-                this.messages[index].message = this.messages[index].message.replace(matches[i], `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="this.closest('li').querySelectorAll('iframe')[${i}].parentElement.classList.toggle('open'); this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`);
-                // const ytThumbs = [];
-                // this.messages[index].yt_thumbnails.push(result.thumbnail_url);
-                // aTag.setAttribute('data-thumb', result.thumbnail_url);
-                // aTag.addEventListener('mouseover', this.showThumbImg, false);
-                // aTag.addEventListener('mouseout', this.hideThumbImg, false);
-                // aTag.addEventListener('click', this.toggleYoutubeFrame, false);
-                this.messages[index].yt_iframes.push(result.html.replace(/"/g, '\''));
-                // console.log(result.html);
-                // console.log(result.html.replace(/\\/g, ''));
-                // insertedNode.innerHTML = result.html;
+                this.messages[index].message = this.messages[index].message.replace(matches[i], `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
+                this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
+                const current_li = this.closest('li');
+                // seleciona, se existir, o iframe que estiver carregado
+                const current_frame = current_li.querySelector('iframe');
+                if (current_frame) {
+                  const div_data_checkiframe = current_frame.parentElement.getAttribute('data-checkiframe');
+                  if( div_data_checkiframe == '${result.thumbnail_url}') {
+                    console.log('matches');
+                    current_frame.remove();
+                    return;
+                  } else {
+                    const atag_to_current_frame = current_li.querySelector(\`a[data-thumb='\${div_data_checkiframe}']\`);
+                    atag_to_current_frame.childNodes[0].textContent = 'mostrar';
+                  }
+                  current_frame.remove();
+                }
+                this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
+                ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`);
               });
           }
         }
@@ -362,9 +368,7 @@ export default {
         fetch(`${apiURL}${this.offset}`).then((response) => response.json())
           .then((result) => {
             if (!result.results) return;
-            result.results.forEach((res) => {
-              this.messages.push(res);
-            });
+            this.messages = this.messages.concat(this.sanitizedMessages(result.results));
           })
           .then(() => {
             const messages = document.querySelector('div.container').children;

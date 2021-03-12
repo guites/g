@@ -77,7 +77,7 @@
         <div v-if="message.yt_iframes"
         class="iframe-wrapper"
         ref="yt_iframes">
-          <div v-html="yt_iframe" v-for="yt_iframe in message.yt_iframes" :key="yt_iframe">
+          <div>
 
           </div>
         </div>

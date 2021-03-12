@@ -1293,15 +1293,23 @@ div li div img {
 }
 
 div li div div.iframe-wrapper {
-  display: initial;
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  width: 100%;
 }
 
 div li div div.iframe-wrapper div {
-  display: none;
+  display: block;
 }
 
 div li div div.iframe-wrapper div.open {
   display: block;
+}
+
+div li div div.iframe-wrapper div iframe {
+  width: 640px;
+  height: 360px;
 }
 
 div li div small {

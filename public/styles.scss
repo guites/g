@@ -943,14 +943,19 @@ div{
           border:none;
         }
         div.iframe-wrapper {
-          display:initial;
+          display:flex;
+          width:100%;
           // &.open {
           //   display:initial;
           // }
           div {
-            display:none;
+            display:block;
             &.open {
               display:block;
+            }
+            iframe {
+              width: 640px;
+              height:360px;
             }
           }
         }
