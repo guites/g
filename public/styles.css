@@ -291,6 +291,7 @@ header .inner-header nav ul li:nth-child(1) {
 
 header .inner-header nav ul li:nth-child(1) img {
   width: 32px;
+  height: 34px;
   margin: 0 0 0 5px;
 }
 

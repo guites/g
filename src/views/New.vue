@@ -72,7 +72,7 @@
         >
         </video>
         <button @click="toggleAudioOnClick" type="button" class="volume">
-          <img src="https://gchan.com.br/volume-off.png" alt="Volume">
+          <img src="http://localhost:8080/volume-off.png" alt="Volume">
         </button>
       </div>
       <p v-else>Formato não suportado! ::(</p>
@@ -82,7 +82,7 @@
 </template>
 
 <script>
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
+const apiURL = 'http://localhost:5000/messages/';
 export default {
   name: 'Home',
   props: {
@@ -172,9 +172,9 @@ export default {
       console.log(video);
       video.muted = !video.muted;
       if (video.muted) {
-        audioImg.src = 'https://gchan.com.br/volume-off.png';
+        audioImg.src = 'http://localhost:8080/volume-off.png';
       } else {
-        audioImg.src = 'https://gchan.com.br/volume-high.png';
+        audioImg.src = 'http://localhost:8080/volume-high.png';
       }
     },
     toggleSubject() {
