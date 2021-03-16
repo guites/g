@@ -30,6 +30,10 @@ body {
   opacity: 0;
 }
 
+.grecaptcha-badge {
+  visibility: hidden;
+}
+
 .alert-error {
   position: absolute;
   background-color: #e74c3c;
