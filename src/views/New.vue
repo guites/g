@@ -83,6 +83,17 @@
 
 <script>
 const apiURL = 'http://localhost:5000/messages/';
+// The .bind method from Prototype.js 
+if (!Function.prototype.bind) { // check if native implementation available
+  Function.prototype.bind = function(){ 
+    var fn = this, args = Array.prototype.slice.call(arguments),
+        object = args.shift(); 
+    return function(){ 
+      return fn.apply(object, 
+        args.concat(Array.prototype.slice.call(arguments))); 
+    }; 
+  };
+}
 export default {
   name: 'Home',
   props: {
@@ -194,43 +205,49 @@ export default {
       return true;
     },
     addMessage() {
-      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
-      submitButton.disabled = true;
-      if (this.auth.username) {
-        this.message.username = this.auth.username;
-        this.message.user_id = parseInt(this.auth.id, 10);
-      }
-      if (/giphy/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'giphy';
-      } else if (/gfycat/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'gfycat';
-      } else if (/tenor/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'tenor';
-      } else if (/imgur/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'imgur';
-      } else {
-        this.message.gif_origin = 'outro';
-      }
-      fetch(apiURL, {
-        method: 'POST',
-        body: JSON.stringify(this.message),
-        headers: {
-          'content-type': 'application/json',
-        },
-      }).then((response) => response.json()).then((result) => {
-        if (result.details) {
-          const error = result.details.map((detail) => detail.message).join('.');
-          this.error = error;
-        } else if (result.error) {
-          if (result.origin === 'psql') {
-            if (result.code === '23505') {
-              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
-            }
+      grecaptcha.ready(() => {
+        grecaptcha.execute('6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471', {action: 'post'}).then((token) => token)
+        .then((token) => {
+          this.message.recaptcha_token = token;
+          const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
+          submitButton.disabled = true;
+          if (this.auth.username) {
+            this.message.username = this.auth.username;
+            this.message.user_id = parseInt(this.auth.id, 10);
           }
-        } else {
-          window.location.href = '/';
-        }
-        submitButton.disabled = false;
+          if (/giphy/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'giphy';
+          } else if (/gfycat/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'gfycat';
+          } else if (/tenor/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'tenor';
+          } else if (/imgur/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'imgur';
+          } else {
+            this.message.gif_origin = 'outro';
+          }
+          fetch(apiURL, {
+            method: 'POST',
+            body: JSON.stringify(this.message),
+            headers: {
+              'content-type': 'application/json',
+            },
+          }).then((response) => response.json()).then((result) => {
+            if (result.details) {
+              const error = result.details.map((detail) => detail.message).join('.');
+              this.error = error;
+            } else if (result.error) {
+              if (result.origin === 'psql') {
+                if (result.code === '23505') {
+                  this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                }
+              }
+            } else {
+              window.location.href = '/';
+            }
+            submitButton.disabled = false;
+          });
+        });
       });
     },
     createVideo(target) {
