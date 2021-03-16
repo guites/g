@@ -82,7 +82,7 @@
 </template>
 
 <script>
-const apiURL = 'http://localhost:5000/messages/';
+const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
 // The .bind method from Prototype.js 
 if (!Function.prototype.bind) { // check if native implementation available
   Function.prototype.bind = function(){ 
