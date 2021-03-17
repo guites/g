@@ -27,8 +27,8 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const messageURL = 'http://localhost:5000/message/';
-const repliesURL = 'http://localhost:5000/replies';
+const messageURL = 'https://gchan-message-board.herokuapp.com/message/';
+const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
 export default {
   name: 'Post',
   components: {
@@ -68,8 +68,9 @@ export default {
     fetch(`${messageURL}${this.id}`).then((response) => response.json())
       .then((result) => {
         if (result.results) {
-          this.message = result.results.shift();
-          this.filterMessage(this.message);
+          // this.message = result.results.shift();
+          // this.filterMessage(this.message);
+          this.message = this.sanitizeSingleMessage(result.results.shift());
           fetch(`${repliesURL}/${this.id}`).then((response) => response.json())
             .then((replies) => {
               if (replies.error) {
@@ -78,7 +79,7 @@ export default {
               this.$set(this.message, 'replies', replies);
             });
         } else {
-          window.location.href = 'http://localhost:8080/';
+          window.location.href = 'https://gchan.com.br/';
         }
       });
   },
@@ -86,40 +87,51 @@ export default {
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
+    sanitizeSingleMessage(message) {
+      const sanitized = message;
+      if (message.message) {
+        sanitized.message = message.message.replace(/</g, '&lt;');
+        sanitized.message = message.message.replace(/>/g, '&gt;');
+      } else {
+        sanitized.content = message.content.replace(/</g, '&lt;');
+        sanitized.content = message.content.replace(/>/g, '&gt;');
+      }
+      return sanitized;
+    },
     async filterMessage(message) {
       const theMessage = message;
       // eslint-disable-next-line
-      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
-      const string = theMessage.message;
-      const matches = string.match(rgx);
-      console.log(matches);
-      if (matches.length > 0) {
-        await this.sleep(100);
-        console.log(`#li_${this.message.id} small`);
-        const smallTag = document.querySelector(`#li_${this.message.id} small`);
-        const pTag = document.querySelector(`#li_${this.message.id} p:not(.mt-0)`);
-        const iframeWrapper = document.createElement('div');
-        iframeWrapper.className = 'iframe-wrapper';
-        const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
-        matches.forEach((match) => {
-          console.log(match);
-          // const filteredString =
-          // string.replace(match, `[<a data-link="${match}" href="javascript:;">youtube</a>]`);
-          pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">youtube:mostrar<img class="yt-thumb" style="display:none;"></a>]`);
-          // theMessage.message = filteredString;
-          fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
-            .then((response) => response.json())
-            .then((result) => {
-              const aTag = document.querySelector(`[data-link="${match}"]`);
-              aTag.children[0].src = result.thumbnail_url;
-              // aTag.setAttribute('data-thumb', result.thumbnail_url);
-              aTag.addEventListener('mouseover', this.showThumbImg, false);
-              aTag.addEventListener('mouseout', this.hideThumbImg, false);
-              aTag.addEventListener('click', this.toggleYoutubeFrame, false);
-              insertedNode.innerHTML = result.html;
-            });
-        });
-      }
+      // const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
+      // const string = theMessage.message;
+      // const matches = string.match(rgx);
+      // console.log(matches);
+      // if (matches.length > 0) {
+      //   await this.sleep(100);
+      //   console.log(`#li_${this.message.id} small`);
+      //   const smallTag = document.querySelector(`#li_${this.message.id} small`);
+      //   const pTag = document.querySelector(`#li_${this.message.id} p:not(.mt-0)`);
+      //   const iframeWrapper = document.createElement('div');
+      //   iframeWrapper.className = 'iframe-wrapper';
+      //   const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
+      //   matches.forEach((match) => {
+      //     console.log(match);
+      //     // const filteredString =
+      //     // string.replace(match, `[<a data-link="${match}" href="javascript:;">youtube</a>]`);
+      //     pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">youtube:mostrar<img class="yt-thumb" style="display:none;"></a>]`);
+      //     // theMessage.message = filteredString;
+      //     fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
+      //       .then((response) => response.json())
+      //       .then((result) => {
+      //         const aTag = document.querySelector(`[data-link="${match}"]`);
+      //         aTag.children[0].src = result.thumbnail_url;
+      //         // aTag.setAttribute('data-thumb', result.thumbnail_url);
+      //         aTag.addEventListener('mouseover', this.showThumbImg, false);
+      //         aTag.addEventListener('mouseout', this.hideThumbImg, false);
+      //         aTag.addEventListener('click', this.toggleYoutubeFrame, false);
+      //         insertedNode.innerHTML = result.html;
+      //       });
+      //   });
+      // }
       return theMessage;
     },
     showThumbImg(e) {
@@ -193,7 +205,7 @@ export default {
         },
         {
           property: 'og:url',
-          content: `http://localhost:8080/#/post/${this.message.id}`,
+          content: `https://gchan.com.br/#/post/${this.message.id}`,
         },
         {
           property: 'og:image',
@@ -205,7 +217,7 @@ export default {
         },
         {
           name: 'twitter:site',
-          content: 'http://localhost:8080',
+          content: 'https://gchan.com.br',
         },
         {
           name: 'twitter:creator',

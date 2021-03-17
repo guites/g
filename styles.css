@@ -92,6 +92,9 @@ section.create-thread {
       justify-content: space-around;
   height: 480px;
   margin-top: 20px;
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
 }
 
 section.create-thread form {

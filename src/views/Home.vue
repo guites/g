@@ -14,9 +14,6 @@
           placeholder="anônimo"
           v-model="message.username"
           maxlength=30
-          required
-          @focus="clearName($event)"
-          @focusout="checkForName($event)"
           >
           <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
@@ -161,17 +158,28 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-// const apiURL = 'http://localhost:5000/messages';
-const apiURL = 'http://localhost:5000/messages/';
-const repliesURL = 'http://localhost:5000/replies';
-const imgurURLimg = 'http://localhost:5000/imgupload';
-const imgurURLgif = 'http://localhost:5000/gifupload';
-const imgurURLupload = 'http://localhost:5000/videoupload';
 // eslint-disable-next-line
 function showThumbImg(e) {
   if (window.innerWidth < 767) return;
   e.target.children[0].style = 'display:block;';
 }
+// const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
+const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
+const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
+const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
+const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
+// The .bind method from Prototype.js 
+if (!Function.prototype.bind) { // check if native implementation available
+  Function.prototype.bind = function(){ 
+    var fn = this, args = Array.prototype.slice.call(arguments),
+        object = args.shift(); 
+    return function(){ 
+      return fn.apply(object, 
+        args.concat(Array.prototype.slice.call(arguments))); 
+    }; 
+  };
+};
 export default {
   name: 'Home',
   components: {
@@ -205,7 +213,7 @@ export default {
     gifs: [],
     hasSubject: false,
     message: {
-      username: 'anônimo',
+      username: '',
       subject: '',
       message: '',
       imageURL: '',
@@ -341,7 +349,9 @@ export default {
       let replyIndex;
       let messageIndexForReplies;
       // eslint-disable-next-line
-      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
+      // const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
+      // const rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/g;
+      const rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
       // se for um objeto, estou passando uma reply como argumento da função
       let string;
       if (isReply) {
@@ -353,8 +363,6 @@ export default {
       if (matches !== null) {
         if (matches.length > 0) {
           if (isReply) {
-            console.log('isReply', isReply);
-            console.log('message_id', index.message_id);
             messageIndexForReplies = this.messages.findIndex((el) => parseInt(el.id, 10)
             === parseInt(index.message_id, 10));
             // eslint-disable-next-line
@@ -367,33 +375,55 @@ export default {
           }
           for (let i = 0; i < matches.length; i += 1) {
             fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
-              .then((response) => response.json())
-              .then((result) => {
-                const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
-                this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
-                const current_li = this.closest('li');
-                // seleciona, se existir, o iframe que estiver carregado
-                const current_frame = current_li.querySelector('iframe');
-                if (current_frame) {
-                  const div_data_checkiframe = current_frame.parentElement.getAttribute('data-checkiframe');
-                  if( div_data_checkiframe == '${result.thumbnail_url}') {
-                    console.log('matches');
+              .then(async (response) => {
+                if (response.ok) {
+                  const result = await response.json();
+                  const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
+                  this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
+                  const current_li = this.closest('li');
+                  // seleciona, se existir, o iframe que estiver carregado
+                  const current_frame = current_li.querySelector('iframe');
+                  if (current_frame) {
+                    const div_data_checkiframe = current_frame.parentElement.getAttribute('data-checkiframe');
+                    if( div_data_checkiframe == '${result.thumbnail_url}') {
+                      console.log('matches');
+                      current_frame.remove();
+                      return;
+                    } else {
+                      const atag_to_current_frame = current_li.querySelector(\`a[data-thumb='\${div_data_checkiframe}']\`);
+                      atag_to_current_frame.childNodes[0].textContent = 'mostrar';
+                    }
                     current_frame.remove();
-                    return;
-                  } else {
-                    const atag_to_current_frame = current_li.querySelector(\`a[data-thumb='\${div_data_checkiframe}']\`);
-                    atag_to_current_frame.childNodes[0].textContent = 'mostrar';
                   }
-                  current_frame.remove();
-                }
-                this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
-                ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`;
-                if (isReply) {
-                  // eslint-disable-next-line
-                  this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
+                  this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
+                  ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`;
+                  if (isReply) {
+                    // eslint-disable-next-line
+                    this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
+                  } else {
+                    this.messages[index].message = this.messages[index].message
+                      .replace(matches[i], htmlString);
+                  }
                 } else {
-                  this.messages[index].message = this.messages[index].message
-                    .replace(matches[i], htmlString);
+                  let htmlString;
+                  if (matches[i].startsWith('http://') || matches[i].startsWith('https://')) {
+                    if (response.status === 400) {
+                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
+                    } else if (response.status === 404) {
+                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
+                    } else {
+                      return
+                    }
+                    if (isReply) {
+                      // eslint-disable-next-line
+                      this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
+                    } else {
+                      this.messages[index].message = this.messages[index].message
+                        .replace(matches[i], htmlString);
+                    }
+                  } else {
+                    return
+                  }
                 }
               });
           }
@@ -432,16 +462,6 @@ export default {
     toggleSubject() {
       this.hasSubject = !this.hasSubject;
     },
-    clearName(e) {
-      if (e.target.value === 'anônimo') {
-        e.target.value = '';
-      }
-    },
-    checkForName(e) {
-      if (e.target.value === '') {
-        e.target.value = 'anônimo';
-      }
-    },
     isMyPost() {
       return true;
     },
@@ -451,56 +471,60 @@ export default {
       this.message.message = '';
       this.message.imageURL = '';
       this.message.user_id = 0;
+      this.message.recaptcha_token = '';
       this.isPreviewing = '';
       this.isGifBeingSearched = '';
       document.querySelector('#uploadIMG').value = '';
       this.optUpload = '';
     },
     addMessage() {
-      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
-      submitButton.disabled = true;
-      if (this.auth.username) {
-        this.message.username = this.auth.username;
-        this.message.user_id = parseInt(this.auth.id, 10);
-      }
-      if (/giphy/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'giphy';
-      } else if (/gfycat/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'gfycat';
-      } else if (/tenor/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'tenor';
-      } else if (/imgur/.test(this.message.imageURL)) {
-        this.message.gif_origin = 'imgur';
-      } else {
-        this.message.gif_origin = 'outro';
-      }
-      fetch(apiURL, {
-        method: 'POST',
-        body: JSON.stringify(this.message),
-        headers: {
-          'content-type': 'application/json',
-        },
-      }).then((response) => response.json()).then((result) => {
-        if (result.details) {
-          const error = result.details.map((detail) => detail.message).join('.');
-          this.error = error;
-        } else if (result.error) {
-          if (result.origin === 'psql') {
-            if (result.code === '23505') {
-              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
-            }
+      grecaptcha.ready(() => {
+        grecaptcha.execute('6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471', {action: 'post'}).then((token) => token)
+        .then((token) => {
+          this.message.recaptcha_token = token;
+          const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
+          submitButton.disabled = true;
+          if (this.auth.username) {
+            this.message.username = this.auth.username;
+            this.message.user_id = parseInt(this.auth.id, 10);
           }
-        } else {
-          this.error = '';
-          const parsedResult = JSON.parse(result);
-          // if (parsedResult.imageurl === '') {
-          //   parsedResult.imageurl = 'nope';
-          // }
-          parsedResult.isNew = true;
-          this.messages.unshift(this.sanitizeSingleMessage(parsedResult));
-          this.clearMsgForm();
-        }
-        submitButton.disabled = false;
+          if (/giphy/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'giphy';
+          } else if (/gfycat/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'gfycat';
+          } else if (/tenor/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'tenor';
+          } else if (/imgur/.test(this.message.imageURL)) {
+            this.message.gif_origin = 'imgur';
+          } else {
+            this.message.gif_origin = 'outro';
+          }
+          fetch(apiURL, {
+            method: 'POST',
+            body: JSON.stringify(this.message),
+            headers: {
+              'content-type': 'application/json',
+            },
+          }).then((response) => response.json()).then((result) => {
+            if (result.details) {
+              const error = result.details.map((detail) => detail.message).join('.');
+              this.error = error;
+            } else if (result.error) {
+              if (result.origin === 'psql') {
+                if (result.code === '23505') {
+                  this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                }
+              }
+            } else {
+              this.error = '';
+              const parsedResult = JSON.parse(result);
+              parsedResult.isNew = true;
+              this.messages.unshift(this.sanitizeSingleMessage(parsedResult));
+              this.clearMsgForm();
+            }
+            submitButton.disabled = false;
+          });
+        });
       });
     },
     deleteMessage(e) {
@@ -554,7 +578,6 @@ export default {
             } else {
               this.$set(this.messages[msgIndex], 'replies', this.sanitizedMessages(replies));
             }
-            console.log(this.messages[msgIndex].replies);
             this.messages[msgIndex].replies.forEach((rep) => {
               this.filterMessage(rep);
             });
@@ -818,7 +841,7 @@ export default {
     },
     removeUpload(e) {
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
-      fetch(`http://localhost:5000/imgur/${deleteHash}`, {
+      fetch(`https://gchan-message-board.herokuapp.com/imgur/${deleteHash}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Client-ID 3435e574a9859d1',
