@@ -310,6 +310,7 @@ export default {
             this.replyObserver.observe(li);
             if (index === this.messagesBatchSize - 1) {
               this.offset += 15;
+              console.log(this.offset);
               li.setAttribute('data-offset', this.offset);
               this.lazyLoadObserver.observe(li);
             }
@@ -345,6 +346,7 @@ export default {
       return sanitized;
     },
     async filterMessage(index) {
+        console.log('filterMessage: ', index);
       const isReply = typeof index === 'object' && index !== null;
       let replyIndex;
       let messageIndexForReplies;
@@ -367,11 +369,14 @@ export default {
             === parseInt(index.message_id, 10));
             // eslint-disable-next-line
             replyIndex = this.messages[messageIndexForReplies].replies.findIndex((el) => parseInt(el.id, 10) === parseInt(index.id, 10));
-            console.log('replyIndex', replyIndex);
+            if (this.messages[messageIndexForReplies].replies[replyIndex].filtered === '1') return;
             this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'yt_iframes', []);
+            this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'filtered', '1');
           } else {
+            if (this.messages[index].filtered === '1') return;
             this.$set(this.messages[index], 'yt_thumbnails', []);
             this.$set(this.messages[index], 'yt_iframes', []);
+            this.$set(this.messages[index], 'filtered', '1');
           }
           for (let i = 0; i < matches.length; i += 1) {
             fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
@@ -449,7 +454,7 @@ export default {
                 console.log('chegou no fim! yey');
                 return;
               }
-              this.replyObserver.observe(messages[i + this.offset].children[0]);
+               this.replyObserver.observe(messages[i + this.offset].children[0]);
               if (i === this.messagesBatchSize - 1) {
                 this.lazyLoadObserver.observe(messages[i + this.offset].children[0]);
                 this.offset += 15;
