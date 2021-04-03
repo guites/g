@@ -346,7 +346,6 @@ export default {
       return sanitized;
     },
     async filterMessage(index) {
-        console.log('filterMessage: ', index);
       const isReply = typeof index === 'object' && index !== null;
       let replyIndex;
       let messageIndexForReplies;

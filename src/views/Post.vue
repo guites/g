@@ -176,6 +176,8 @@ export default {
       } else {
         typeCheckedReply = reply;
       }
+      console.log(this.message);
+      if (this.message.replies === undefined) this.message.replies = []; 
       this.message.replies.push(typeCheckedReply);
     },
   },
