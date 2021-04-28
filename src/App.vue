@@ -13,11 +13,14 @@
                     </li> -->
                 </ul>
             </nav>
-            <!-- <form>
-                <label for='search'>Busque:</label>
-                <input type='text' name='search' placeholder='assunto/mensagem' required>
-                <button type='sumit'>pesquisar</button>
-            </form> -->
+            <template>
+                <form>
+                    <label for="search">Pesquisar</label>
+                    <input v-model="q" id="search" name="search" type="search" aria-label="Pesquisar">
+                </form>
+                <SearchBar :q="q">
+                </SearchBar>
+            </template>
         </div>
         <!-- <transition name="fadeForm">
           <div class="janitor-login" v-if="janitor">
@@ -137,13 +140,15 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
   window.location.protocol = 'https:';
 }
 // import Home from '@/views/Home.vue';
-const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
+import SearchBar from './components/searchbar.vue';
+const marqueeURL = 'http://localhost:5000/marquee';
 export default {
   name: 'App',
-  // components: {
-  //   Home,
-  // },
+  components: {
+    SearchBar,
+  },
   data: () => ({
+    q: '',
     janitor: false,
     marquees: [],
     marquee: true,
@@ -156,7 +161,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
+    SERVERurl: 'http://localhost:5000',
     showOptions: '',
     auth: {
       loggedIn: '',
@@ -171,6 +176,9 @@ export default {
     },
   }),
   methods: {
+    searchInputTerm(term) {
+      this.q = term;
+    },
     ajaxGtmRequest() {
       const gtmScript = document.createElement('script');
       gtmScript.type = 'text/javascript';
@@ -356,7 +364,7 @@ export default {
         },
         {
           property: 'og:image',
-          content: 'https://gchan.com.br/gchan_embbed.jpg',
+          content: 'http://localhost:8080/gchan_embbed.jpg',
         },
         {
           name: 'robots',
@@ -368,7 +376,7 @@ export default {
         },
         {
           name: 'twitter:site',
-          content: 'https://gchan.com.br',
+          content: 'http://localhost:8080',
         },
         {
           name: 'twitter:creator',
@@ -384,7 +392,7 @@ export default {
         },
         {
           name: 'twitter:image',
-          content: 'https://gchan.com.br/gchan_twitter.jpg',
+          content: 'http://localhost:8080/gchan_twitter.jpg',
         },
       ],
     };
