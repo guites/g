@@ -1,8 +1,42 @@
 <style>
     .inner-header { flex-wrap: wrap; }
-    #searchbar { width: 100%; }
-    #searchbar ul li img { width: 120px; height: 60px; object-fit: cover; object-position: top; }
+    #searchbar {
+      width: 100%;
+      display:flex;
+      border: 1px solid #444;
+      padding: 25px;
+      border-radius: 4px;
+      border-bottom: none;
+      border-bottom-right-radius: 0;
+      border-bottom-left-radius: 0;
+      background-color: #222;
+    }
     #searchbar ul li div small { display: initial; font-size:small; }
+    #searchbar ul {
+      max-width:460px;
+      width:100%;
+    }
+  #searchbar ul .search-list-title {
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+    display: block;
+    width: 100%;
+    max-width: 200px;
+  }
+    #searchbar ul li {
+      display:block;
+      min-height:60px;
+    }
+    #searchbar ul li div {
+      width:initial;
+      min-height:60px;
+    }
+    #searchbar ul li img {
+      width: 120px; height: 60px;
+      object-fit: cover; object-position: top;
+      float:left;
+    }
     #searchbar ul li:hover {
         border: 2px solid #222;
         cursor: pointer;
@@ -22,22 +56,35 @@
     }
 </style>
 <template>
-  <div id="searchbar">
-  <p v-if="aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ aviso }} posts!</p>
+  <div id="searchbar" v-if="posts.results.length > 0 || replies.results.length > 0">
   <ul>
-    <li
-    v-for="res in results"
-    :key="res.id">
-    <a class="nostyle" :href="'/#/post/' + res.id">
-    <img :src="res.imageurl">
+    <strong class="search-list-title">POSTS</strong>
+    <p v-if="posts.aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ posts.aviso }} posts!</p>
+    <a v-for="post in posts.results" :key="post.id" class="nostyle" :href="'/#/post/' + post.id">
+    <li>
+    <img :src="post.imageurl">
     <div>
-        <strong v-if="res.subject">{{res.subject}}</strong>
-        <strong v-else>gchan post #{{res.id}}</strong>
-        <small> em {{res.created}}</small>
-        <p>{{res.message}}</p>
+        <strong v-if="post.subject">{{post.subject}}</strong>
+        <strong v-else>gchan post #{{post.id}}</strong>
+        <small> em {{post.created}}</small>
+        <p>{{post.message}}</p>
     </div>
+    </li>
     </a>
-    </li>  
+  </ul>
+  <ul>
+    <strong class="search-list-title">RESPOSTAS</strong>
+    <p v-if="replies.aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ replies.aviso }} posts!</p>
+    <a v-for="reply in replies.results" :key="reply.id" class="nostyle" :href="'/#/post/' + reply.message_id">
+    <li>
+    <img :src="reply.imageurl">
+    <div>
+        <strong v-if="reply.username">por {{reply.username}}</strong>
+        <small> em {{reply.created}}</small>
+        <p>{{reply.content}}</p>
+    </div>
+    </li>
+    </a>
   </ul>
   </div>
 </template>
@@ -47,57 +94,75 @@ export default {
     name: 'SearchBar',
     props: ['q'],
     data: () => ({
-      searchURL:'http://localhost:5000/search-posts?q=',
-      messagesURL: 'http://localhost:5000/message/',
       maxResults: 5,
-      results_index: [],
-      results: [],
-      relevant_ids: [],
-      aviso: '',
+      posts: {
+        results_index: [],
+        results: [],
+        aviso: '',
+        search_url: 'http://localhost:5000/search-posts?q=',
+        db_url: 'http://localhost:5000/message/',
+      },
+      replies: {
+        results_index: [],
+        results: [],
+        aviso: '',
+        search_url: 'http://localhost:5000/search-replies?q=',
+        db_url: 'http://localhost:5000/reply/',
+      },
+     //  posts_results_index: [],
+     //  posts_results: [],
+    // posts_aviso: '',
     }),
+    methods: {
+      search(collection, q) {
+        if (q == '') {
+          this[collection]['results_index'] = [];
+          this[collection]['results'] = [];
+          return;
+        }
+        fetch(`${this[collection]['search_url']}${q}`).then((response) => response.json()).then((result) => {
+          if (result.length <= 0) {
+            this[collection]['results_index'] = [];
+            this[collection]['results'] = [];
+           //  this[collection]['results'].pop();
+           //  this[collection]['results_index'].pop();
+            return;
+          }
+          result.forEach(r => {
+            const id = parseInt(r.split(':').pop(), 10);
+            if (isNaN(id)) return;
+            fetch(`${this[collection]['db_url']}${id}`).then((response) => response.json()).then((result) => {
+                if(this[collection]['results'].length >= this.maxResults) { 
+                    this[collection]['results'].pop();
+                    this[collection]['results_index'].pop();
+                }
+                let filtered;
+                if (collection == 'posts') {
+                  filtered = (({ created, id, imageurl, message, subject, username }) => ({created, id, imageurl, message, subject, username}))(result.results[0]);
+                } else if (collection == 'replies') {
+                  filtered = (({ created, id, imageurl, content, message_id, username }) => ({created, id, imageurl, content, message_id, username}))(result.results[0]);
+                }
+                filtered.created = new Date(filtered.created).toLocaleDateString('pt-BR');
+                if (this[collection]['results_index'].includes(filtered.id)) {
+                    const duplicated_pos = this[collection]['results_index'].indexOf(filtered.id);
+                    this[collection]['results_index'].splice(duplicated_pos, 1);
+                    this[collection]['results'].splice(duplicated_pos, 1);
+                }
+                this[collection]['results_index'].unshift(filtered.id);
+                this[collection]['results'].unshift(filtered);
+            });
+          });
+        });
+      },
+    },
     watch: {
         q(val) {
-            if (val == '') {
-                this.results_index = [];
-                this.results = [];
-                return;
-            }
-            fetch(`${this.searchURL}${val}`).then((response) => response.json()).then((result) => {
-                if (result.length <= 0) {
-                    this.results.pop();
-                    this.results_index.pop();
-                    if (this.results_index.length == 0) this.aviso = 'nenhum resultado t_t';
-                    return;
-                }
-                result.forEach(r => {
-                    const id = parseInt(r.split(':').pop(), 10);
-                    if (isNaN(id)) return;
-                    fetch(`${this.messagesURL}${id}`).then((response) => response.json()).then((result) => {
-                        if(this.results.length >= this.maxResults) { 
-                            this.results.pop();
-                            this.results_index.pop();
-                        }
-                        const filtered = (({ created, id, imageurl, message, subject, username }) => ({created, id, imageurl, message, subject, username}))(result.results[0]);
-                        filtered.created = new Date(filtered.created).toLocaleDateString('pt-BR');
-                        if (this.results_index.includes(filtered.id)) {
-                            const duplicated_pos = this.results_index.indexOf(filtered.id);
-                            this.results_index.splice(duplicated_pos, 1);
-                            this.results.splice(duplicated_pos, 1);
-                        }
-                        this.results_index.unshift(filtered.id);
-                        this.results.unshift(filtered);
-                        // this.aviso = `encontrados ${this.results_index.length} posts!`;
-                    });
-                });
-            });
+          this.search('posts', val);
+          this.search('replies', val);
         },
-        results_index(val) {
-            this.aviso = val.length;
-        },
-        searched_ids(val) {
-            const difference = val.filter(x => this.searched_ids_old.indexOf(x) === -1);
-            console.log(difference);
-        }
+       //  posts_results_index(val) {
+       //      this.posts_aviso = val.length;
+       //  },
     },
 };
 </script>

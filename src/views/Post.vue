@@ -1,5 +1,15 @@
+<style>
+  h1 {
+    max-width:980px;
+    width:100%;
+    border-bottom: 1px solid #424242;
+    margin: 20px auto;
+    padding:0 0 20px 0;
+  }
+</style>
 <template>
   <section>
+    <h1>Respondendo ao post #{{message.id}}</h1>
     <Message
     v-bind:message="message"
     v-bind:auth="auth"
@@ -64,26 +74,32 @@ export default {
       'video/mpeg',
     ],
   }),
+  watch: {
+    id(val) {
+        this.getThePost();
+    },
+  },
   mounted() {
-    fetch(`${messageURL}${this.id}`).then((response) => response.json())
-      .then((result) => {
-        if (result.results) {
-          // this.message = result.results.shift();
-          // this.filterMessage(this.message);
-          this.message = this.sanitizeSingleMessage(result.results.shift());
-          fetch(`${repliesURL}/${this.id}`).then((response) => response.json())
-            .then((replies) => {
-              if (replies.error) {
-                return;
-              }
-              this.$set(this.message, 'replies', replies);
-            });
-        } else {
-          window.location.href = 'http://localhost:8080/';
-        }
-      });
+      this.getThePost();
   },
   methods: {
+    getThePost() {
+        fetch(`${messageURL}${this.id}`).then((response) => response.json())
+          .then((result) => {
+            if (result.results) {
+              this.message = this.sanitizeSingleMessage(result.results.shift());
+              fetch(`${repliesURL}/${this.id}`).then((response) => response.json())
+                .then((replies) => {
+                  if (replies.error) {
+                    return;
+                  }
+                  this.$set(this.message, 'replies', replies);
+                });
+            } else {
+              window.location.href = 'http://localhost:8080/';
+            }
+          });
+    },
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
@@ -97,42 +113,6 @@ export default {
         sanitized.content = message.content.replace(/>/g, '&gt;');
       }
       return sanitized;
-    },
-    async filterMessage(message) {
-      const theMessage = message;
-      // eslint-disable-next-line
-      // const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
-      // const string = theMessage.message;
-      // const matches = string.match(rgx);
-      // console.log(matches);
-      // if (matches.length > 0) {
-      //   await this.sleep(100);
-      //   console.log(`#li_${this.message.id} small`);
-      //   const smallTag = document.querySelector(`#li_${this.message.id} small`);
-      //   const pTag = document.querySelector(`#li_${this.message.id} p:not(.mt-0)`);
-      //   const iframeWrapper = document.createElement('div');
-      //   iframeWrapper.className = 'iframe-wrapper';
-      //   const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
-      //   matches.forEach((match) => {
-      //     console.log(match);
-      //     // const filteredString =
-      //     // string.replace(match, `[<a data-link="${match}" href="javascript:;">youtube</a>]`);
-      //     pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">youtube:mostrar<img class="yt-thumb" style="display:none;"></a>]`);
-      //     // theMessage.message = filteredString;
-      //     fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
-      //       .then((response) => response.json())
-      //       .then((result) => {
-      //         const aTag = document.querySelector(`[data-link="${match}"]`);
-      //         aTag.children[0].src = result.thumbnail_url;
-      //         // aTag.setAttribute('data-thumb', result.thumbnail_url);
-      //         aTag.addEventListener('mouseover', this.showThumbImg, false);
-      //         aTag.addEventListener('mouseout', this.hideThumbImg, false);
-      //         aTag.addEventListener('click', this.toggleYoutubeFrame, false);
-      //         insertedNode.innerHTML = result.html;
-      //       });
-      //   });
-      // }
-      return theMessage;
     },
     showThumbImg(e) {
       if (window.innerWidth < 767) return;
