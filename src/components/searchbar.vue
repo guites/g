@@ -37,6 +37,11 @@
       object-fit: cover; object-position: top;
       float:left;
     }
+    #searchbar ul li img.search_placeholder{
+      object-fit: cover;
+      width:32px;
+      height:32px;
+    }
     #searchbar ul li:hover {
         border: 2px solid #222;
         cursor: pointer;
@@ -54,6 +59,11 @@
         color: inherit;
         display: contents;
     }
+    @media only screen and (max-width: 767px) {
+      #searchbar {
+        flex-direction:column;
+      }
+    }
 </style>
 <template>
   <div id="searchbar" v-if="posts.results.length > 0 || replies.results.length > 0">
@@ -62,7 +72,8 @@
     <p v-if="posts.aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ posts.aviso }} posts!</p>
     <a v-for="post in posts.results" :key="post.id" class="nostyle" :href="'/#/post/' + post.id">
     <li>
-    <img :src="post.imageurl">
+    <img v-if="post.imageurl" @error="setPlaceholder($event)" :src="post.imageurl">
+    <img v-else class="search_placeholder" src="@/assets/sham.png">
     <div>
         <strong v-if="post.subject">{{post.subject}}</strong>
         <strong v-else>gchan post #{{post.id}}</strong>
@@ -77,7 +88,8 @@
     <p v-if="replies.aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ replies.aviso }} posts!</p>
     <a v-for="reply in replies.results" :key="reply.id" class="nostyle" :href="'/#/post/' + reply.message_id">
     <li>
-    <img :src="reply.imageurl">
+    <img v-if="reply.imageurl" @error="setPlaceholder($event)" :src="reply.imageurl">
+    <img v-else class="search_placeholder" src="@/assets/sham.png">
     <div>
         <strong v-if="reply.username">por {{reply.username}}</strong>
         <small> em {{reply.created}}</small>
@@ -114,6 +126,10 @@ export default {
     // posts_aviso: '',
     }),
     methods: {
+      setPlaceholder(e) {
+        e.target.src = require('@/assets/sham.png');
+        e.target.classList.add('search_placeholder');
+      },
       search(collection, q) {
         if (q == '') {
           this[collection]['results_index'] = [];
