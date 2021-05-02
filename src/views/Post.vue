@@ -1,5 +1,5 @@
 <style>
-  h1 {
+  .container h1 {
     max-width:980px;
     width:100%;
     border-bottom: 1px solid #424242;

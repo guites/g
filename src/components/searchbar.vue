@@ -63,10 +63,14 @@
       #searchbar {
         flex-direction:column;
       }
+      #searchbar ul:nth-child(1) {
+        margin-bottom:25px;
+      }
     }
 </style>
 <template>
-  <div id="searchbar" v-if="posts.results.length > 0 || replies.results.length > 0">
+  <div id="searchbar" v-if="q != ''">
+  <!-- (posts.results.length > 0 || replies.results.length > 0) && -->
   <ul>
     <strong class="search-list-title">POSTS</strong>
     <p v-if="posts.aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ posts.aviso }} posts!</p>
@@ -82,6 +86,7 @@
     </div>
     </li>
     </a>
+    <p v-if="posts.results.length <= 0">Nenhum post encontrado! :(</p>
   </ul>
   <ul>
     <strong class="search-list-title">RESPOSTAS</strong>
@@ -97,6 +102,7 @@
     </div>
     </li>
     </a>
+    <p v-if="replies.results.length <= 0">Nenhuma resposta encontrada! :(</p>
   </ul>
   </div>
 </template>

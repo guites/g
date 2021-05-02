@@ -16,7 +16,11 @@
             <template>
                 <form>
                     <label for="search">Pesquisar</label>
-                    <input v-model="q" id="search" name="search" type="search" aria-label="Pesquisar">
+                    <input v-model="q"
+                    id="search"
+                    name="search" type="search"
+                    placeholder="Pesquise no site"
+                    aria-label="Pesquisar">
                 </form>
                 <SearchBar :q="q">
                 </SearchBar>
