@@ -145,7 +145,7 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
 }
 // import Home from '@/views/Home.vue';
 import SearchBar from './components/searchbar.vue';
-const marqueeURL = 'http://localhost:5000/marquee';
+const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
 export default {
   name: 'App',
   components: {
@@ -165,7 +165,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    SERVERurl: 'http://localhost:5000',
+    SERVERurl: 'https://gchan-message-board.herokuapp.com',
     showOptions: '',
     auth: {
       loggedIn: '',
@@ -368,7 +368,7 @@ export default {
         },
         {
           property: 'og:image',
-          content: 'http://localhost:8080/gchan_embbed.jpg',
+          content: 'https://gchan.com.br/gchan_embbed.jpg',
         },
         {
           name: 'robots',
@@ -380,7 +380,7 @@ export default {
         },
         {
           name: 'twitter:site',
-          content: 'http://localhost:8080',
+          content: 'https://gchan.com.br',
         },
         {
           name: 'twitter:creator',
@@ -396,7 +396,7 @@ export default {
         },
         {
           name: 'twitter:image',
-          content: 'http://localhost:8080/gchan_twitter.jpg',
+          content: 'https://gchan.com.br/gchan_twitter.jpg',
         },
       ],
     };
