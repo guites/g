@@ -73,7 +73,7 @@
   <!-- (posts.results.length > 0 || replies.results.length > 0) && -->
   <ul>
     <strong class="search-list-title">POSTS</strong>
-    <p v-if="posts.aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ posts.aviso }} posts!</p>
+    <p v-if="posts.aviso" style="text-decoration:underline;">{{posts.aviso}}</p>
     <a v-for="post in posts.results" :key="post.id" class="nostyle" :href="'/#/post/' + post.id">
     <li>
     <img v-if="post.imageurl" @error="setPlaceholder($event)" :src="post.imageurl">
@@ -86,11 +86,11 @@
     </div>
     </li>
     </a>
-    <p v-if="posts.results.length <= 0">Nenhum post encontrado! :(</p>
+    <p v-if="(posts.results.length <= 0) && posts.aviso == ''">Nenhum post encontrado! :(</p>
   </ul>
   <ul>
     <strong class="search-list-title">RESPOSTAS</strong>
-    <p v-if="replies.aviso" style="text-align:center; text-decoration:underline;">Encontrados {{ replies.aviso }} posts!</p>
+    <p v-if="replies.aviso" style="text-decoration:underline;">{{replies.aviso }}</p>
     <a v-for="reply in replies.results" :key="reply.id" class="nostyle" :href="'/#/post/' + reply.message_id">
     <li>
     <img v-if="reply.imageurl" @error="setPlaceholder($event)" :src="reply.imageurl">
@@ -102,7 +102,7 @@
     </div>
     </li>
     </a>
-    <p v-if="replies.results.length <= 0">Nenhuma resposta encontrada! :(</p>
+    <p v-if="replies.results.length <= 0 && replies.aviso == ''">Nenhuma resposta encontrada! :(</p>
   </ul>
   </div>
 </template>
@@ -127,9 +127,6 @@ export default {
         search_url: 'http://localhost:5000/search-replies?q=',
         db_url: 'http://localhost:5000/reply/',
       },
-     //  posts_results_index: [],
-     //  posts_results: [],
-    // posts_aviso: '',
     }),
     methods: {
       setPlaceholder(e) {
@@ -142,8 +139,15 @@ export default {
           this[collection]['results'] = [];
           return;
         }
-        fetch(`${this[collection]['search_url']}${q}`).then((response) => response.json()).then((result) => {
+        fetch(`${this[collection]['search_url']}${q}`).then(
+          (response) => {
+            if (!response.ok) {
+              throw new Error(response.status);
+            }
+            return response.json()
+            }).then((result) => {
           if (result.length <= 0) {
+            this[collection]['aviso'] = '';
             this[collection]['results_index'] = [];
             this[collection]['results'] = [];
            //  this[collection]['results'].pop();
@@ -174,6 +178,11 @@ export default {
                 this[collection]['results'].unshift(filtered);
             });
           });
+        })
+        .catch((err) => {
+          if(err.message == '503') {
+            this[collection]['aviso'] = 'Busca indisponível! Faça um post reclamando.';
+          }
         });
       },
     },
@@ -182,9 +191,6 @@ export default {
           this.search('posts', val);
           this.search('replies', val);
         },
-       //  posts_results_index(val) {
-       //      this.posts_aviso = val.length;
-       //  },
     },
 };
 </script>
