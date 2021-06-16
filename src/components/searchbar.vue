@@ -1,49 +1,55 @@
 <style>
+    .text-warning { color: #f39c12; }
+    .text-success { color: #00bc8c; }
     .inner-header { flex-wrap: wrap; }
     #searchbar {
       width: 100%;
       display:flex;
+      flex-direction: column;
       border: 1px solid #444;
       padding: 25px;
       border-radius: 4px;
-      border-bottom: none;
-      border-bottom-right-radius: 0;
-      border-bottom-left-radius: 0;
       background-color: #222;
+      margin-bottom:5px;
     }
-    #searchbar ul li div small { display: initial; font-size:small; }
-    #searchbar ul {
-      max-width:460px;
-      width:100%;
-    }
-  #searchbar ul .search-list-title {
-    border-bottom: 2px solid #444;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-    display: block;
-    width: 100%;
-    max-width: 200px;
-  }
-    #searchbar ul li {
+
+    #searchbar #searchbar-header { width: 100%; }
+    #searchbar #searchbar-header p { border-bottom: 2px solid #444; padding:5px; margin: 5px 5px 15px; }
+
+    #searchbar #searchbar-lists { display: flex; }
+    #searchbar #searchbar-lists ul {max-width:460px;width:100%;}
+    #searchbar #searchbar-lists ul li {
       display:block;
       min-height:60px;
+      border: 2px solid transparent;
+      background-color: transparent;
+      transition: all 100ms;
     }
-    #searchbar ul li div {
+    #searchbar #searchbar-lists ul li div {
       width:initial;
       min-height:60px;
     }
-    #searchbar ul li img {
+    #searchbar #searchbar-lists ul li div small { display: initial; font-size:small; }
+    #searchbar #searchbar-lists ul .search-list-title {
+      border-bottom: 2px solid #444;
+      padding-bottom: 10px;
+      margin-bottom: 10px;
+      display: block;
+      width: 100%;
+      max-width: 200px;
+    }
+    #searchbar #searchbar-lists ul li img {
       width: 120px; height: 60px;
       object-fit: cover; object-position: top;
       float:left;
     }
-    #searchbar ul li img.search_placeholder{
+    #searchbar #searchbar-lists ul li img.search_placeholder{
       object-fit: cover;
       width:32px;
       height:32px;
     }
-    #searchbar ul li:hover {
-        border: 2px solid #222;
+    #searchbar #searchbar-lists ul li:hover {
+        border-color: #222;
         cursor: pointer;
         border-radius: 4px;
         background-color: #b9b9b9;
@@ -60,19 +66,20 @@
         display: contents;
     }
     @media only screen and (max-width: 767px) {
-      #searchbar {
+      #searchbar #searchbar-lists {
         flex-direction:column;
       }
-      #searchbar ul:nth-child(1) {
+      #searchbar #searchbar-lists ul:nth-child(1) {
         margin-bottom:25px;
       }
     }
 </style>
 <template>
   <div id="searchbar" v-if="q != ''">
+  <div id="searchbar-header"><p><span :class=posts.aviso_class id="searchbar-aviso-posts">{{posts.aviso}}</span> &#10574; <span :class=replies.aviso_class id="searchbar-aviso-replies">{{replies.aviso}}</span></p></div>
+  <div id="searchbar-lists">
   <ul>
     <strong class="search-list-title">POSTS</strong>
-    <p v-if="posts.aviso" style="text-decoration:underline;">{{posts.aviso}}</p>
     <a v-for="post in posts.results" :key="post.id" class="nostyle" :href="'/#/post/' + post.id">
     <li>
     <img v-if="post.imageurl" @error="setPlaceholder($event)" :src="post.imageurl">
@@ -85,11 +92,10 @@
     </div>
     </li>
     </a>
-    <p v-if="(posts.results.length <= 0) && posts.aviso == ''">Nenhum post encontrado! :(</p>
+    <p v-if="(posts.results.length <= 0)">Nenhum post encontrado! :(</p>
   </ul>
   <ul>
     <strong class="search-list-title">RESPOSTAS</strong>
-    <p v-if="replies.aviso" style="text-decoration:underline;">{{replies.aviso }}</p>
     <a v-for="reply in replies.results" :key="reply.id" class="nostyle" :href="'/#/post/' + reply.message_id">
     <li>
     <img v-if="reply.imageurl" @error="setPlaceholder($event)" :src="reply.imageurl">
@@ -101,8 +107,9 @@
     </div>
     </li>
     </a>
-    <p v-if="replies.results.length <= 0 && replies.aviso == ''">Nenhuma resposta encontrada! :(</p>
+    <p v-if="replies.results.length <= 0">Nenhuma resposta encontrada! :(</p>
   </ul>
+  </div>
   </div>
 </template>
 
@@ -116,15 +123,19 @@ export default {
         results_index: [],
         results: [],
         aviso: '',
+        aviso_class: '',
         search_url: 'https://gchan-message-board.herokuapp.com/search-posts?q=',
         db_url: 'https://gchan-message-board.herokuapp.com/message/',
+        name: 'post'
       },
       replies: {
         results_index: [],
         results: [],
         aviso: '',
+        aviso_class: '',
         search_url: 'https://gchan-message-board.herokuapp.com/search-replies?q=',
         db_url: 'https://gchan-message-board.herokuapp.com/reply/',
+        name: 'reply'
       },
     }),
     methods: {
@@ -145,12 +156,16 @@ export default {
             }
             return response.json()
             }).then((result) => {
-          if (result.length <= 0) {
-            this[collection]['aviso'] = '';
-            this[collection]['results_index'] = [];
-            this[collection]['results'] = [];
-            return;
-          }
+              if (result.error && result.code == 'no results') {
+                this[collection]['aviso'] = `nenhum ${this[collection]['name']} encontrado`;
+                this[collection]['aviso_class'] = 'text-warning';
+                this[collection]['results_index'] = [];
+                this[collection]['results'] = [];
+                return;
+              }
+              const plural = result.results.length > 1 ? 's' : '';
+              this[collection]['aviso'] = `${result.results.length} novo${plural} ${this[collection]['name']}${plural} encontrado${plural}`;
+              this[collection]['aviso_class'] = 'text-success';
           result.results.forEach(r => {
             if(this[collection]['results'].length >= this.maxResults) { 
                 this[collection]['results'].pop();
