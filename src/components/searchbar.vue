@@ -149,33 +149,27 @@ export default {
             this[collection]['aviso'] = '';
             this[collection]['results_index'] = [];
             this[collection]['results'] = [];
-           //  this[collection]['results'].pop();
-           //  this[collection]['results_index'].pop();
             return;
           }
-          result.forEach(r => {
-            const id = parseInt(r.split(':').pop(), 10);
-            if (isNaN(id)) return;
-            fetch(`${this[collection]['db_url']}${id}`).then((response) => response.json()).then((result) => {
-                if(this[collection]['results'].length >= this.maxResults) { 
-                    this[collection]['results'].pop();
-                    this[collection]['results_index'].pop();
-                }
-                let filtered;
-                if (collection == 'posts') {
-                  filtered = (({ created, id, imageurl, message, subject, username }) => ({created, id, imageurl, message, subject, username}))(result.results[0]);
-                } else if (collection == 'replies') {
-                  filtered = (({ created, id, imageurl, content, message_id, username }) => ({created, id, imageurl, content, message_id, username}))(result.results[0]);
-                }
-                filtered.created = new Date(filtered.created).toLocaleDateString('pt-BR');
-                if (this[collection]['results_index'].includes(filtered.id)) {
-                    const duplicated_pos = this[collection]['results_index'].indexOf(filtered.id);
-                    this[collection]['results_index'].splice(duplicated_pos, 1);
-                    this[collection]['results'].splice(duplicated_pos, 1);
-                }
-                this[collection]['results_index'].unshift(filtered.id);
-                this[collection]['results'].unshift(filtered);
-            });
+          result.results.forEach(r => {
+            if(this[collection]['results'].length >= this.maxResults) { 
+                this[collection]['results'].pop();
+                this[collection]['results_index'].pop();
+            }
+            let filtered;
+            if (collection == 'posts') {
+              filtered = (({ created, id, imageurl, message, subject, username }) => ({created, id, imageurl, message, subject, username}))(r);
+            } else if (collection == 'replies') {
+              filtered = (({ created, id, imageurl, content, message_id, username }) => ({created, id, imageurl, content, message_id, username}))(r);
+            }
+            filtered.created = new Date(filtered.created).toLocaleDateString('pt-BR');
+            if (this[collection]['results_index'].includes(filtered.id)) {
+                const duplicated_pos = this[collection]['results_index'].indexOf(filtered.id);
+                this[collection]['results_index'].splice(duplicated_pos, 1);
+                this[collection]['results'].splice(duplicated_pos, 1);
+            }
+            this[collection]['results_index'].unshift(filtered.id);
+            this[collection]['results'].unshift(filtered);
           });
         })
         .catch((err) => {
