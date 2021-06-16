@@ -1,13 +1,11 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import VueMeta from 'vue-meta';
 import Home from '../views/Home.vue';
 import Info from '../views/Info.vue';
 import Post from '../views/Post.vue';
 import New from '../views/New.vue';
 
 Vue.use(VueRouter);
-Vue.use(VueMeta);
 
 const routes = [
   {
