@@ -1,3 +1,8 @@
+<style>
+  #search-form { flex-direction:column; justify-content:center;} 
+  #search-form div:nth-child(2) { margin-top: 5px; min-height: 20px;}
+  #search-form div small span { color: #2c81ba; }
+</style>
 <template>
   <div id="app">
    <header>
@@ -14,13 +19,18 @@
                 </ul>
             </nav>
             <template>
-                <form>
-                    <label for="search">Pesquisar</label>
-                    <input v-model="q"
-                    id="search"
-                    name="search" type="search"
-                    placeholder="Pesquise no site"
-                    aria-label="Pesquisar">
+                <form id="search-form" @submit.prevent="searchAction()">
+                    <div>
+                      <label for="search">Pesquisar</label>
+                      <input v-model="searchText"
+                      id="search"
+                      name="search" type="search"
+                      placeholder="Pesquise no site"
+                      aria-label="Pesquisar">
+                    </div>
+                    <div>
+                      <small v-if="searchText">aperte <span>&lt;enter&gt;</span>!</small>
+                    </div>
                 </form>
                 <SearchBar :q="q">
                 </SearchBar>
@@ -152,6 +162,7 @@ export default {
     SearchBar,
   },
   data: () => ({
+    searchText: '',
     q: '',
     janitor: false,
     marquees: [],
@@ -180,8 +191,8 @@ export default {
     },
   }),
   methods: {
-    searchInputTerm(term) {
-      this.q = term;
+    searchAction() {
+      this.q = this.searchText;
     },
     ajaxGtmRequest() {
       const gtmScript = document.createElement('script');

@@ -70,7 +70,6 @@
 </style>
 <template>
   <div id="searchbar" v-if="q != ''">
-  <!-- (posts.results.length > 0 || replies.results.length > 0) && -->
   <ul>
     <strong class="search-list-title">POSTS</strong>
     <p v-if="posts.aviso" style="text-decoration:underline;">{{posts.aviso}}</p>
