@@ -17,9 +17,6 @@
       </button>
     </div>
     <form id="replyForm" @submit.prevent="addReply()">
-      <!-- <input type="hidden" name="message_id"
-      v-model="replyMessage.message_id"
-      :value="messageToReplyTo"> -->
       <div class="form-group">
         <label for="username">Usuário</label>
         <input type="text" class="form-control" id="username"
@@ -108,16 +105,15 @@ export default {
         let replyTextArea = document.querySelector('#replybox textarea#message');
         if (!replyTextArea) {
           const liToQuote = document.querySelector(`[data-quoteid="${val}"]`);
-          // this.$emit('messageToReplyTo', liToQuote.closest('ul').children[0].id);
           const replyToId = liToQuote.closest('ul').children[0].id.replace('li_', '');
           document.querySelector(`[data-replyto="${replyToId}"]`).click();
           setTimeout(() => {
             replyTextArea = document.querySelector('#replybox textarea#message');
-            replyTextArea.value += `>>${val}\n`;
+            replyTextArea.value += `>>${val}: `;
             replyTextArea.focus();
           }, 200);
         } else {
-          replyTextArea.value += `>>${val}\n`;
+          replyTextArea.value += `>>${val}: `;
           replyTextArea.focus();
         }
       }

@@ -549,6 +549,7 @@ export default {
     },
     closeReply() {
       this.messageToReplyTo = '';
+      this.quotesToAdd = '';
     },
     addReplyToThread(reply) {
       let typeCheckedReply;
