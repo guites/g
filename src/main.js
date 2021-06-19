@@ -10,13 +10,13 @@ const store = new Vuex.Store();
 
 new Vue({
   router,
-  store,
+  //store,
   render(h) { return h(App); },
-  created () {
-    if (sessionStorage.redirect) {
-      const redirect = sessionStorage.redirect;
-      delete sessionStorage.redirect;
-      this.$router.push(redirect);
-    }
-  }
+ // created () {
+ //   if (sessionStorage.redirect) {
+ //     const redirect = sessionStorage.redirect;
+ //     delete sessionStorage.redirect;
+ //     this.$router.push(redirect);
+ //   }
+ // }
 }).$mount('#app');
