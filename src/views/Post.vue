@@ -37,8 +37,8 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const messageURL = 'https://gchan-message-board.herokuapp.com/message/';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+const messageURL = 'http://localhost:4450/message/';
+const repliesURL = 'http://localhost:4450/replies';
 export default {
   name: 'Post',
   components: {
@@ -96,7 +96,7 @@ export default {
                   this.$set(this.message, 'replies', replies);
                 });
             } else {
-              window.location.href = 'https://gchan.com.br/';
+              window.location.href = 'http://localhost:8080/';
             }
           });
     },
@@ -160,65 +160,6 @@ export default {
       if (this.message.replies === undefined) this.message.replies = []; 
       this.message.replies.push(typeCheckedReply);
     },
-  },
-  metaInfo() {
-    return {
-      title: this.message.subject || `gchan post ${this.message.id}`,
-      meta: [
-        {
-          name: 'description',
-          content: this.message.message,
-        },
-        {
-          property: 'og:title',
-          content: this.message.subject || `gchan post ${this.message.id}`,
-        },
-        {
-          property: 'og:site_name',
-          content: 'gchan',
-        },
-        {
-          property: 'og:description',
-          content: this.message.message,
-        },
-        {
-          property: 'og:type',
-          content: 'post',
-        },
-        {
-          property: 'og:url',
-          content: `https://gchan.com.br/#/post/${this.message.id}`,
-        },
-        {
-          property: 'og:image',
-          content: this.message.imageurl,
-        },
-        {
-          name: 'twitter:card',
-          content: 'summary',
-        },
-        {
-          name: 'twitter:site',
-          content: 'https://gchan.com.br',
-        },
-        {
-          name: 'twitter:creator',
-          content: '@gchan_board',
-        },
-        {
-          name: 'twitter:description',
-          content: this.message.message,
-        },
-        {
-          name: 'twitter:title',
-          content: this.message.subject || `gchan post ${this.message.id}`,
-        },
-        {
-          name: 'twitter:image',
-          content: this.message.imageurl,
-        },
-      ],
-    };
   },
 };
 </script>
