@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://gchan.com.br/sitemap.xml
