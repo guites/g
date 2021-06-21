@@ -39,6 +39,18 @@ import Message from '../components/message.vue';
 
 const messageURL = 'https://gchan-message-board.herokuapp.com/message/';
 const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+
+// injeção de valores via pre-rendering
+
+if (window.__PRERENDER_INJECTED !== undefined) {
+  var post_id = window.location.pathname.split('/').pop();
+  document.body.innerHTML += `<p style='display: none;' id='injected_id'>${post_id}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_por'>${(window['__PRERENDER_INJECTED'][post_id]['por'])}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_title'>${(window['__PRERENDER_INJECTED'][post_id]['title'])}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_content'>${(window['__PRERENDER_INJECTED'][post_id]['content'])}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_thumbnail'>${(window['__PRERENDER_INJECTED'][post_id]['thumbnail'])}</p>`;
+}
+
 export default {
   name: 'Post',
   components: {
@@ -80,9 +92,22 @@ export default {
     },
   },
   mounted() {
-      this.getThePost();
+    this.getThePost();
+    this.setInjectedData();
   },
   methods: {
+    setInjectedData() {
+      const id = document.getElementById('injected_id').innerText;
+      const por = document.getElementById('injected_por').innerText;
+      const title = document.getElementById('injected_title').innerText;
+      const content = document.getElementById('injected_content').innerText;
+      const thumbnail = document.getElementById('injected_thumbnail').innerText;
+
+      document.querySelector('.message-id').innerText = id;
+      document.querySelector('.message-subject').innerText = `${title}`;
+      document.querySelector('.message-content').innerText = `${content}`;
+      document.querySelector('.img-thumbnail').src = thumbnail;
+    },
     getThePost() {
         fetch(`${messageURL}${this.id}`).then((response) => response.json())
           .then((result) => {
@@ -96,7 +121,7 @@ export default {
                   this.$set(this.message, 'replies', replies);
                 });
             } else {
-              window.location.href = 'https://gchan.com.br/';
+              window.location.href = 'https://gchan.com.br/not-found';
             }
           });
     },
@@ -160,65 +185,6 @@ export default {
       if (this.message.replies === undefined) this.message.replies = []; 
       this.message.replies.push(typeCheckedReply);
     },
-  },
-  metaInfo() {
-    return {
-      title: this.message.subject || `gchan post ${this.message.id}`,
-      meta: [
-        {
-          name: 'description',
-          content: this.message.message,
-        },
-        {
-          property: 'og:title',
-          content: this.message.subject || `gchan post ${this.message.id}`,
-        },
-        {
-          property: 'og:site_name',
-          content: 'gchan',
-        },
-        {
-          property: 'og:description',
-          content: this.message.message,
-        },
-        {
-          property: 'og:type',
-          content: 'post',
-        },
-        {
-          property: 'og:url',
-          content: `https://gchan.com.br/#/post/${this.message.id}`,
-        },
-        {
-          property: 'og:image',
-          content: this.message.imageurl,
-        },
-        {
-          name: 'twitter:card',
-          content: 'summary',
-        },
-        {
-          name: 'twitter:site',
-          content: 'https://gchan.com.br',
-        },
-        {
-          name: 'twitter:creator',
-          content: '@gchan_board',
-        },
-        {
-          name: 'twitter:description',
-          content: this.message.message,
-        },
-        {
-          name: 'twitter:title',
-          content: this.message.subject || `gchan post ${this.message.id}`,
-        },
-        {
-          name: 'twitter:image',
-          content: this.message.imageurl,
-        },
-      ],
-    };
   },
 };
 </script>

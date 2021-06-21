@@ -247,15 +247,6 @@ export default {
     },
   },
   computed: {
-    // async reversedMessages() {
-    //   // return this.messages.slice().reverse();
-    //   const filteredMessages = [];
-    //   for (let i = 0; i < this.messages.length; i += 1) {
-    //     filteredMessages.push(await this.filterMessage(this.messages[i]));
-    //   }
-    //   console.log(filteredMessages);
-    //   return filteredMessages;
-    // },
     uniqueGifs() {
       const result = [];
       const map = new Map();
@@ -349,10 +340,9 @@ export default {
       const isReply = typeof index === 'object' && index !== null;
       let replyIndex;
       let messageIndexForReplies;
-      // eslint-disable-next-line
-      // const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
+      // const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/g;
       // const rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/g;
-      const rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
+      const yt_rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
       // se for um objeto, estou passando uma reply como argumento da função
       let string;
       if (isReply) {
@@ -360,13 +350,12 @@ export default {
       } else {
         string = this.messages[index].message;
       }
-      const matches = string.match(rgx);
+      const matches = string.match(yt_rgx);
       if (matches !== null) {
         if (matches.length > 0) {
           if (isReply) {
             messageIndexForReplies = this.messages.findIndex((el) => parseInt(el.id, 10)
             === parseInt(index.message_id, 10));
-            // eslint-disable-next-line
             replyIndex = this.messages[messageIndexForReplies].replies.findIndex((el) => parseInt(el.id, 10) === parseInt(index.id, 10));
             if (this.messages[messageIndexForReplies].replies[replyIndex].filtered === '1') return;
             this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'yt_iframes', []);
@@ -402,7 +391,6 @@ export default {
                   this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
                   ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`;
                   if (isReply) {
-                    // eslint-disable-next-line
                     this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
                   } else {
                     this.messages[index].message = this.messages[index].message
@@ -419,7 +407,6 @@ export default {
                       return
                     }
                     if (isReply) {
-                      // eslint-disable-next-line
                       this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
                     } else {
                       this.messages[index].message = this.messages[index].message
@@ -433,6 +420,8 @@ export default {
           }
         }
       }
+      const insta_rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
+
     },
     adjustYtIframe() {
 
@@ -568,7 +557,6 @@ export default {
         if (!entry.isIntersecting) return;
         this.replyObserver.unobserve(entry.target);
         const postId = entry.target.id.replace('li_', '');
-        // this.filterMessage(entry);
         const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(postId, 10));
         this.filterMessage(msgIndex);
@@ -586,12 +574,6 @@ export default {
             this.messages[msgIndex].replies.forEach((rep) => {
               this.filterMessage(rep);
             });
-            // const filteredReplies = [];
-            // replies.forEach((rep) => {
-            //   console.log(rep);
-            // filteredReplies.push(this.filterMessage(this.sanitizeSingleMessage(rep)));
-            // console.log(rep.constructor === Array);
-            // });
           });
       });
     },

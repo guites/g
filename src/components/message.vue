@@ -38,7 +38,7 @@
           </div>
         </div>
         <div class="edit_tab" :data-message-id="message.id">
-          <p class='mt-0 mb-1 name'>por: {{message.username}}</p>
+          <p class='message-username mt-0 mb-1 name'>por: {{message.username}}</p>
           <button type="button"
           v-if="message.user_id === auth.id"
           v-on:click="deleteMessage($event)"
@@ -68,11 +68,11 @@
         <small>Este post possui {{replyCount}} respostas!</small>
         </div>
         <p class="mt-0 mb-1 subject">
-          <span class="id">#{{message.id}} / </span>
-          <span v-if="message.subject">{{message.subject}}</span>
-          <span class="id" v-else>gchan post</span>
+          <span class="id message-id">#{{message.id}} / </span>
+          <span class="message-subject" v-if="message.subject">{{message.subject}}</span>
+          <span class="id message-subject" v-else>gchan post</span>
         </p>
-        <p v-html="message.message"></p>
+        <p class="message-content" v-html="message.message"></p>
         <br />
         <div v-if="message.yt_iframes"
         class="iframe-wrapper"
@@ -199,11 +199,6 @@ export default {
       controls.className = 'volume';
       controls.type = 'button';
       video.classList.add('img-thumbnail');
-      // video.innerHTML += `<source src="${image.src}" type="video/mp4;
-      // codecs=&quot;av01.0.00M.08, opus&quot;">`;
-      // video.innerHTML += `<source src="${image.src}" type="video/mp4;">`;
-      // video.innerHTML += `<source src="${image.src}"
-      // type="video/webm; codecs=&quot;vp9, opus&quot;">`;
       video.autoplay = true;
       video.loop = true;
       video.muted = true;
@@ -277,7 +272,7 @@ export default {
     async filterMessage(message) {
       const theMessage = message;
       // eslint-disable-next-line
-      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?/g;
+      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/g;
       const string = theMessage.message;
       const matches = string.match(rgx);
       console.log(matches);
@@ -291,16 +286,12 @@ export default {
         const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
         matches.forEach((match) => {
           console.log(match);
-          // const filteredString =
-          // string.replace(match, `[<a data-link="${match}" href="javascript:;">youtube</a>]`);
           pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
-          // theMessage.message = filteredString;
           fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
             .then((response) => response.json())
             .then((result) => {
               const aTag = document.querySelector(`[data-link="${match}"]`);
               aTag.children[0].src = result.thumbnail_url;
-              // aTag.setAttribute('data-thumb', result.thumbnail_url);
               aTag.addEventListener('mouseover', this.showThumbImg, false);
               aTag.addEventListener('mouseout', this.hideThumbImg, false);
               aTag.addEventListener('click', this.toggleYoutubeFrame, false);
@@ -324,16 +315,6 @@ export default {
       }
       return this.replies;
     },
-  },
-  mounted() {
-    // console.log(this.$refs);
-    // this.$nextTick(() => {
-    //   console.log(this.$refs);
-    // });
-    // console.log(this.$refs.yt_frames);
-    // this.$refs.yt_iframes.querySelectorAll('iframe').forEach((ytFrame) => {
-    //   console.log(ytFrame);
-    // });
   },
 };
 </script>

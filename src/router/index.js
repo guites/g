@@ -4,6 +4,7 @@ import Home from '../views/Home.vue';
 import Info from '../views/Info.vue';
 import Post from '../views/Post.vue';
 import New from '../views/New.vue';
+import About from '../views/About.vue';
 
 Vue.use(VueRouter);
 
@@ -16,12 +17,7 @@ const routes = [
   {
     path: '/about',
     name: 'About',
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component() {
-      return import(/* webpackChunkName: "about" */ '../views/About.vue');
-    },
+    component: About,
   },
   {
     path: '/info',
@@ -45,18 +41,18 @@ const routes = [
 ];
 
 const router = new VueRouter({
-  // mode: 'history',
+  mode: 'history',
   routes,
 });
 
-// router.beforeEach((to, from, next) => {
-//   // Redirect if fullPath begins with a hash (ignore hashes later in path)
-//   if (to.fullPath.substr(0, 2) === '/#') {
-//     const path = to.fullPath.substr(2);
-//     next(path);
-//     return;
-//   }
-//   next();
-// });
+router.beforeEach((to, from, next) => {
+  // Redirect if fullPath begins with a hash (ignore hashes later in path)
+  if (to.fullPath.substr(0, 2) === '/#') {
+    const path = to.fullPath.substr(2);
+    next(path);
+    return;
+  }
+  next();
+});
 
 export default router;
