@@ -70,78 +70,77 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new PrerenderSPAPlugin({
       staticDir: path.join(__dirname, 'dist'),
-      routes: [ '/', '/about', '/info', '/new', '/post/1036', '/post/1039', '/post/1040', '/post/1042', '/post/1041', '/post/1038', '/post/1035', '/post/1023', '/post/1033', '/post/1037', '/post/1034'],
+      routes: [ '/', '/about', '/info', '/new', '/post/1029', '/post/1031', '/post/1032', '/post/1030', '/post/1027', '/post/1028', '/post/789', '/post/458', '/post/823', '/post/945', '/post/989'],
       renderer: new Renderer({
         // The name of the property
         injectProperty: '__PRERENDER_INJECTED',
         // The values to have access to via `window.injectProperty` (the above property )
-        inject:
-        {
-          "1040": {
-            "content": "fica a dica",
-            "thumbnail": "https://i.imgur.com/w9A7lxm.jpg",
-            "title": "gchan post # 1040",
-            "por": "jairo"
+        inject: {
+          "989": {
+            "content": "As vezes o jovem é muito focado! ",
+            "title": "gchan post # 989",
+            "por": "anônimo",
+            "thumbnail": "https://i.imgur.com/UshI03m.jpg"
           },
-          "1037": {
-            "content": "Garibaldo tá de pilantragem! ",
-            "thumbnail": "https://i.imgur.com/KWzshGs.jpg",
-            "title": "gchan post # 1037",
-            "por": "anônimo"
+          "1029": {
+            "content": "'Não é um bug, é uma 'não-implementação''\n(GARCIA, Guilherme)",
+            "title": "gchan post # 1029",
+            "por": "MLucas",
+            "thumbnail": "https://preview.redd.it/ky9opkwv4u111.png?width=960&crop=smart&auto=webp&s=d253578480729e658979576dda10eea365edad78"
           },
-          "1041": {
-            "content": "cliente: não consigo fechar compra no cartão de crédito\n\n\nprogramador:",
-            "thumbnail": "https://s2.glbimg.com/0wY3Lla2cgM5I_v9VQtPWPct45o=/smart/e.glbimg.com/og/ed/f/original/2021/05/04/image_ReC1Zdd.png",
-            "title": "gchan post # 1041",
-            "por": "anônimo"
+          "1027": {
+            "content": "tamo assombrado piazada",
+            "title": "gchan post # 1027",
+            "por": "anônimo",
+            "thumbnail": "https://i.imgur.com/XmxxZK8.jpg"
           },
-          "1038": {
-            "content": "depurando em produção sem read nos logs be like",
-            "thumbnail": "https://i.imgur.com/AmeGSIh.jpg",
-            "title": "gchan post # 1038",
-            "por": "anônimo"
+          "945": {
+            "content": "O gato Goose foi invocado....\nContemplem:\nGumercindo 'Goose' Lucas\n",
+            "title": "gchan post # 945",
+            "por": "MLucas",
+            "thumbnail": "https://i.imgur.com/luoANOU.jpg"
           },
-          "1033": {
-            "content": "the gado awaits",
-            "thumbnail": "https://i.imgur.com/32OJW36.png",
-            "title": "sry jatnara",
-            "por": "anônimo"
+          "1031": {
+            "content": "E NÃO PODERIA ESTAR ACONTECENDO\nBAH",
+            "title": "gchan post # 1031",
+            "por": "anônimo",
+            "thumbnail": "https://media2.giphy.com/media/EtB1yylKGGAUg/giphy.webp?cid=12057471udl59dhn1vu1tlp3dcwpry97qku67976axpf8ixe&rid=giphy.webp&ct=ghttps://media2.giphy.com/media/EtB1yylKGGAUg/giphy-preview.webp?cid=12057471udl59dhn1vu1tlp3dcwpry97qku67976axpf8ixe&rid=giphy-preview.webp&ct=g"
           },
-          "1042": {
-            "content": "nluke",
-            "thumbnail": "https://i.imgur.com/pWVYpea.jpg",
-            "title": "gchan post # 1042",
-            "por": "anônimo"
+          "1028": {
+            "content": "2019, colorido",
+            "title": "usuário MLucas realiza um rollback",
+            "por": "anônimo",
+            "thumbnail": "https://i.imgur.com/WRDe3oV.mp4"
           },
-          "1036": {
-            "content": "Depois da thread do Monkiflip, uma thread para mamacos em geral...",
-            "thumbnail": "https://i.imgur.com/V3fyJpq.mp4",
-            "title": "gchan post # 1036",
-            "por": "MLucas"
+          "1030": {
+            "content": "bolsominion refutado",
+            "title": "gchan post # 1030",
+            "por": "jairo petista",
+            "thumbnail": "https://i.imgur.com/Oiv218N.png"
           },
-          "1039": {
-            "content": "o estadista cruel",
-            "thumbnail": "https://img-9gag-fun.9cache.com/photo/aXoK1mP_460svvp9.mp4",
-            "title": "gchan post # 1039",
-            "por": "jairo"
+          "1032": {
+            "content": "sneaky blog da carvalho",
+            "title": "tentando entender pq o site ta lento",
+            "por": "anônimo",
+            "thumbnail": "https://i.imgur.com/Y2khgwW.gif"
           },
-          "1023": {
-            "content": "Pra ela é óbvio\nPorque ela é burra",
-            "thumbnail": "https://i.imgur.com/vkeL9fD.png",
-            "title": "gchan post # 1023",
-            "por": "MLucas"
+          "458": {
+            "content": "Treinando monki flip",
+            "title": "gchan post # 458",
+            "por": "MLucas",
+            "thumbnail": "https://video.twimg.com/ext_tw_video/1304520174528331778/pu/vid/640x640/evhne68Q6PO3syCO.mp4"
           },
-          "1034": {
-            "content": "eu: vo jogar um lolzin pegar um elo\n\na sociedade:",
-            "thumbnail": "https://i.imgur.com/76l9meb.mp4",
-            "title": "gchan post # 1034",
-            "por": "anônimo"
+          "823": {
+            "content": "fucking hACKED",
+            "title": "gchan post # 823",
+            "por": "anônimo",
+            "thumbnail": "https://i.imgur.com/6wtoeV5.jpg"
           },
-          "1035": {
-            "content": ".",
-            "thumbnail": "https://i.imgur.com/OROuUzF.jpg",
-            "title": "gchan post # 1035",
-            "por": "FPassa"
+          "789": {
+            "content": "TETA",
+            "title": "gchan post # 789",
+            "por": "anônimo",
+            "thumbnail": "https://i.imgur.com/MX10ry8.jpg"
           }
         },
       })

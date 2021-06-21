@@ -14943,6 +14943,7 @@ const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
 
 if (window.__PRERENDER_INJECTED !== undefined) {
   var post_id = window.location.pathname.split('/').pop();
+  document.body.innerHTML += `<p style='display: none;' id='injected_id'>${post_id}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_por'>${window['__PRERENDER_INJECTED'][post_id]['por']}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_title'>${window['__PRERENDER_INJECTED'][post_id]['title']}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_content'>${window['__PRERENDER_INJECTED'][post_id]['content']}</p>`;
@@ -14986,12 +14987,13 @@ if (window.__PRERENDER_INJECTED !== undefined) {
   },
   methods: {
     setInjectedData() {
+      const id = document.getElementById('injected_id').innerText;
       const por = document.getElementById('injected_por').innerText;
       const title = document.getElementById('injected_title').innerText;
       const content = document.getElementById('injected_content').innerText;
       const thumbnail = document.getElementById('injected_thumbnail').innerText;
 
-      document.querySelector('.message-id').innerText = `#775`;
+      document.querySelector('.message-id').innerText = id;
       document.querySelector('.message-subject').innerText = `${title}`;
       document.querySelector('.message-content').innerText = `${content}`;
       document.querySelector('.img-thumbnail').src = thumbnail;
@@ -19471,7 +19473,7 @@ module.exports = __webpack_require__.p + "gchan_hero.jpg?fbf14c4eac68c2d71e9aaeb
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_89bde380___ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_56337bc9___ = __webpack_require__(59);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Post_vue_vue_type_script_lang_js___ = __webpack_require__(20);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Post_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(61);
@@ -19486,8 +19488,8 @@ module.exports = __webpack_require__.p + "gchan_hero.jpg?fbf14c4eac68c2d71e9aaeb
 
 var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_1__Post_vue_vue_type_script_lang_js___["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_89bde380___["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_89bde380___["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_56337bc9___["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_56337bc9___["b" /* staticRenderFns */],
   false,
   null,
   null,
@@ -19502,9 +19504,9 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_89bde380___ = __webpack_require__(60);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_89bde380___["a"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_89bde380___["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_56337bc9___ = __webpack_require__(60);
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_56337bc9___["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_56337bc9___["b"]; });
 
 
 /***/ }),

@@ -44,6 +44,7 @@ const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
 
 if (window.__PRERENDER_INJECTED !== undefined) {
   var post_id = window.location.pathname.split('/').pop();
+  document.body.innerHTML += `<p style='display: none;' id='injected_id'>${post_id}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_por'>${(window['__PRERENDER_INJECTED'][post_id]['por'])}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_title'>${(window['__PRERENDER_INJECTED'][post_id]['title'])}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_content'>${(window['__PRERENDER_INJECTED'][post_id]['content'])}</p>`;
@@ -96,12 +97,13 @@ export default {
   },
   methods: {
     setInjectedData() {
+      const id = document.getElementById('injected_id').innerText;
       const por = document.getElementById('injected_por').innerText;
       const title = document.getElementById('injected_title').innerText;
       const content = document.getElementById('injected_content').innerText;
       const thumbnail = document.getElementById('injected_thumbnail').innerText;
 
-      document.querySelector('.message-id').innerText = `#775`;
+      document.querySelector('.message-id').innerText = id;
       document.querySelector('.message-subject').innerText = `${title}`;
       document.querySelector('.message-content').innerText = `${content}`;
       document.querySelector('.img-thumbnail').src = thumbnail;
