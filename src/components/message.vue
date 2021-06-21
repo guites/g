@@ -38,7 +38,7 @@
           </div>
         </div>
         <div class="edit_tab" :data-message-id="message.id">
-          <p class='mt-0 mb-1 name'>por: {{message.username}}</p>
+          <p class='message-username mt-0 mb-1 name'>por: {{message.username}}</p>
           <button type="button"
           v-if="message.user_id === auth.id"
           v-on:click="deleteMessage($event)"
@@ -68,11 +68,11 @@
         <small>Este post possui {{replyCount}} respostas!</small>
         </div>
         <p class="mt-0 mb-1 subject">
-          <span class="id">#{{message.id}} / </span>
-          <span v-if="message.subject">{{message.subject}}</span>
-          <span class="id" v-else>gchan post</span>
+          <span class="id message-id">#{{message.id}} / </span>
+          <span class="message-subject" v-if="message.subject">{{message.subject}}</span>
+          <span class="id message-subject" v-else>gchan post</span>
         </p>
-        <p v-html="message.message"></p>
+        <p class="message-content" v-html="message.message"></p>
         <br />
         <div v-if="message.yt_iframes"
         class="iframe-wrapper"

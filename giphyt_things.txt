@@ -1,3 +1,0 @@
-thumbnail : 
-curl -X GET 'https://api.giphy.com/v1/gifs/search?api_key=5KnNW5U9nJ2Xjnas3lugKxMIXVdCsrqF&q=cats&limit=5&offset=0' | jq '.data.images.fixed_height_downsampled.webp' | sed 's/media4/i/' | sed 's/\.webp.*/\.webp/'
-nao precisa ajusta a url, ele pega só a imagem quando linka de fora : ))

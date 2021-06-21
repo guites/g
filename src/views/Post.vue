@@ -39,6 +39,17 @@ import Message from '../components/message.vue';
 
 const messageURL = 'https://gchan-message-board.herokuapp.com/message/';
 const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
+
+// injeção de valores via pre-rendering
+
+if (window.__PRERENDER_INJECTED !== undefined) {
+  var post_id = window.location.pathname.split('/').pop();
+  document.body.innerHTML += `<p style='display: none;' id='injected_por'>${(window['__PRERENDER_INJECTED'][post_id]['por'])}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_title'>${(window['__PRERENDER_INJECTED'][post_id]['title'])}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_content'>${(window['__PRERENDER_INJECTED'][post_id]['content'])}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_thumbnail'>${(window['__PRERENDER_INJECTED'][post_id]['thumbnail'])}</p>`;
+}
+
 export default {
   name: 'Post',
   components: {
@@ -80,9 +91,21 @@ export default {
     },
   },
   mounted() {
-      this.getThePost();
+    this.getThePost();
+    this.setInjectedData();
   },
   methods: {
+    setInjectedData() {
+      const por = document.getElementById('injected_por').innerText;
+      const title = document.getElementById('injected_title').innerText;
+      const content = document.getElementById('injected_content').innerText;
+      const thumbnail = document.getElementById('injected_thumbnail').innerText;
+
+      document.querySelector('.message-id').innerText = `#775`;
+      document.querySelector('.message-subject').innerText = `${title}`;
+      document.querySelector('.message-content').innerText = `${content}`;
+      document.querySelector('.img-thumbnail').src = thumbnail;
+    },
     getThePost() {
         fetch(`${messageURL}${this.id}`).then((response) => response.json())
           .then((result) => {

@@ -154,6 +154,7 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
   window.location.protocol = 'https:';
 }
 // import Home from '@/views/Home.vue';
+import '@/assets/css/styles.css';
 import SearchBar from './components/searchbar.vue';
 const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
 export default {
@@ -191,6 +192,11 @@ export default {
     },
   }),
   methods: {
+    captchaV3() {
+      const captchaScript = document.createElement('script');
+      captchaScript.src = 'https://www.google.com/recaptcha/api.js?render=6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471';
+        document.head.appendChild(captchaScript);
+    },
     searchAction() {
       this.q = this.searchText;
     },
@@ -343,6 +349,7 @@ export default {
     this.checkLogin();
   },
   mounted() {
+    this.captchaV3();
     this.checkCookies();
     fetch(marqueeURL).then((response) => response.json()).then((result) => {
       this.marquees = result.results;
