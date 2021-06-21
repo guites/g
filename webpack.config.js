@@ -70,79 +70,80 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new PrerenderSPAPlugin({
       staticDir: path.join(__dirname, 'dist'),
-      routes: [ '/', '/about', '/info', '/new', '/post/1029', '/post/1031', '/post/1032', '/post/1030', '/post/1027', '/post/1028', '/post/789', '/post/458', '/post/823', '/post/945', '/post/989'],
+      routes: [ '/', '/about', '/info', '/new', '/post/1026', '/post/1025', '/post/1024', '/post/1017', '/post/1020', '/post/1022', '/post/1021', '/post/1019', '/post/1018', '/post/1016', '/post/1004'],
       renderer: new Renderer({
         // The name of the property
         injectProperty: '__PRERENDER_INJECTED',
         // The values to have access to via `window.injectProperty` (the above property )
-        inject: {
-          "989": {
-            "content": "As vezes o jovem é muito focado! ",
-            "title": "gchan post # 989",
-            "por": "anônimo",
-            "thumbnail": "https://i.imgur.com/UshI03m.jpg"
-          },
-          "1029": {
-            "content": "'Não é um bug, é uma 'não-implementação''\n(GARCIA, Guilherme)",
-            "title": "gchan post # 1029",
-            "por": "MLucas",
-            "thumbnail": "https://preview.redd.it/ky9opkwv4u111.png?width=960&crop=smart&auto=webp&s=d253578480729e658979576dda10eea365edad78"
-          },
-          "1027": {
-            "content": "tamo assombrado piazada",
-            "title": "gchan post # 1027",
-            "por": "anônimo",
-            "thumbnail": "https://i.imgur.com/XmxxZK8.jpg"
-          },
-          "945": {
-            "content": "O gato Goose foi invocado....\nContemplem:\nGumercindo 'Goose' Lucas\n",
-            "title": "gchan post # 945",
-            "por": "MLucas",
-            "thumbnail": "https://i.imgur.com/luoANOU.jpg"
-          },
-          "1031": {
-            "content": "E NÃO PODERIA ESTAR ACONTECENDO\nBAH",
-            "title": "gchan post # 1031",
-            "por": "anônimo",
-            "thumbnail": "https://media2.giphy.com/media/EtB1yylKGGAUg/giphy.webp?cid=12057471udl59dhn1vu1tlp3dcwpry97qku67976axpf8ixe&rid=giphy.webp&ct=ghttps://media2.giphy.com/media/EtB1yylKGGAUg/giphy-preview.webp?cid=12057471udl59dhn1vu1tlp3dcwpry97qku67976axpf8ixe&rid=giphy-preview.webp&ct=g"
-          },
-          "1028": {
-            "content": "2019, colorido",
-            "title": "usuário MLucas realiza um rollback",
-            "por": "anônimo",
-            "thumbnail": "https://i.imgur.com/WRDe3oV.mp4"
-          },
-          "1030": {
-            "content": "bolsominion refutado",
-            "title": "gchan post # 1030",
-            "por": "jairo petista",
-            "thumbnail": "https://i.imgur.com/Oiv218N.png"
-          },
-          "1032": {
-            "content": "sneaky blog da carvalho",
-            "title": "tentando entender pq o site ta lento",
-            "por": "anônimo",
-            "thumbnail": "https://i.imgur.com/Y2khgwW.gif"
-          },
-          "458": {
-            "content": "Treinando monki flip",
-            "title": "gchan post # 458",
-            "por": "MLucas",
-            "thumbnail": "https://video.twimg.com/ext_tw_video/1304520174528331778/pu/vid/640x640/evhne68Q6PO3syCO.mp4"
-          },
-          "823": {
-            "content": "fucking hACKED",
-            "title": "gchan post # 823",
-            "por": "anônimo",
-            "thumbnail": "https://i.imgur.com/6wtoeV5.jpg"
-          },
-          "789": {
-            "content": "TETA",
-            "title": "gchan post # 789",
-            "por": "anônimo",
-            "thumbnail": "https://i.imgur.com/MX10ry8.jpg"
-          }
+        inject:
+        {
+        "1004": {
+          "content": "Tomate",
+          "title": "Tomate idoso",
+          "por": "anônimo",
+          "thumbnail": "https://i.imgur.com/SsgZU1t.jpg"
         },
+        "1016": {
+          "content": "Uma rapidinha querido! ",
+          "title": "gchan post # 1016",
+          "por": "Vacilaidson",
+          "thumbnail": "https://img-9gag-fun.9cache.com/photo/a9EOzmL_460svav1.mp4"
+        },
+        "1021": {
+          "content": "Um desses e uma faca, apenas o necessário para salvar o governo americano!",
+          "title": "gchan post # 1021",
+          "por": "Solid Snake",
+          "thumbnail": "https://img-9gag-fun.9cache.com/photo/aqjYyEP_460svav1.mp4"
+        },
+        "1022": {
+          "content": "Alguns jovens são precipitados, gostam de fracassar antes de sairem das fraldas",
+          "title": "gchan post # 1022",
+          "por": "Friendzone",
+          "thumbnail": "https://img-9gag-fun.9cache.com/photo/anQrz0V_460svav1.mp4"
+        },
+        "1026": {
+          "content": "Se Arrastando",
+          "title": "gchan post # 1026",
+          "por": "anônimo",
+          "thumbnail": "https://i.kym-cdn.com/entries/icons/facebook/000/028/015/cover3.jpg"
+        },
+        "1025": {
+          "content": "quando o spammer indiano teve o ensino médio forte",
+          "title": "gchan post # 1025",
+          "por": "anônimo",
+          "thumbnail": "https://i.imgur.com/izSNKAN.jpg"
+        },
+        "1018": {
+          "content": "Mais um jovem vegano saindo do armário no churrasco do domingo em família ",
+          "title": "gchan post # 1018",
+          "por": "anônimo",
+          "thumbnail": "https://img-9gag-fun.9cache.com/photo/a6EjZ3b_460svvp9.webm"
+        },
+        "1019": {
+          "content": "...",
+          "title": "gchan post # 1019",
+          "por": "anônimo",
+          "thumbnail": "https://img-9gag-fun.9cache.com/photo/aV7VgX8_460swp.webp"
+        },
+        "1017": {
+          "content": "#SuperaJairo",
+          "title": "gchan post # 1017",
+          "por": "anônimo",
+          "thumbnail": "https://i.imgur.com/4fhpM4v.jpg"
+        },
+        "1024": {
+          "content": "eu dps de xingar deus e o mundo e ainda é 9:42",
+          "title": "gchan post # 1024",
+          "por": "gilerme",
+          "thumbnail": "https://i0.wp.com/media.tumblr.com/tumblr_ls9dlqzXX81qklj8n.gif"
+        },
+        "1020": {
+          "content": "Buraco da glória para crianças",
+          "title": "gchan post # 1020",
+          "por": "anônimo",
+          "thumbnail": "https://img-9gag-fun.9cache.com/photo/aEpO0bx_460swp.webp"
+        }
+      }
       })
     })
   ])
