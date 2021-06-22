@@ -183,9 +183,9 @@ export default {
       console.log(video);
       video.muted = !video.muted;
       if (video.muted) {
-        audioImg.src = './docs/volume-off.png';
+        audioImg.src = './volume-off.png';
       } else {
-        audioImg.src = './docs/volume-high.png';
+        audioImg.src = './volume-high.png';
       }
     },
     toggleSubject() {
