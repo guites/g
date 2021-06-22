@@ -103,10 +103,26 @@ export default {
       const content = document.getElementById('injected_content').innerText;
       const thumbnail = document.getElementById('injected_thumbnail').innerText;
 
-      document.querySelector('.message-id').innerText = id;
+      // popula html do post
+      document.querySelector('.container h1').innerText = `Respondendo ao post #${id}`;
+      document.querySelector('.message-id').innerText = `${id} / `;
+      document.querySelector('.message-username').innerText = `por: ${por}`;
       document.querySelector('.message-subject').innerText = `${title}`;
       document.querySelector('.message-content').innerText = `${content}`;
       document.querySelector('.img-thumbnail').src = thumbnail;
+
+      // atualiza metatags da página
+      document.querySelector('meta[name=title]').setAttribute("content", `gchan: ${title}`);
+      document.querySelector('meta[name=description]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
+      document.querySelector('title').innerText = `gchan: ${title}`;
+
+      document.querySelector('meta[property="og:title"]').setAttribute("content", `gchan: ${title}`);
+      document.querySelector('meta[property="og:description"]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
+      document.querySelector('meta[property="og:image"]').setAttribute("content", thumbnail);
+
+      document.querySelector('meta[property="twitter:title"]').setAttribute("content", `gchan: ${title}`);
+      document.querySelector('meta[property="twitter:description"]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
+      document.querySelector('meta[property="twitter:image"]').setAttribute("content", thumbnail);
     },
     getThePost() {
       fetch(`${this.$backendURL}${this.messageURL}${this.id}`).then((response) => response.json())
