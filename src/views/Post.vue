@@ -109,7 +109,7 @@ export default {
       document.querySelector('.img-thumbnail').src = thumbnail;
     },
     getThePost() {
-      fetch(`${this.backendURL}${this.messageURL}${this.id}`).then((response) => response.json())
+      fetch(`${this.$backendURL}${this.messageURL}${this.id}`).then((response) => response.json())
           .then((result) => {
             if (result.results) {
               this.message = this.sanitizeSingleMessage(result.results.shift());
