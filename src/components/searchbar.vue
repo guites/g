@@ -92,7 +92,7 @@
     </div>
     </li>
     </a>
-    <p v-if="(posts.results.length <= 0)">Nenhum post encontrado! :(</p>
+    <p v-if="(posts.results.length <= 0)">0 posts! :(</p>
   </ul>
   <ul>
     <strong class="search-list-title">RESPOSTAS</strong>
@@ -107,7 +107,7 @@
     </div>
     </li>
     </a>
-    <p v-if="replies.results.length <= 0">Nenhuma resposta encontrada! :(</p>
+    <p v-if="replies.results.length <= 0">0 replies! :(</p>
   </ul>
   </div>
   </div>
@@ -124,8 +124,7 @@ export default {
         results: [],
         aviso: '',
         aviso_class: '',
-        search_url: 'https://gchan-message-board.herokuapp.com/search-posts?q=',
-        db_url: 'https://gchan-message-board.herokuapp.com/message/',
+        search_url: `search-posts?q=`,
         name: 'post'
       },
       replies: {
@@ -133,8 +132,7 @@ export default {
         results: [],
         aviso: '',
         aviso_class: '',
-        search_url: 'https://gchan-message-board.herokuapp.com/search-replies?q=',
-        db_url: 'https://gchan-message-board.herokuapp.com/reply/',
+        search_url: `search-replies?q=`,
         name: 'reply'
       },
     }),
@@ -149,7 +147,7 @@ export default {
           this[collection]['results'] = [];
           return;
         }
-        fetch(`${this[collection]['search_url']}${q}`).then(
+        fetch(`${this.$backendURL}${this[collection]['search_url']}${q}`).then(
           (response) => {
             if (!response.ok) {
               throw new Error(response.status);
@@ -157,14 +155,14 @@ export default {
             return response.json()
             }).then((result) => {
               if (result.error && result.code == 'no results') {
-                this[collection]['aviso'] = `nenhum ${this[collection]['name']} encontrado`;
+                this[collection]['aviso'] = `0 ${this[collection]['name']}s`;
                 this[collection]['aviso_class'] = 'text-warning';
                 this[collection]['results_index'] = [];
                 this[collection]['results'] = [];
                 return;
               }
-              const plural = result.results.length > 1 ? 's' : '';
-              this[collection]['aviso'] = `${result.results.length} novo${plural} ${this[collection]['name']}${plural} encontrado${plural}`;
+              const plural = result.results.length != 1 ? 's' : '';
+              this[collection]['aviso'] = `+${result.results.length} ${this[collection]['name']}${plural}`;
               this[collection]['aviso_class'] = 'text-success';
           result.results.forEach(r => {
             if(this[collection]['results'].length >= this.maxResults) { 

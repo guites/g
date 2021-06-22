@@ -153,10 +153,9 @@ const host = 'gchan.com.br';
 if (window.location.host === host && window.location.protocol !== 'https:') {
   window.location.protocol = 'https:';
 }
-// import Home from '@/views/Home.vue';
+
 import '@/assets/css/styles.css';
 import SearchBar from './components/searchbar.vue';
-const marqueeURL = 'https://gchan-message-board.herokuapp.com/marquee';
 export default {
   name: 'App',
   components: {
@@ -177,7 +176,6 @@ export default {
     error: '',
     username: '',
     password: '',
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
     showOptions: '',
     auth: {
       loggedIn: '',
@@ -236,7 +234,7 @@ export default {
       }
     },
     async login() {
-      fetch(`${this.SERVERurl}/login`, {
+      fetch(`${this.$backendURL}login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -264,7 +262,7 @@ export default {
         });
     },
     checkLogin() {
-      fetch(`${this.SERVERurl}/login`, {
+      fetch(`${this.$backendURL}login`, {
         method: 'GET',
         credentials: 'include',
       })
@@ -280,7 +278,7 @@ export default {
         });
     },
     logOut() {
-      fetch(`${this.SERVERurl}/logout`, {
+      fetch(`${this.$backendURL}logout`, {
         method: 'DELETE',
         credentials: 'include',
       })
@@ -295,7 +293,6 @@ export default {
     },
     showMarqueeOpts() {
       document.querySelector('.marquee').classList.toggle('has-opts');
-      // e.target.classList.toggle('has-opts');
     },
     clearMarqueeForm() {
       this.marqueeMessage.content = '';
@@ -303,10 +300,9 @@ export default {
       this.marqueeMessage.href = '';
     },
     addMarquee() {
-      console.log('lol?');
       const submitButton = document.querySelector('#marqueeForm input[type="submit"]');
       submitButton.disabled = true;
-      fetch(marqueeURL, {
+      fetch(`${this.$backendURL}marquee`, {
         method: 'POST',
         body: JSON.stringify(this.marqueeMessage),
         headers: {
@@ -351,10 +347,9 @@ export default {
   mounted() {
     this.captchaV3();
     this.checkCookies();
-    fetch(marqueeURL).then((response) => response.json()).then((result) => {
+    fetch(`${this.$backendURL}marquee`).then((response) => response.json()).then((result) => {
       this.marquees = result.results;
     });
-    // this.handleMarqueeResize();
   },
   computed: {
     isHome() {

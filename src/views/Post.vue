@@ -37,8 +37,6 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-const messageURL = 'https://gchan-message-board.herokuapp.com/message/';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
 
 // injeção de valores via pre-rendering
 
@@ -72,6 +70,8 @@ export default {
     },
   },
   data: () => ({
+    messageURL: 'message/',
+    repliesURL: 'replies',
     message: '',
     quotesToAdd: '',
     messageToReplyTo: '',
@@ -109,11 +109,11 @@ export default {
       document.querySelector('.img-thumbnail').src = thumbnail;
     },
     getThePost() {
-        fetch(`${messageURL}${this.id}`).then((response) => response.json())
+      fetch(`${this.backendURL}${this.messageURL}${this.id}`).then((response) => response.json())
           .then((result) => {
             if (result.results) {
               this.message = this.sanitizeSingleMessage(result.results.shift());
-              fetch(`${repliesURL}/${this.id}`).then((response) => response.json())
+              fetch(`${this.$backendURL}${this.repliesURL}/${this.id}`).then((response) => response.json())
                 .then((replies) => {
                   if (replies.error) {
                     return;
@@ -121,7 +121,7 @@ export default {
                   this.$set(this.message, 'replies', replies);
                 });
             } else {
-              window.location.href = 'https://gchan.com.br/not-found';
+              window.location.href = '/not-found';
             }
           });
     },

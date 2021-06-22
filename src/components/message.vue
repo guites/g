@@ -16,7 +16,7 @@
       loading="lazy"
       v-else
       class="img-thumbnail placeholder"
-      src="https://gchan-message-board.herokuapp.com/placeholders"
+      :src="$backendURL+'placeholders'"
       alt="post sem imagem"
       >
       <div class="align-self-center media-body">
@@ -121,7 +121,6 @@
   </ul>
 </template>
 <script>
-const handleURL = 'https://gchan-message-board.herokuapp.com/';
 export default {
   name: 'Message',
   props: {
@@ -168,7 +167,7 @@ export default {
             'content-type': 'application/json',
           };
       }
-      fetch(`${handleURL}${url}`, {
+      fetch(`${this.$backendURL}${url}`, {
         method,
         headers,
         body,
@@ -195,7 +194,7 @@ export default {
       const video = document.createElement('video');
       video.src = image.src;
       const controls = document.createElement('button');
-      controls.innerHTML = '<img src="https://gchan.com.br/volume-off.png" alt="Volume">';
+      controls.innerHTML = `<img src="./docs/volume-off.png" alt="Volume">`;
       controls.className = 'volume';
       controls.type = 'button';
       video.classList.add('img-thumbnail');
@@ -219,9 +218,9 @@ export default {
             }
             video.muted = !video.muted;
             if (video.muted) {
-              audioBtn.src = 'https://gchan.com.br/volume-off.png';
+              audioBtn.src = './docs/volume-off.png';
             } else {
-              audioBtn.src = 'https://gchan.com.br/volume-high.png';
+              audioBtn.src = './docs/volume-high.png';
             }
           });
         } else {
@@ -232,17 +231,22 @@ export default {
         this.fullSizeDiv(e.target.parentElement);
         this.fullSize(e);
       });
-      video.onerror = function test(e) {
-        const parent = e.target.parentElement.parentElement;
-        const videoWrapper = parent.querySelector('div.video-wrap');
-        const showThisImg = parent.querySelector('img.img-thumbnail');
-        showThisImg.src = 'https://gchan-message-board.herokuapp.com/placeholders';
-        showThisImg.style.display = 'initial';
-        showThisImg.classList.add('placeholder');
-        showThisImg.onclick = null;
-        e.target.remove();
-        videoWrapper.remove();
-      };
+      // uso de currying pra passar a this.$backendURL no
+      // callback do eventListener https://stackoverflow.com/a/58675429/14427854
+      function onerrorCallback(backendURL) {
+        return function(e) {
+          const parent = e.target.parentElement.parentElement;
+          const videoWrapper = parent.querySelector('div.video-wrap');
+          const showThisImg = parent.querySelector('img.img-thumbnail');
+          showThisImg.src = `${backendURL}placeholders`;
+          showThisImg.style.display = 'initial';
+          showThisImg.classList.add('placeholder');
+          showThisImg.onclick = null;
+          e.target.remove();
+          videoWrapper.remove();
+        }
+      }
+      video.addEventListener('error', onerrorCallback(this.$backendURL));
     },
     preventVideo(target) {
       const image = target.target;
@@ -271,7 +275,6 @@ export default {
     },
     async filterMessage(message) {
       const theMessage = message;
-      // eslint-disable-next-line
       const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/g;
       const string = theMessage.message;
       const matches = string.match(rgx);

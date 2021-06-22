@@ -72,7 +72,7 @@
         >
         </video>
         <button @click="toggleAudioOnClick" type="button" class="volume">
-          <img src="https://gchan.com.br/volume-off.png" alt="Volume">
+          <img src="@/assets/volume-off.png" alt="Volume">
         </button>
       </div>
       <p v-else>Formato não suportado! ::(</p>
@@ -82,7 +82,6 @@
 </template>
 
 <script>
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
 // The .bind method from Prototype.js 
 if (!Function.prototype.bind) { // check if native implementation available
   Function.prototype.bind = function(){ 
@@ -107,6 +106,7 @@ export default {
     },
   },
   data: () => ({
+    apiURL: 'messages/',
     optUpload: '',
     messages: [],
     replyObserver: null,
@@ -183,9 +183,9 @@ export default {
       console.log(video);
       video.muted = !video.muted;
       if (video.muted) {
-        audioImg.src = 'https://gchan.com.br/volume-off.png';
+        audioImg.src = './docs/volume-off.png';
       } else {
-        audioImg.src = 'https://gchan.com.br/volume-high.png';
+        audioImg.src = './docs/volume-high.png';
       }
     },
     toggleSubject() {
@@ -226,7 +226,7 @@ export default {
           } else {
             this.message.gif_origin = 'outro';
           }
-          fetch(apiURL, {
+          fetch(`${this.$backendURL}${this.apiURL}`, {
             method: 'POST',
             body: JSON.stringify(this.message),
             headers: {

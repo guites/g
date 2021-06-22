@@ -158,17 +158,10 @@
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 
-// eslint-disable-next-line
 function showThumbImg(e) {
   if (window.innerWidth < 767) return;
   e.target.children[0].style = 'display:block;';
 }
-// const apiURL = 'https://gchan-message-board.herokuapp.com/messages';
-const apiURL = 'https://gchan-message-board.herokuapp.com/messages/';
-const repliesURL = 'https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
 // The .bind method from Prototype.js 
 if (!Function.prototype.bind) { // check if native implementation available
   Function.prototype.bind = function(){ 
@@ -197,6 +190,11 @@ export default {
     },
   },
   data: () => ({
+    apiURL: `messages/`,
+    repliesURL: 'replies',
+    imgurURLimg: 'imgupload',
+    imgurURLgif: 'gifupload',
+    imgurURLupload: 'videoupload',
     optUpload: '',
     messages: [],
     replyObserver: null,
@@ -291,7 +289,7 @@ export default {
         threshold: 0,
       },
     );
-    fetch(`${apiURL}${this.offset}`).then((response) => response.json())
+    fetch(`${this.$backendURL}${this.apiURL}${this.offset}`).then((response) => response.json())
       .then((result) => {
         this.messages = this.sanitizedMessages(result.results);
       })
@@ -340,8 +338,6 @@ export default {
       const isReply = typeof index === 'object' && index !== null;
       let replyIndex;
       let messageIndexForReplies;
-      // const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/g;
-      // const rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)\&?/g;
       const yt_rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
       // se for um objeto, estou passando uma reply como argumento da função
       let string;
@@ -430,7 +426,7 @@ export default {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         this.lazyLoadObserver.unobserve(entry.target);
-        fetch(`${apiURL}${this.offset}`).then((response) => response.json())
+        fetch(`${this.$backendURL}${this.apiURL}${this.offset}`).then((response) => response.json())
           .then((result) => {
             if (!result.results) return;
             this.messages = this.messages.concat(this.sanitizedMessages(result.results));
@@ -492,7 +488,7 @@ export default {
           } else {
             this.message.gif_origin = 'outro';
           }
-          fetch(apiURL, {
+          fetch(`${this.$backendURL}${this.apiURL}`, {
             method: 'POST',
             body: JSON.stringify(this.message),
             headers: {
@@ -560,7 +556,7 @@ export default {
         const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(postId, 10));
         this.filterMessage(msgIndex);
-        fetch(`${repliesURL}/${postId}`).then((response) => response.json())
+        fetch(`${this.$backendURL}${this.repliesURL}/${postId}`).then((response) => response.json())
           .then((replies) => {
             if (replies.error) {
               return;
@@ -716,16 +712,16 @@ export default {
         if (true) {
         // if (arquivo.type === 'image/gif') {
           formData.append('image', arquivo);
-          postURL = imgurURLgif;
+          postURL = `${this.$backendURL}${this.imgurURLgif}`;
         } else {
           const file = document.querySelector('#imageToUpload').src;
           const base64result = file.split(',')[1];
-          postURL = imgurURLimg;
+          postURL = `${this.$backendURL}${this.imgurURLimg}`;
           formData.append('image', base64result);
         }
       } else {
         formData.append('video', arquivo);
-        postURL = imgurURLupload;
+        postURL = `${this.$backendURL}${this.imgurURLupload}`;
       }
       const requestOptions = {
         method: 'POST',
@@ -828,7 +824,7 @@ export default {
     },
     removeUpload(e) {
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
-      fetch(`https://gchan-message-board.herokuapp.com/imgur/${deleteHash}`, {
+      fetch(`${this.$backendURL}imgur/${deleteHash}`, {
         method: 'DELETE',
         headers: {
           Authorization: 'Client-ID 3435e574a9859d1',

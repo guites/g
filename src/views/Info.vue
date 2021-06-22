@@ -58,7 +58,6 @@ export default {
     },
   },
   data: () => ({
-    SERVERurl: 'https://gchan-message-board.herokuapp.com',
     show_pwd_checked: '',
     name: '',
     email: '',
@@ -105,7 +104,7 @@ export default {
       }
     },
     register(e) {
-      fetch(`${this.SERVERurl}/register`, {
+      fetch(`${this.$backendURL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -124,7 +123,6 @@ export default {
             e.target.reset();
             this.signUpFlash.type = 'success';
             this.signUpFlash.header = 'Bem vindo!';
-            // this.signUpFlash.link = '/';
             this.signUpFlash.text = `Cadastro realizado com sucesso, ${this.username}!\nRealizando login...\n`;
             this.signUpFlash.message = 'Aguarde...';
             this.login();
@@ -134,7 +132,7 @@ export default {
         });
     },
     async login() {
-      fetch(`${this.SERVERurl}/login`, {
+      fetch(`${this.$backendURL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

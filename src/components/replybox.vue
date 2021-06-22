@@ -63,10 +63,6 @@
 </template>
 
 <script>
-const replyURL = 'https://gchan-message-board.herokuapp.com/replies';
-const imgurURLimg = 'https://gchan-message-board.herokuapp.com/imgupload';
-const imgurURLgif = 'https://gchan-message-board.herokuapp.com/gifupload';
-const imgurURLupload = 'https://gchan-message-board.herokuapp.com/videoupload';
 export default {
   name: 'ReplyBox',
   props: ['messageToReplyTo', 'allowedUploadVideoFormats', 'quotesToAdd'],
@@ -245,7 +241,7 @@ export default {
       const submitButton = document.querySelector('#replybox form button[type="submit"]');
       submitButton.disabled = true;
       this.replyMessage.message_id = this.messageToReplyTo;
-      fetch(replyURL, {
+      fetch(`${this.$backendURL}replies`, {
         method: 'POST',
         body: JSON.stringify(this.replyMessage),
         headers: {
@@ -334,19 +330,19 @@ export default {
         // if (file.type === 'image/gif') {
         if (true) {
           formData.append('image', file);
-          await this.postImgGif(formData, imgurURLgif);
+          await this.postImgGif(formData,`${this.$backendURL}gifupload`);
         } else {
           const reader = new FileReader();
           reader.onload = async () => {
             const base64result = reader.result.split(',')[1];
             formData.append('image', base64result);
-            await this.postImgGif(formData, imgurURLimg);
+            await this.postImgGif(formData, `${this.$backendURL}imgupload`);
           };
           reader.readAsDataURL(file);
         }
       } else {
         formData.append('video', file);
-        fetch(imgurURLupload, {
+        fetch(`${this.$backendURL}videoupload`, {
           method: 'POST',
           body: formData,
           redirect: 'follow',
