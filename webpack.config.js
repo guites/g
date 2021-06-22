@@ -70,200 +70,201 @@ if (process.env.NODE_ENV === 'production') {
     }),
     new PrerenderSPAPlugin({
       staticDir: path.join(__dirname, 'dist'),
-      routes: ['/', '/about', '/info', '/new', '/post/632', '/post/993', '/post/992', '/post/991', '/post/990', '/post/978', '/post/988', '/post/987', '/post/986', '/post/984', '/post/985', '/post/982', '/post/983', '/post/981', '/post/980', '/post/979', '/post/977', '/post/923', '/post/948', '/post/976', '/post/888', '/post/975', '/post/974', '/post/973', '/post/972', '/post/717', '/post/971', '/post/970', '/post/969', '/post/968', '/post/967'],
+      routes: ['/', '/about', '/info', '/new', '/post/966', '/post/958', '/post/965', '/post/964', '/post/951', '/post/963', '/post/960', '/post/962', '/post/953', '/post/961', '/post/959', '/post/957', '/post/956', '/post/954', '/post/955', '/post/952', '/post/949', '/post/950', '/post/947', '/post/946', '/post/944', '/post/943', '/post/938', '/post/942', '/post/941', '/post/940', '/post/935', '/post/939', '/post/741', '/post/934', '/post/540'],
       renderer: new Renderer({
         // The name of the property
         injectProperty: '__PRERENDER_INJECTED',
         // The values to have access to via `window.injectProperty` (the above property )
         inject:
         {
-  "987": {
-    "thumbnail": "https://media.tenor.com/images/b690c54a0eae8afbdf812b02f49c3fc9/tenor.gif",
-    "por": "anônimo",
-    "title": "gchan post # 987",
-    "content": "'conversei com o comercial, sabe, aquele bate e volta'\n\no bate e volta:"
+  "955": {
+    "content": "Eu conferindo minhas contas",
+    "thumbnail": "https://i.imgur.com/ljvwZne.jpg",
+    "title": "gchan post # 955",
+    "por": "anônimo"
   },
-  "983": {
+  "942": {
+    "content": "o que o google quis dizer com isso",
+    "thumbnail": "https://i.imgur.com/AAmwNlb.png",
+    "title": "gchan post # 942",
+    "por": "anônimo"
+  },
+  "741": {
+    "content": "sinais claros",
+    "thumbnail": "https://i.imgur.com/ZdtNLRK.jpg",
+    "title": "gchan post # 741",
+    "por": "anônimo"
+  },
+  "960": {
+    "content": "Aquele tesão reprimido pela pessoa que nunca passa.",
     "thumbnail": "",
-    "por": "Jael",
-    "title": "gchan post # 983",
-    "content": "Eae"
+    "title": "gchan post # 960",
+    "por": "anônimo"
   },
-  "976": {
-    "thumbnail": "https://i.imgur.com/4LwuoAr.jpg",
-    "por": "anônimo",
-    "title": "gchan post # 976",
-    "content": "isolation"
+  "963": {
+    "content": "o absoluto estado do ''pop punk'' moderno\n\n\n",
+    "thumbnail": "https://i.imgur.com/DHizmIw.jpg",
+    "title": "musicas para encolher seu jeans",
+    "por": "anônimo"
   },
-  "632": {
-    "thumbnail": "https://i.imgur.com/kQxCzbG.mp4",
-    "por": "anônimo",
-    "title": "gchan post # 632",
-    "content": "dica: como economizar na mensalidade do treino\n*pode acarretar em 2 a 5 anos de clausura"
+  "540": {
+    "content": "Dia mundial dos gatunos! ",
+    "thumbnail": "https://i.imgur.com/z2BbrpZ.mp4",
+    "title": "gchan post # 540",
+    "por": "Shippo-chan"
   },
-  "985": {
-    "thumbnail": "https://i.imgur.com/hwGDAny.jpg",
-    "por": "anônimo",
-    "title": "ciclone passando de boas",
-    "content": "fica meu telhado, por favor não se vá"
+  "958": {
+    "content": "Eterno",
+    "thumbnail": "https://i.imgur.com/2djAPuQ.jpg",
+    "title": "gchan post # 958",
+    "por": "anônimo"
   },
-  "980": {
-    "thumbnail": "https://i.imgur.com/hvpSIuZ.png",
-    "por": "anônimo",
-    "title": "aplicações seguras",
-    "content": "safety"
-  },
-  "992": {
-    "thumbnail": "http://deeperintomovies.net/journal/image11/roadkill5.jpg",
-    "por": "anônimo",
-    "title": "gchan post # 992",
-    "content": "canada"
-  },
-  "972": {
-    "thumbnail": "https://i.ytimg.com/vi/E3eN-kdPouc/sddefault.jpg",
-    "por": "anônimo",
-    "title": "os true neutral com o sofrimento alheio",
-    "content": "eu: pedindo uma ajuda sobre uma tarefa q pode muito bem me custar a tarde interna\n\npessoas que eu achei que teriam empatia com a minha dor: https://www.youtube.com/watch?v=ussCHoQttyQ"
-  },
-  "888": {
-    "thumbnail": "https://raw.githubusercontent.com/Kos-M/GogsThemes/master/img/screenShots/file.png",
-    "por": "jairo",
-    "title": "gchan post # 888",
-    "content": "petição para o MLucas instalar o tema escuro no repositório\n\nlink da petição: http://chng.it/4LhRVNcf"
-  },
-  "973": {
-    "thumbnail": "https://i.imgur.com/W1hagSw.png",
-    "por": "It4chi_uc",
-    "title": "gchan post # 973",
-    "content": "oni chan"
-  },
-  "991": {
-    "thumbnail": "https://i.imgur.com/MyfGcxw.png",
-    "por": "anônimo",
-    "title": "véspera de feriado",
-    "content": "boa jazz-feira camaradas"
-  },
-  "981": {
-    "thumbnail": "https://i.imgur.com/iJ2or4l.png",
-    "por": "anônimo",
-    "title": "gchan post # 981",
-    "content": "quando o trabalho  te da sinais"
-  },
-  "990": {
-    "thumbnail": "https://i.giphy.com/media/jp2KXzsPtoKFG/giphy.gif",
-    "por": "anônimo",
-    "title": "slackin",
-    "content": "oi mundo"
-  },
-  "988": {
-    "thumbnail": "https://i.imgur.com/C9OXJjl.gif",
-    "por": "anônimo",
-    "title": "gchan post # 988",
-    "content": "Kkkkj"
-  },
-  "969": {
-    "thumbnail": "https://i.imgflip.com/59922q.jpg",
-    "por": "MLucas",
-    "title": "gchan post # 969",
-    "content": "'Como assim, entra no setor aqui com uma demanda nova do cliente pra fazer, não é bem assim... tem que ter tempo pra fazer, encaixar na agenda, testar....'\n\nEnfim, a hipocrisia"
-  },
-  "968": {
+  "962": {
+    "content": "Mais alguém está ansioso pela sexta feira? ",
     "thumbnail": "",
-    "por": "anônimo",
-    "title": "gchan post # 968",
-    "content": "Anime\n"
+    "title": "gchan post # 962",
+    "por": "anônimo"
   },
-  "982": {
-    "thumbnail": "https://media3.giphy.com/media/ZB3IAId94nJj07ZzUf/giphy.webp?cid=12057471o7365xxaksanio01d46cld99f2h1icvwlr8sbjjl&rid=giphy.webp&ct=g",
-    "por": "anônimo",
-    "title": "gchan post # 982",
-    "content": "Hi"
+  "938": {
+    "content": "Todos estes anos assistindo produções japonesas me fazem ter certeza que esse cachorro está no meio de uma luta épica... e que está levando a pior neste momento, mas ele vai se levantar e VENCER!",
+    "thumbnail": "https://pbs.twimg.com/media/E0RWB3BXoAENMQT?format=jpg&name=large",
+    "title": "gchan post # 938",
+    "por": "MLucas"
   },
-  "970": {
-    "thumbnail": "https://i.imgur.com/AGnek5K.gif",
-    "por": "sidnnw",
-    "title": "gchan post # 970",
-    "content": "Aceita\n"
+  "935": {
+    "content": "Straigh Edge Cocktail Recipes",
+    "thumbnail": "https://img-9gag-fun.9cache.com/photo/azMd1EN_700bwp.webp",
+    "title": "gchan post # 935",
+    "por": "anônimo"
   },
-  "971": {
-    "thumbnail": "http://i1.ytimg.com/vi/8JI2sn6cm8o/hqdefault.jpg",
-    "por": "anônimo",
-    "title": "gchan post # 971",
-    "content": "cagar de jaqueta não é tão ruim, discutão"
+  "956": {
+    "content": "Sem mais.",
+    "thumbnail": "https://i.imgur.com/GdNFyvS.jpg",
+    "title": "gchan post # 956",
+    "por": "anônimo"
   },
-  "975": {
-    "thumbnail": "https://i.imgur.com/sMtDEKH.jpg",
-    "por": "o instanciador",
-    "title": "gchan post # 975",
-    "content": " seguirei instanciando, macaco-senpai"
+  "959": {
+    "content": "Dica do dia, seu dentista agradece.",
+    "thumbnail": "https://i.imgur.com/bjB8q4v.jpg",
+    "title": "gchan post # 959",
+    "por": "anônimo"
   },
-  "979": {
-    "thumbnail": "https://i.imgur.com/HxeKJDB.png",
-    "por": "anônimo",
-    "title": "qnd o youtube acha sua playlist",
-    "content": "thx algoritimo"
+  "964": {
+    "content": "tô subindo umas alterações talvez a coisa fique instável por algumas horas",
+    "thumbnail": "https://memegenerator.net/img/instances/71820630/our-database-is-down-for-maintenance-please-wait.jpg",
+    "title": "very important",
+    "por": "admeen"
   },
-  "984": {
-    "thumbnail": "https://i.imgur.com/9cwf8ZG.gif",
-    "por": "anônimo",
-    "title": "gchan post # 984",
-    "content": "Google"
+  "952": {
+    "content": "Abençoo toda a indústria pornográfica",
+    "thumbnail": "https://cdn.joke4fun.com/media/posts/00000/74kg5027jmde.jpg",
+    "title": "gchan post # 952",
+    "por": "Astronauta cansado"
   },
-  "993": {
-    "thumbnail": "https://i.kym-cdn.com/entries/icons/mobile/000/022/310/isleep.jpg",
-    "por": "anônimo",
-    "title": "funcionário novo na firma",
-    "content": "hm"
+  "940": {
+    "content": "Nao",
+    "thumbnail": "http://g-chan.wibicode.com",
+    "title": "gchan post # 940",
+    "por": "Victor "
   },
-  "967": {
-    "thumbnail": "https://media2.giphy.com/media/4QxQgWZHbeYwM/giphy.webp?cid=12057471opnl8a57jfgas6wx6787gzdo0qdn4ew4a4lyi8o1&rid=giphy.webp&ct=g",
-    "por": "anônimo",
-    "title": "gchan post # 967",
-    "content": "anime"
+  "949": {
+    "content": "tutorial de como resolver os probleminhas",
+    "thumbnail": "https://www.wikihow.com/images_en/thumb/6/6b/Get-Prescribed-Xanax-Step-5-Version-3.jpg/v4-460px-Get-Prescribed-Xanax-Step-5-Version-3.jpg",
+    "title": "gchan post # 949",
+    "por": "anônimo"
   },
-  "986": {
+  "953": {
+    "content": "Frio + Café = Perfeição",
     "thumbnail": "",
-    "por": "Vingames26",
-    "title": "gchan post # 986",
-    "content": "Zero two?\n"
+    "title": "gchan post # 953",
+    "por": "anônimo"
   },
-  "948": {
-    "thumbnail": "https://i.imgur.com/vI2JOfu.jpg",
-    "por": "anônimo",
-    "title": "gchan post # 948",
-    "content": "40 patacas para a glória"
+  "934": {
+    "content": "...",
+    "thumbnail": "https://i.imgur.com/0krkBNi.jpg",
+    "title": "gchan post # 934",
+    "por": "anônimo"
   },
-  "923": {
-    "thumbnail": "",
-    "por": "Charline",
-    "title": "gchan post # 923",
-    "content": "Excelentíssimo, por gentileza telegram! :)"
+  "951": {
+    "content": ".",
+    "thumbnail": "https://img-9gag-fun.9cache.com/photo/aNpvKv3_460sv.mp4",
+    "title": "gchan post # 951",
+    "por": "anônimo"
   },
-  "717": {
-    "thumbnail": "https://i.imgur.com/Ey5AgGl.jpg",
-    "por": "anônimo",
-    "title": "gchan post # 717",
-    "content": "não seje cuzao, adote o dexter"
+  "947": {
+    "content": "gustavo  10h45\nsim\n10h45\neu vou dar uma olhada no banco (editado) \n10h45\nta com cheirinho de ser tamanho de coluna",
+    "thumbnail": "https://storage.googleapis.com/sales.appinst.io/2018/02/boo-hacker.gif",
+    "title": "woof",
+    "por": "anônimo"
   },
-  "978": {
-    "thumbnail": "https://i.imgur.com/BwlOFZ8.jpg",
-    "por": "Tardígrado Cosmonauta ",
-    "title": "gchan post # 978",
-    "content": "❤❤❤\n\nhttps://www.uol.com.br/tilt/noticias/redacao/2021/05/21/tardigrados-sao-disparados-de-arma-em-teste-de-resistencia-a-impactos.htm"
+  "954": {
+    "content": "lembrete diário de que a era dos humanos está chegando ao fim",
+    "thumbnail": "https://i.imgur.com/ouM2QtH.jpg",
+    "title": "gchan post # 954",
+    "por": "anônimo"
   },
-  "977": {
-    "thumbnail": "https://i.imgur.com/TyCIzun.jpg",
-    "por": "anônimo",
-    "title": "gchan post # 977",
-    "content": "H3ntai"
+  "944": {
+    "content": "recebendo um não da cherosa",
+    "thumbnail": "https://i.imgur.com/h5cXjTs.jpg",
+    "title": "gchan post # 944",
+    "por": "anônimo"
   },
-  "974": {
-    "thumbnail": "https://imagez.tmz.com/image/c9/1by1/2017/07/28/c95fef52c65d52c7b265c162b9671229_xl.jpg",
-    "por": "anônimo",
-    "title": "Gomorrah (2008)",
-    "content": "Boa noite gurizada, aqui vai a recomendação de filme do dia: https://www.imdb.com/title/tt0929425/\n\n\nPra quem sempre quis saber como é o cidade de deus italiano, tá na mão. "
+  "943": {
+    "content": "Vive a vida",
+    "thumbnail": "https://media3.giphy.com/media/a6pzK009rlCak/giphy.webp?cid=1205747112xty6ldpq0tsxy1qwyq2qvgtu65ubyxuvibe0kz&rid=giphy.webp&ct=g",
+    "title": "gchan post # 943",
+    "por": "Juliagameer11"
+  },
+  "966": {
+    "content": "'mas ela me deu oi no slack bro'",
+    "thumbnail": "https://i.imgur.com/ONXxXO7.jpg",
+    "title": "gchan post # 966",
+    "por": "anônimo"
+  },
+  "957": {
+    "content": "To nada",
+    "thumbnail": "https://i.imgur.com/H3m2LBK.jpg",
+    "title": "gchan post # 957",
+    "por": "anônimo"
+  },
+  "946": {
+    "content": "🏃🏽‍♀️",
+    "thumbnail": "https://i.imgur.com/031Idds.png",
+    "title": "gchan post # 946",
+    "por": "anônimo"
+  },
+  "961": {
+    "content": "Enfeitar demais as vezes estraga.",
+    "thumbnail": "https://i.imgur.com/1y90S8u.jpg",
+    "title": "gchan post # 961",
+    "por": "anônimo"
+  },
+  "965": {
+    "content": "claro que eu tenho",
+    "thumbnail": "https://i.imgur.com/dgHkyJz.jpg",
+    "title": "caralho instagram",
+    "por": "anônimo"
+  },
+  "939": {
+    "content": "9.2/10 no imdb",
+    "thumbnail": "https://i.imgur.com/lSi4Lct.mp4",
+    "title": "the godless father",
+    "por": "anônimo"
+  },
+  "950": {
+    "content": "Pensem numa mulher com propriedade para fala!\nIsso sim é beleza, valorizem quem usa o cérebro...\n\nhttps://www.brasil247.com/blog/3-dias-de-uma-experiencia-fracassada?fbclid=IwAR3C5zgryMDzsEd8-7vwF5szU8IrddXOjm2zMiXdp301y61_sK8Ynmrqkcc",
+    "thumbnail": "https://i.imgur.com/keqvSDt.jpg",
+    "title": "gchan post # 950",
+    "por": "Charline"
+  },
+  "941": {
+    "content": "isso é violência gratuita?",
+    "thumbnail": "https://live.staticflickr.com/65535/50930962348_aeb5d829e1_o.jpg",
+    "title": "gchan post # 941",
+    "por": "anônimo"
   }
 }
+
       })
     })
   ])
