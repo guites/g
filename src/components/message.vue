@@ -194,7 +194,7 @@ export default {
       const video = document.createElement('video');
       video.src = image.src;
       const controls = document.createElement('button');
-      controls.innerHTML = `<img src="./volume-off.png" alt="Volume">`;
+      controls.innerHTML = `<img src="${this.$projectURL}volume-off.png" alt="Volume">`;
       controls.className = 'volume';
       controls.type = 'button';
       video.classList.add('img-thumbnail');
@@ -218,9 +218,9 @@ export default {
             }
             video.muted = !video.muted;
             if (video.muted) {
-              audioBtn.src = './volume-off.png';
+              audioBtn.src = `${this.$projectURL}volume-off.png`;
             } else {
-              audioBtn.src = './volume-high.png';
+              audioBtn.src = `${this.$projectURL}volume-high.png`;
             }
           });
         } else {

@@ -2,6 +2,7 @@
   <div class="about">
     <h1>Bem-vindo ao gchan!</h1>
     <img src="@/assets/gchan_hero.jpg" alt="poste no gchan">
+    <img style="display: none;" src="@/assets/volume-high.png" alt="Volume">
     <section id="cookies">
       <div id="cookies-text">
         <p>o <b>gchan</b> usa o
