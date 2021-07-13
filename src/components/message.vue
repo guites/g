@@ -81,7 +81,7 @@
 
           </div>
         </div>
-        <small>{{message.created}}</small><br />
+        <small>{{convertTZ(message.created)}}</small><br />
         <img v-if="message.gif_origin == 'giphy'"
         alt='powered by GIPHY'
         class="gif_origin"
@@ -114,7 +114,7 @@
         </div>
           <p v-html="reply.content"></p><br />
           <div class="iframe-wrapper"></div>
-          <small>{{reply.created}}</small><br />
+          <small>{{convertTZ(reply.created)}}</small><br />
       </div>
     </li>
     <hr>
@@ -144,6 +144,15 @@ export default {
     },
   },
   methods: {
+    convertTZ(date) {
+      //source: https://stackoverflow.com/a/54127122/14427854
+      var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+      var hour = ("0" + date_sp.getHours()).slice(-2);
+      var min = ("0" + date_sp.getMinutes()).slice(-2);
+      var day = ("0" + date_sp.getDate()).slice(-2);
+      var month = ("0" + (date_sp.getMonth() + 1)).slice(-2);
+      return `${hour}:${min} ${day}/${month}/${date_sp.getFullYear()}`;
+    },
     handleMessage(messageID, action, e) {
       e.target.disabled = true;
       let method;

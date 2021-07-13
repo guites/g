@@ -187,7 +187,7 @@ export default {
         })
         .catch((err) => {
           if(err.message == '503') {
-            this[collection]['aviso'] = 'Busca indisponível! Faça um post reclamando.';
+            this[collection]['aviso'] = 'Busca indisponível!';
           }
         });
       },

@@ -240,7 +240,7 @@ export default {
     },
     addReply() {
       grecaptcha.ready(() => {
-        grecaptcha.execute('6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471', { action: 'reply' }).then((token) => token)
+        grecaptcha.execute(this.$captchaClient, { action: 'reply' }).then((token) => token)
           .then((token) => {
             this.replyMessage.recaptcha_token = token;
             const submitButton = document.querySelector('#replybox form button[type="submit"]');

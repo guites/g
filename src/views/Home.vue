@@ -170,7 +170,7 @@ if (!Function.prototype.bind) { // check if native implementation available
     return function(){ 
       return fn.apply(object, 
         args.concat(Array.prototype.slice.call(arguments))); 
-    }; 
+    };
   };
 };
 export default {
@@ -469,7 +469,7 @@ export default {
     },
     addMessage() {
       grecaptcha.ready(() => {
-        grecaptcha.execute('6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471', {action: 'post'}).then((token) => token)
+        grecaptcha.execute(this.$captchaClient, {action: 'post'}).then((token) => token)
         .then((token) => {
           this.message.recaptcha_token = token;
           const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
