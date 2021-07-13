@@ -146,7 +146,7 @@ export default {
   methods: {
     convertTZ(date) {
       //source: https://stackoverflow.com/a/54127122/14427854
-      var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+      var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString());
       var hour = ("0" + date_sp.getHours()).slice(-2);
       var min = ("0" + date_sp.getMinutes()).slice(-2);
       var day = ("0" + date_sp.getDate()).slice(-2);
