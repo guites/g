@@ -13401,7 +13401,7 @@ if (!Function.prototype.bind) {
     //   return this.auth.username || this.message.username;
     // },
     smallUsernamePhrase() {
-      const phrases = [{ quote: 'o que é que há, pois, num nome?', reference: 'https://pt.wikipedia.org/wiki/William_Shakespeare' }, { quote: 'remember: no use for a name', reference: 'https://www.youtube.com/watch?v=mEdd1NHnwIE' }, { quote: 'o homem é menos ele mesmo quando fala de sua pessoa', reference: 'https://pt.wikipedia.org/wiki/Oscar_Wilde' }, { quote: 'o anonimato é a fama do futuro', reference: 'https://pt.wikipedia.org/wiki/John_Boyle' }, { quote: 'a vingança nunca é plena, mata a alma e a envenena', reference: 'https://pt.wikiquote.org/wiki/Seu_Madruga' }, { quote: 'Ski-bi dibby dib yo da dub dub', reference: 'https://www.youtube.com/watch?v=Hy8kmNEo1i8' }, { quote: 'Baby don\'t hurt me', reference: 'watsalov' }];
+      const phrases = [{ quote: 'o que é que há, pois, num nome?', reference: 'https://pt.wikipedia.org/wiki/William_Shakespeare' }, { quote: 'remember: no use for a name', reference: 'https://www.youtube.com/watch?v=mEdd1NHnwIE' }, { quote: 'o homem é menos ele mesmo quando fala de sua pessoa', reference: 'https://pt.wikipedia.org/wiki/Oscar_Wilde' }, { quote: 'o anonimato é a fama do futuro', reference: 'https://pt.wikipedia.org/wiki/John_Boyle' }, { quote: 'a vingança nunca é plena, mata a alma e a envenena', reference: 'https://pt.wikiquote.org/wiki/Seu_Madruga' }, { quote: 'Ski-bi dibby dib yo da dub dub', reference: 'https://www.youtube.com/watch?v=Hy8kmNEo1i8' }, { quote: 'Baby don\'t hurt me', reference: 'watsalov' }, { quote: 'Pode entrar armado no gchan?', reference: 'jairinho' }];
       return phrases[Math.floor(phrases.length * Math.random())].quote;
     }
   },
@@ -13942,7 +13942,7 @@ if (!Function.prototype.bind) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_9ab14a2a___ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_30c85c08___ = __webpack_require__(49);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__replybox_vue_vue_type_script_lang_js___ = __webpack_require__(13);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -13955,8 +13955,8 @@ if (!Function.prototype.bind) {
 
 var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_1__replybox_vue_vue_type_script_lang_js___["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_9ab14a2a___["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_9ab14a2a___["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_30c85c08___["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_30c85c08___["b" /* staticRenderFns */],
   false,
   null,
   null,
@@ -14067,7 +14067,8 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
       content: '',
       imageURL: '',
       message_id: '',
-      user_id: 0
+      user_id: 0,
+      recaptcha_token: ''
     },
     error: '',
     optUpload: false
@@ -14212,34 +14213,39 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
       this.optUpload = false;
     },
     addReply() {
-      const submitButton = document.querySelector('#replybox form button[type="submit"]');
-      submitButton.disabled = true;
-      this.replyMessage.message_id = this.messageToReplyTo;
-      fetch(`${this.$backendURL}replies`, {
-        method: 'POST',
-        body: JSON.stringify(this.replyMessage),
-        headers: {
-          'content-type': 'application/json'
-        }
-      }).then(response => response.json()).then(result => {
-        const parseResult = result;
-        if (parseResult.details) {
-          const error = parseResult.details.map(detail => detail.message).join('.');
-          this.error = error;
-        } else if (parseResult.error) {
-          if (parseResult.origin === 'psql') {
-            if (parseResult.code === '23505') {
-              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+      grecaptcha.ready(() => {
+        grecaptcha.execute('6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471', { action: 'reply' }).then(token => token).then(token => {
+          this.replyMessage.recaptcha_token = token;
+          const submitButton = document.querySelector('#replybox form button[type="submit"]');
+          submitButton.disabled = true;
+          this.replyMessage.message_id = this.messageToReplyTo;
+          fetch(`${this.$backendURL}replies`, {
+            method: 'POST',
+            body: JSON.stringify(this.replyMessage),
+            headers: {
+              'content-type': 'application/json'
             }
-          }
-        } else {
-          this.error = '';
-          // aqui tem que disponibilizar o conteúdo do reply na Home.vue
-          this.addReplyToThread(parseResult);
-          this.clearReplyForm();
-          this.closeReply();
-        }
-        submitButton.disabled = false;
+          }).then(response => response.json()).then(result => {
+            const parseResult = result;
+            if (parseResult.details) {
+              const error = parseResult.details.map(detail => detail.message).join('.');
+              this.error = error;
+            } else if (parseResult.error) {
+              if (parseResult.origin === 'psql') {
+                if (parseResult.code === '23505') {
+                  this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                }
+              }
+            } else {
+              this.error = '';
+              // aqui tem que disponibilizar o conteúdo do reply na Home.vue
+              this.addReplyToThread(parseResult);
+              this.clearReplyForm();
+              this.closeReply();
+            }
+            submitButton.disabled = false;
+          });
+        });
       });
     },
     async handleUpload(e) {
@@ -19313,7 +19319,7 @@ if (inBrowser && window.Vue) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_405662b0___ = __webpack_require__(46);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_e81cf408___ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Home_vue_vue_type_script_lang_js___ = __webpack_require__(10);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -19326,8 +19332,8 @@ if (inBrowser && window.Vue) {
 
 var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_1__Home_vue_vue_type_script_lang_js___["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_405662b0___["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_405662b0___["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_e81cf408___["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_e81cf408___["b" /* staticRenderFns */],
   false,
   null,
   null,
@@ -19342,9 +19348,9 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_405662b0___ = __webpack_require__(47);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_405662b0___["a"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_405662b0___["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_e81cf408___ = __webpack_require__(47);
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_e81cf408___["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_e81cf408___["b"]; });
 
 
 /***/ }),
@@ -19370,9 +19376,9 @@ module.exports = __webpack_require__.p + "giphy-attr.png?439da1ed3ca70fb090eb986
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_9ab14a2a___ = __webpack_require__(50);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_9ab14a2a___["a"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_9ab14a2a___["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_30c85c08___ = __webpack_require__(50);
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_30c85c08___["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_30c85c08___["b"]; });
 
 
 /***/ }),

@@ -272,6 +272,7 @@ export default {
         { quote: 'a vingança nunca é plena, mata a alma e a envenena', reference: 'https://pt.wikiquote.org/wiki/Seu_Madruga' },
         { quote: 'Ski-bi dibby dib yo da dub dub', reference: 'https://www.youtube.com/watch?v=Hy8kmNEo1i8' },
         { quote: 'Baby don\'t hurt me', reference: 'watsalov' },
+        { quote: 'Pode entrar armado no gchan?', reference: 'jairinho' },
       ];
       return phrases[Math.floor((phrases.length * Math.random()))].quote;
     },

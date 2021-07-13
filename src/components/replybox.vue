@@ -86,6 +86,7 @@ export default {
       imageURL: '',
       message_id: '',
       user_id: 0,
+      recaptcha_token: ''
     },
     error: '',
     optUpload: false,
@@ -238,34 +239,40 @@ export default {
       this.optUpload = false;
     },
     addReply() {
-      const submitButton = document.querySelector('#replybox form button[type="submit"]');
-      submitButton.disabled = true;
-      this.replyMessage.message_id = this.messageToReplyTo;
-      fetch(`${this.$backendURL}replies`, {
-        method: 'POST',
-        body: JSON.stringify(this.replyMessage),
-        headers: {
-          'content-type': 'application/json',
-        },
-      }).then((response) => response.json()).then((result) => {
-        const parseResult = result;
-        if (parseResult.details) {
-          const error = parseResult.details.map((detail) => detail.message).join('.');
-          this.error = error;
-        } else if (parseResult.error) {
-          if (parseResult.origin === 'psql') {
-            if (parseResult.code === '23505') {
-              this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
-            }
-          }
-        } else {
-          this.error = '';
-          // aqui tem que disponibilizar o conteúdo do reply na Home.vue
-          this.addReplyToThread(parseResult);
-          this.clearReplyForm();
-          this.closeReply();
-        }
-        submitButton.disabled = false;
+      grecaptcha.ready(() => {
+        grecaptcha.execute('6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471', { action: 'reply' }).then((token) => token)
+          .then((token) => {
+            this.replyMessage.recaptcha_token = token;
+            const submitButton = document.querySelector('#replybox form button[type="submit"]');
+            submitButton.disabled = true;
+            this.replyMessage.message_id = this.messageToReplyTo;
+            fetch(`${this.$backendURL}replies`, {
+              method: 'POST',
+              body: JSON.stringify(this.replyMessage),
+              headers: {
+                'content-type': 'application/json',
+              },
+            }).then((response) => response.json()).then((result) => {
+              const parseResult = result;
+              if (parseResult.details) {
+                const error = parseResult.details.map((detail) => detail.message).join('.');
+                this.error = error;
+              } else if (parseResult.error) {
+                if (parseResult.origin === 'psql') {
+                  if (parseResult.code === '23505') {
+                    this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                  }
+                }
+              } else {
+                this.error = '';
+                // aqui tem que disponibilizar o conteúdo do reply na Home.vue
+                this.addReplyToThread(parseResult);
+                this.clearReplyForm();
+                this.closeReply();
+              }
+              submitButton.disabled = false;
+            });
+          });
       });
     },
     async handleUpload(e) {
