@@ -113,7 +113,7 @@
           </button>
         </div>
         <p class="text-content" v-html="reply.content"></p>
-        <div @click="expandContent($event)" class="reply-warning"><em>resposta truncada devido ao tamanho. clique para visualizar na íntegra.</em><button v-if="checkContentLength(reply.content)" class="button-link" type="button">expandir</button></div>
+        <div v-if="checkContentLength(reply.content)" @click="expandContent($event)" class="reply-warning"><em>resposta truncada devido ao tamanho. clique para visualizar na íntegra.</em><button class="button-link" type="button">expandir</button></div>
           <div class="iframe-wrapper"></div>
           <small>{{convertTZ(reply.created)}}</small><br />
       </div>
