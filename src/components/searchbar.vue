@@ -88,7 +88,7 @@
         <strong v-if="post.subject">{{post.subject}}</strong>
         <strong v-else>gchan post #{{post.id}}</strong>
         <small> em {{post.created}}</small>
-        <p>{{post.message}}</p>
+        <p class="text-content">{{post.message}}</p>
     </div>
     </li>
     </a>
@@ -103,7 +103,7 @@
     <div>
         <strong v-if="reply.username">por {{reply.username}}</strong>
         <small> em {{reply.created}}</small>
-        <p>{{reply.content}}</p>
+        <p class="text-content">{{reply.content}}</p>
     </div>
     </li>
     </a>

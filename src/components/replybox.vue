@@ -30,7 +30,7 @@
         <label for="message">Mensagem</label>
         <textarea class="form-control" id="message" rows="5"
         v-model="replyMessage.content"
-        maxlength=250
+        maxlength=1000
         required>
         </textarea>
       </div>

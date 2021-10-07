@@ -24,6 +24,7 @@ body{
   opacity: 0;
 }
 
+
 //* SHARED SHIT *//
 .grecaptcha-badge { 
     visibility: hidden;
@@ -103,7 +104,6 @@ form{
     }
   }
   textarea {
-    resize:vertical;
   }
 textarea, input[type="email"],input[type="password"],input[type="text"],input[type="url"]{
   height:36.5px;
@@ -960,10 +960,48 @@ div{
     }
     div{
         width: calc(100% - 300px);
+        .reply-warning {
+          width: 100%;
+          cursor: pointer;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          em {
+            font-size: 12px;
+            pointer-events: none;
+          }
+          button {
+            &.button-link {
+              pointer-events: none;
+              float: right;
+              padding: 3px;
+              background-color: #444;
+              border: 1px solid #444;
+              color: #b9b9b9;
+              width: 65px;
+            }
+          }
+        }
         p{
           white-space: pre-line;
           overflow-wrap: break-word;
           width:95%;
+          &.text-content {
+            max-height: 114px;
+            height: 100%;
+            overflow: hidden;
+            margin-bottom: 10px;
+            transition: max-height ease 300ms;
+            &.show-all {
+              max-height: 330px;
+              overflow: scroll;
+            }
+            &+ .reply-warning {
+              em {
+                opacity: 0;
+              }
+            }
+          }
           a {
             position:relative;
             display:inline-block;
@@ -1162,7 +1200,7 @@ div{
   border:2px solid #444;
   background-color:#222;
   padding:15px;
-  max-width:calc(100vw - 25px);
+  max-width:650px;
   max-height:100vh;
   #replybox-head{
     width: 100%;
@@ -1467,6 +1505,9 @@ header{
               }
           }
       }
+  }
+  #replybox {
+    max-width: calc(100vw - 25px);
   }
   div{
       li{
