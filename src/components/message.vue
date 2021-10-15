@@ -146,7 +146,9 @@ export default {
   },
   methods: {
     checkContentLength(content) {
-      return content.length > 250;
+      let tempDiv = document.createElement("div");
+      tempDiv.innerHTML = content;
+      return tempDiv.textContent.length > 250;
     },
     convertTZ(date) {
       //source: https://stackoverflow.com/a/54127122/14427854
