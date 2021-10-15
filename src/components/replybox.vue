@@ -106,7 +106,8 @@ export default {
           document.querySelector(`[data-replyto="${replyToId}"]`).click();
           setTimeout(() => {
             replyTextArea = document.querySelector('#replybox textarea#message');
-            replyTextArea.value += `>>${val}: `;
+            //replyTextArea.value += `>>${val}: `;
+            this.replyMessage.content += `>>${val}: `;
             replyTextArea.focus();
           }, 200);
         } else {
