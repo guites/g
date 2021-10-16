@@ -278,6 +278,30 @@ export default {
     },
   },
   mounted() {
+    const mouseActions = ['mouseover', 'mouseout'];
+    mouseActions.forEach((ev) => {
+      document.querySelector('body').addEventListener(ev, function(e) {
+        if (e.target.className == 'quote') {
+          const quoted_reply_id = e.target.href.split('#').splice(-1)[0];
+          const reply_id = quoted_reply_id.split('_').splice(-1)[0];
+          const replyBox = e.target.closest('ul').querySelector(`#${quoted_reply_id}`);
+          if (replyBox) {
+            if (ev == 'mouseover') {
+              replyBox.classList.add('target');
+            } else {
+              replyBox.classList.remove('target');
+            }
+          } else {
+            const quote_preview = e.target.parentElement.querySelector(`#quoted_hidden_${reply_id}`);
+            if (ev == 'mouseover') {
+              quote_preview.classList.add('show');
+            } else {
+              quote_preview.classList.remove('show');
+            }
+          }
+        }
+      });
+    });
     this.replyObserver = new IntersectionObserver(
       this.onElementObserved,
       {
@@ -300,7 +324,6 @@ export default {
             this.replyObserver.observe(li);
             if (index === this.messagesBatchSize - 1) {
               this.offset += 15;
-              console.log(this.offset);
               li.setAttribute('data-offset', this.offset);
               this.lazyLoadObserver.observe(li);
             }
@@ -308,6 +331,15 @@ export default {
       });
   },
   methods: {
+    convertTZ(date) {
+      //source: https://stackoverflow.com/a/54127122/14427854
+      var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+      var hour = ("0" + date_sp.getHours()).slice(-2);
+      var min = ("0" + date_sp.getMinutes()).slice(-2);
+      var day = ("0" + date_sp.getDate()).slice(-2);
+      var month = ("0" + (date_sp.getMonth() + 1)).slice(-2);
+      return `${hour}:${min} ${day}/${month}/${date_sp.getFullYear()}`;
+    },
     sanitizeSingleMessage(message) {
       const sanitized = message;
       if (message.message) {
@@ -340,6 +372,7 @@ export default {
       let replyIndex;
       let messageIndexForReplies;
       const yt_rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
+      const quotes_rgx = new RegExp("&gt;&gt;([0-9]{1,5}):", "g");
       // se for um objeto, estou passando uma reply como argumento da função
       let string;
       if (isReply) {
@@ -348,96 +381,86 @@ export default {
         string = this.messages[index].message;
       }
       const matches = string.match(yt_rgx);
-      if (matches !== null) {
-        if (matches.length > 0) {
-          if (isReply) {
-            messageIndexForReplies = this.messages.findIndex((el) => parseInt(el.id, 10)
-            === parseInt(index.message_id, 10));
-            replyIndex = this.messages[messageIndexForReplies].replies.findIndex((el) => parseInt(el.id, 10) === parseInt(index.id, 10));
-            if (this.messages[messageIndexForReplies].replies[replyIndex].filtered === '1') return;
-            this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'yt_iframes', []);
-            this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'filtered', '1');
-          } else {
-            if (this.messages[index].filtered === '1') return;
-            this.$set(this.messages[index], 'yt_thumbnails', []);
-            this.$set(this.messages[index], 'yt_iframes', []);
-            this.$set(this.messages[index], 'filtered', '1');
-          }
-          for (let i = 0; i < matches.length; i += 1) {
-            fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
-              .then(async (response) => {
-                if (response.ok) {
-                  const result = await response.json();
-                  const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
-                  this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
-                  const current_li = this.closest('li');
-                  // seleciona, se existir, o iframe que estiver carregado
-                  const current_frame = current_li.querySelector('iframe');
-                  if (current_frame) {
-                    const div_data_checkiframe = current_frame.parentElement.getAttribute('data-checkiframe');
-                    if( div_data_checkiframe == '${result.thumbnail_url}') {
-                      console.log('matches');
+      const quote_matches = string.matchAll(quotes_rgx);
+      if (quote_matches !== null || matches !== null) {
+        if (isReply) {
+          messageIndexForReplies = this.messages.findIndex((el) => parseInt(el.id, 10)
+          === parseInt(index.message_id, 10));
+          replyIndex = this.messages[messageIndexForReplies].replies.findIndex((el) => parseInt(el.id, 10) === parseInt(index.id, 10));
+          if (this.messages[messageIndexForReplies].replies[replyIndex].filtered === '1') return;
+          this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'yt_iframes', []);
+          this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'filtered', '1');
+        } else {
+          if (this.messages[index].filtered === '1') return;
+          this.$set(this.messages[index], 'yt_thumbnails', []);
+          this.$set(this.messages[index], 'yt_iframes', []);
+          this.$set(this.messages[index], 'filtered', '1');
+        }
+
+        // filtra links do youtube
+        if (matches !== null) {
+          if (matches.length > 0) {
+            for (let i = 0; i < matches.length; i += 1) {
+              fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
+                .then(async (response) => {
+                  if (response.ok) {
+                    const result = await response.json();
+                    const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
+                    this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
+                    const current_li = this.closest('li');
+                    // seleciona, se existir, o iframe que estiver carregado
+                    const current_frame = current_li.querySelector('iframe');
+                    if (current_frame) {
+                      const div_data_checkiframe = current_frame.parentElement.getAttribute('data-checkiframe');
+                      if( div_data_checkiframe == '${result.thumbnail_url}') {
+                        current_frame.remove();
+                        return;
+                      } else {
+                        const atag_to_current_frame = current_li.querySelector(\`a[data-thumb='\${div_data_checkiframe}']\`);
+                        atag_to_current_frame.childNodes[0].textContent = 'mostrar';
+                      }
                       current_frame.remove();
-                      return;
-                    } else {
-                      const atag_to_current_frame = current_li.querySelector(\`a[data-thumb='\${div_data_checkiframe}']\`);
-                      atag_to_current_frame.childNodes[0].textContent = 'mostrar';
                     }
-                    current_frame.remove();
-                  }
-                  this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
-                  ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`;
-                  if (isReply) {
-                    this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
-                  } else {
-                    this.messages[index].message = this.messages[index].message
-                      .replace(matches[i], htmlString);
-                  }
-                } else {
-                  let htmlString;
-                  if (matches[i].startsWith('http://') || matches[i].startsWith('https://')) {
-                    if (response.status === 400) {
-                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
-                    } else if (response.status === 404) {
-                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
-                    } else {
-                      return
-                    }
+                    this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
+                    ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`;
                     if (isReply) {
                       this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
+                      // this.messages[messageIndexForReplies].replies[replyIndex].content = string.replace(matches[i], htmlString);
                     } else {
-                      this.messages[index].message = this.messages[index].message
-                        .replace(matches[i], htmlString);
+                      // this.messages[index].message = string.replace(matches[i], htmlString);
+                      this.messages[index].message = this.messages[index].message.replace(matches[i], htmlString);
                     }
                   } else {
-                    return
+                    let htmlString;
+                    if (matches[i].startsWith('http://') || matches[i].startsWith('https://')) {
+                      if (response.status === 400) {
+                        htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
+                      } else if (response.status === 404) {
+                        htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
+                      } else {
+                        return
+                      }
+                      if (isReply) {
+                        this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
+                        // this.messages[messageIndexForReplies].replies[replyIndex].content = string.replace(matches[i], htmlString);
+                      } else {
+                        this.messages[index].message = this.messages[index].message.replace(matches[i], htmlString);
+                        // this.messages[index].message = string.replace(matches[i], htmlString);
+                      }
+                    } else {
+                      return;
+                    }
                   }
-                }
-              });
+                });
+            }
           }
         }
-      }
-      const insta_rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
-      const quotes_rgx = new RegExp("&gt;&gt;([0-9]{1,5}):", "g");
-      let quote_matches = quotes_rgx.exec(string);
-        if (quote_matches != null) {
-          if (isReply) {
-            messageIndexForReplies = this.messages.findIndex((el) => parseInt(el.id, 10)
-            === parseInt(index.message_id, 10));
-            replyIndex = this.messages[messageIndexForReplies].replies.findIndex((el) => parseInt(el.id, 10) === parseInt(index.id, 10));
-            if (this.messages[messageIndexForReplies].replies[replyIndex].filtered === '1') return;
-            this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'yt_iframes', []);
-            this.$set(this.messages[messageIndexForReplies].replies[replyIndex], 'filtered', '1');
-          } else {
-            if (this.messages[index].filtered === '1') return;
-            this.$set(this.messages[index], 'yt_thumbnails', []);
-            this.$set(this.messages[index], 'yt_iframes', []);
-            this.$set(this.messages[index], 'filtered', '1');
-          }
 
-          while (quote_matches != null) {
-            var current_quote = quote_matches[0];
-            var reply_id = quote_matches[1];
+        // filtra menção a outras respostas
+        if (quote_matches != null) {
+          for (const quote_match of quote_matches) {
+            const current_quote = quote_match[0];
+            const reply_id = quote_match[1];
             if (reply_id) {
               fetch(`${this.$backendURL}reply/${reply_id}`)
                 .then((response) => {
@@ -448,86 +471,46 @@ export default {
                   }
                 })
                 .then((r) => {
-                  console.log(messageIndexForReplies);
                   const sanitizedQuoteMsg = this.sanitizeSingleMessage(r.results[0]);
                   const quote_content = sanitizedQuoteMsg.content;
                   const quote_message_id = sanitizedQuoteMsg.message_id;
-                  const htmlString = `<a href='/post/${quote_message_id}'>${current_quote}</a>`;
+                  let htmlString = `
+                    <a class="quote" href='/post/${quote_message_id}#quoted_${reply_id}'>
+                      ${current_quote}
+                    </a>
+                    <li class="media reply-item quote-hidden" id="quoted_hidden_${reply_id}">
+                    `;
+                  if (sanitizedQuoteMsg.imageurl != '') {
+                    htmlString += `
+                      <img loading="lazy" data-src="${sanitizedQuoteMsg.imageurl}" src="${sanitizedQuoteMsg.imageurl}" alt="" class="img-thumbnail"> 
+                    `;
+                  }
+                  htmlString += `
+                      <div class="align-self-center media-body" >
+                        <div class="edit_tab">
+                          <p class="mt-0 mb-1">${sanitizedQuoteMsg.username}</p>
+                          <button class="link link-reply">#${sanitizedQuoteMsg.id}</button>
+                        </div>
+                        <p class="text-content">${sanitizedQuoteMsg.content}</p>
+                        <small>${this.convertTZ(sanitizedQuoteMsg.created)}</small><br/>
+                      </div>
+                    </li>`;
                   if (isReply) {
                     this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(current_quote, htmlString);
+                    //this.messages[messageIndexForReplies].replies[replyIndex].content = string.replace(current_quote, htmlString);
                   } else {
-                    this.messages[index].message = this.messages[index].message
-                      .replace(current_quote, htmlString);
+                    this.messages[index].message = this.messages[index].message.replace(current_quote, htmlString);
+                    //this.messages[index].message = string.replace(current_quote, htmlString);
                   }
                 })
                 .catch((err) => {
                   console.log(err);
                 });
             }
-            quote_matches = quotes_rgx.exec(string);
-          }
-
-        }
-        return;
-      if (quote_matches !== null) {
-        if (quote_matches.length > 0) {
-          for (let j = 0; j < quote_matches.length; j += 1) {
-            console.log(quote_matches[j]);
-            return;
-            fetch(`${this.$backendURL}/reply/${quote_matches[j]}`)
-              .then(async (response) => {
-                if (response.ok) {
-                  const result = await response.json();
-                  const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'" onclick="
-                  this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
-                  const current_li = this.closest('li');
-                  // seleciona, se existir, o iframe que estiver carregado
-                  const current_frame = current_li.querySelector('iframe');
-                  if (current_frame) {
-                    const div_data_checkiframe = current_frame.parentElement.getAttribute('data-checkiframe');
-                    if( div_data_checkiframe == '${result.thumbnail_url}') {
-                      console.log('matches');
-                      current_frame.remove();
-                      return;
-                    } else {
-                      const atag_to_current_frame = current_li.querySelector(\`a[data-thumb='\${div_data_checkiframe}']\`);
-                      atag_to_current_frame.childNodes[0].textContent = 'mostrar';
-                    }
-                    current_frame.remove();
-                  }
-                  this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
-                  ">mostrar<img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}"></a>]`;
-                  if (isReply) {
-                    this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
-                  } else {
-                    this.messages[index].message = this.messages[index].message
-                      .replace(matches[i], htmlString);
-                  }
-                } else {
-                  let htmlString;
-                  if (matches[i].startsWith('http://') || matches[i].startsWith('https://')) {
-                    if (response.status === 400) {
-                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
-                    } else if (response.status === 404) {
-                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?<span style="display:none;">não conseguimos verificar este link. Tenha cautela!</span></a>]`;
-                    } else {
-                      return
-                    }
-                    if (isReply) {
-                      this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(matches[i], htmlString);
-                    } else {
-                      this.messages[index].message = this.messages[index].message
-                        .replace(matches[i], htmlString);
-                    }
-                  } else {
-                    return
-                  }
-                }
-              });
           }
         }
       }
-
+      return;
     },
     adjustYtIframe() {
 

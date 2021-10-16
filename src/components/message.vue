@@ -103,7 +103,7 @@
       @load="preventVideo($event)"
       alt=""
       >
-      <div class="align-self-center media-body">
+      <div class="align-self-center media-body" :id="'quoted_' + reply.id">
         <div class="edit_tab">
           <p class="mt-0 mb-1">{{reply.username}}</p>
           <button type='button' class='link link-reply' :data-quoteid="reply.id"
@@ -301,7 +301,6 @@ export default {
       const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/g;
       const string = theMessage.message;
       const matches = string.match(rgx);
-      console.log(matches);
       if (matches.length > 0) {
         await this.sleep(100);
         console.log(`#li_${this.message.id} small`);
@@ -311,7 +310,6 @@ export default {
         iframeWrapper.className = 'iframe-wrapper';
         const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
         matches.forEach((match) => {
-          console.log(match);
           pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
           fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
             .then((response) => response.json())

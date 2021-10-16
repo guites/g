@@ -1001,6 +1001,27 @@ div{
                 opacity: 0;
               }
             }
+            .quote-hidden {
+              position: absolute;
+              border: 2px dashed #888;
+              background-color: #101010;
+              width: 100%;
+              display: none;
+              z-index: 3;
+              margin: 0 auto 10px;
+              max-width: 980px;
+              justify-content: flex-start;
+              align-items: start;
+              padding: 10px;
+              overflow-wrap: initial;
+              white-space: initial;
+              &.show {
+                display: flex;
+              }
+              > div {
+                width: 100%;
+              }
+            }
           }
           a {
             position:relative;
@@ -1180,10 +1201,14 @@ div{
           position:absolute;
         }
       }
-      > div{
+      > div, .quote-hidden{
         border: 2px solid #444;
         background-color: #333;
         padding:10px 10px 0;
+        &:target, &.target {
+          border: 2px dashed #888;
+          background-color: #101010;
+        }
       }
     }
   }
