@@ -297,43 +297,8 @@ export default {
       textBlock.classList.toggle('show-all');
       btn.textContent = btn.textContent == 'colapsar' ? 'expandir' : 'colapsar';
     },
-    update(e) {
-      console.log(e);
-    },
-    async filterMessage(message) {
-      const theMessage = message;
-      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/g;
-      const string = theMessage.message;
-      const matches = string.match(rgx);
-      if (matches.length > 0) {
-        await this.sleep(100);
-        console.log(`#li_${this.message.id} small`);
-        const smallTag = document.querySelector(`#li_${this.message.id} small`);
-        const pTag = document.querySelector(`#li_${this.message.id} p:not(.mt-0)`);
-        const iframeWrapper = document.createElement('div');
-        iframeWrapper.className = 'iframe-wrapper';
-        const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
-        matches.forEach((match) => {
-          pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
-          fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
-            .then((response) => response.json())
-            .then((result) => {
-              const aTag = document.querySelector(`[data-link="${match}"]`);
-              aTag.children[0].src = result.thumbnail_url;
-              aTag.addEventListener('mouseover', this.showThumbImg, false);
-              aTag.addEventListener('mouseout', this.hideThumbImg, false);
-              aTag.addEventListener('click', this.toggleYoutubeFrame, false);
-              insertedNode.innerHTML = result.html;
-            });
-        });
-      }
-      return theMessage;
-    },
   },
   computed: {
-    filterMessageText() {
-      return 'messageText';
-    },
     isHome() {
       return this.$route.name === 'Home';
     },
