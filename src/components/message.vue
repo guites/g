@@ -148,6 +148,10 @@ export default {
     checkContentLength(content) {
       let tempDiv = document.createElement("div");
       tempDiv.innerHTML = content;
+      const hiddenQuotes = tempDiv.querySelectorAll('.quote-hidden');
+      hiddenQuotes.forEach((quote) => {
+        quote.remove();
+      });
       return tempDiv.textContent.length > 250;
     },
     convertTZ(date) {
