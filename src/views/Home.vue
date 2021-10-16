@@ -474,27 +474,11 @@ export default {
                   const sanitizedQuoteMsg = this.sanitizeSingleMessage(r.results[0]);
                   const quote_content = sanitizedQuoteMsg.content;
                   const quote_message_id = sanitizedQuoteMsg.message_id;
-                  let htmlString = `
-                    <a class="quote" href='/post/${quote_message_id}#quoted_${reply_id}'>
-                      ${current_quote}
-                    </a>
-                    <li class="media reply-item quote-hidden" id="quoted_hidden_${reply_id}">
-                    `;
+                  let htmlString = `<a class="quote" href='/post/${quote_message_id}#quoted_${reply_id}'>${current_quote}</a><li class="media reply-item quote-hidden" id="quoted_hidden_${reply_id}">`;
                   if (sanitizedQuoteMsg.imageurl != '') {
-                    htmlString += `
-                      <img loading="lazy" data-src="${sanitizedQuoteMsg.imageurl}" src="${sanitizedQuoteMsg.imageurl}" alt="" class="img-thumbnail"> 
-                    `;
+                    htmlString += `<img loading="lazy" data-src="${sanitizedQuoteMsg.imageurl}" src="${sanitizedQuoteMsg.imageurl}" alt="" class="img-thumbnail">`;
                   }
-                  htmlString += `
-                      <div class="align-self-center media-body" >
-                        <div class="edit_tab">
-                          <p class="mt-0 mb-1">${sanitizedQuoteMsg.username}</p>
-                          <button class="link link-reply">#${sanitizedQuoteMsg.id}</button>
-                        </div>
-                        <p class="text-content">${sanitizedQuoteMsg.content}</p>
-                        <small>${this.convertTZ(sanitizedQuoteMsg.created)}</small><br/>
-                      </div>
-                    </li>`;
+                  htmlString += `<div class="align-self-center media-body"><div class="edit_tab"><p class="mt-0 mb-1">${sanitizedQuoteMsg.username}</p><button class="link link-reply">#${sanitizedQuoteMsg.id}</button></div><p class="text-content">${sanitizedQuoteMsg.content}</p><small>${this.convertTZ(sanitizedQuoteMsg.created)}</small><br/></div></li>`;
                   if (isReply) {
                     this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replace(current_quote, htmlString);
                     //this.messages[messageIndexForReplies].replies[replyIndex].content = string.replace(current_quote, htmlString);
