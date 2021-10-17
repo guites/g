@@ -81,7 +81,7 @@
 
           </div>
         </div>
-        <small>{{convertTZ(message.created)}}</small><br />
+        <small id="message-created" v-if="message.created">{{convertTZ(message.created)}}</small><br />
         <img v-if="message.gif_origin == 'giphy'"
         alt='powered by GIPHY'
         class="gif_origin"
