@@ -278,27 +278,50 @@ export default {
     },
   },
   mounted() {
-    const mouseActions = ['mouseover', 'mouseout'];
+    function checkHighlightedQuotes(ev) {
+      if (ev == 'click' && window.innerWidth < 767) {
+        const checkQuoteRedirect = document.querySelector('[data-redirect]');
+        if (checkQuoteRedirect) delete checkQuoteRedirect.dataset.redirect;
+        const checkQuotePreview = document.querySelector('.quote-hidden.show');
+        if (checkQuotePreview) checkQuotePreview.classList.remove('show');
+        const checkQuoteTarget = document.querySelector('.target');
+        if (checkQuoteTarget) checkQuoteTarget.classList.remove('target');
+      }
+    };
+    const mouseActions = ['mouseover', 'mouseout', 'click'];
     mouseActions.forEach((ev) => {
       document.querySelector('body').addEventListener(ev, function(e) {
+        if (ev == 'click') {
+          if (window.innerWidth < 767) {
+            e.preventDefault();
+          } else {
+            return;
+          }
+        }
         if (e.target.className == 'quote') {
+          if (e.target.getAttribute('data-redirect')) window.location = e.target.href;
+          checkHighlightedQuotes(ev);
           const quoted_reply_id = e.target.href.split('#').splice(-1)[0];
           const reply_id = quoted_reply_id.split('_').splice(-1)[0];
           const replyBox = e.target.closest('ul').querySelector(`#${quoted_reply_id}`);
           if (replyBox) {
-            if (ev == 'mouseover') {
+            if (ev == 'mouseover' || ev == 'click') {
               replyBox.classList.add('target');
+              if (ev == 'click') e.target.setAttribute('data-redirect', true);
             } else {
               replyBox.classList.remove('target');
             }
           } else {
             const quote_preview = e.target.parentElement.querySelector(`#quoted_hidden_${reply_id}`);
-            if (ev == 'mouseover') {
+            if (ev == 'mouseover' || ev == 'click') {
               quote_preview.classList.add('show');
+              if (ev == 'click') e.target.setAttribute('data-redirect', true);
             } else {
               quote_preview.classList.remove('show');
             }
           }
+        } else {
+          checkHighlightedQuotes(ev);
         }
       });
     });
@@ -493,7 +516,7 @@ export default {
                     }
                   })
                   .catch((err) => {
-                    console.log(err);
+                    console.log('resposta de id '+reply_id+' não encontrada.');
                   });
               }
             }
