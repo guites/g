@@ -47,7 +47,8 @@ if (process.env.NODE_ENV === 'production') {
               "content": results[i].message,
               "thumbnail": results[i].imageurl,
               "title": results[i].subject,
-              "por": results[i].username
+              "por": results[i].username,
+              "created": results[i].created
             };    
           }
           i++;

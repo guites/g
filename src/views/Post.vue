@@ -47,6 +47,7 @@ if (window.__PRERENDER_INJECTED !== undefined) {
   document.body.innerHTML += `<p style='display: none;' id='injected_title'>${(window['__PRERENDER_INJECTED'][post_id]['title'])}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_content'>${(window['__PRERENDER_INJECTED'][post_id]['content'])}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_thumbnail'>${(window['__PRERENDER_INJECTED'][post_id]['thumbnail'])}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_created'>${(window['__PRERENDER_INJECTED'][post_id]['created'])}</p>`;
 }
 
 export default {
@@ -91,38 +92,70 @@ export default {
         this.getThePost();
     },
   },
-  mounted() {
+  beforeMount() {
     this.getThePost();
     this.setInjectedData();
   },
   methods: {
+    targetQuote() {
+      this.$nextTick(() => {
+        const checkTarget = window.location.href.split('#');
+        if (checkTarget.length > 1) {
+          const targetQuote = checkTarget.splice(-1)[0];
+          const quoteElement = document.querySelector('#'+targetQuote);
+          if (quoteElement) {
+            quoteElement.scrollIntoView({top: 0, behavior: 'smooth'});
+            quoteElement.classList.add('target');
+          }
+        }
+      });
+    },
     setInjectedData() {
-      const id = document.getElementById('injected_id').innerText;
-      const por = document.getElementById('injected_por').innerText;
-      const title = document.getElementById('injected_title').innerText;
-      const content = document.getElementById('injected_content').innerText;
-      const thumbnail = document.getElementById('injected_thumbnail').innerText;
 
-      // popula html do post
-      document.querySelector('.container h1').innerText = `Respondendo ao post #${id}`;
-      document.querySelector('.message-id').innerText = `${id} / `;
-      document.querySelector('.message-username').innerText = `por: ${por}`;
-      document.querySelector('.message-subject').innerText = `${title}`;
-      document.querySelector('.message-content').innerText = `${content}`;
-      document.querySelector('.img-thumbnail').src = thumbnail;
+      let id, por, title, content, thumbnail;
 
-      // atualiza metatags da página
-      document.querySelector('meta[name=title]').setAttribute("content", `gchan: ${title}`);
-      document.querySelector('meta[name=description]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
-      document.querySelector('title').innerText = `gchan: ${title}`;
+      const idEl = document.getElementById('injected_id');
+      const porEl = document.getElementById('injected_por');
+      const titleEl = document.getElementById('injected_title');
+      const contentEl = document.getElementById('injected_content');
+      const thumbnailEl = document.getElementById('injected_thumbnail');
+      const createdEl = document.getElementById('injected_created');
 
-      document.querySelector('meta[property="og:title"]').setAttribute("content", `gchan: ${title}`);
-      document.querySelector('meta[property="og:description"]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
-      document.querySelector('meta[property="og:image"]').setAttribute("content", thumbnail);
+      if (createdEl) {
+        created = createEl.innerText;
+        document.querySelector('#message-created').innerText = created;
+      }
+      if (idEl) {
+        id = idEl.innerText;
+        document.querySelector('.container h1').innerText = `Respondendo ao post #${id}`;
+        document.querySelector('.message-id').innerText = `${id} / `;
+      }
+      if (porEl) {
+        por = porEl.innerText;
+        document.querySelector('.message-username').innerText = `por: ${por}`;
+      }
+      if (titleEl) {
+        title = titleEl.innerText;
+        document.querySelector('.message-subject').innerText = `${title}`;
+        document.querySelector('meta[name=title]').setAttribute("content", `gchan: ${title}`);
+        document.querySelector('meta[property="twitter:title"]').setAttribute("content", `gchan: ${title}`);
+        document.querySelector('title').innerText = `gchan: ${title}`;
+        document.querySelector('meta[property="og:title"]').setAttribute("content", `gchan: ${title}`);
+      }
+      if (contentEl) {
+        content = contentEl.innerText;
+        document.querySelector('.message-content').innerText = `${content}`;
+        document.querySelector('meta[name=description]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
+        document.querySelector('meta[property="og:description"]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
+        document.querySelector('meta[property="twitter:description"]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
+      }
+      if (thumbnailEl) {
+        thumbnail = thumbnailEl.innerText;
+        document.querySelector('.img-thumbnail').src = thumbnail;
+        document.querySelector('meta[property="og:image"]').setAttribute("content", thumbnail);
+        document.querySelector('meta[property="twitter:image"]').setAttribute("content", thumbnail);
+      }
 
-      document.querySelector('meta[property="twitter:title"]').setAttribute("content", `gchan: ${title}`);
-      document.querySelector('meta[property="twitter:description"]').setAttribute("content", `gchan: ${content.substr(0,180)}`);
-      document.querySelector('meta[property="twitter:image"]').setAttribute("content", thumbnail);
     },
     getThePost() {
       fetch(`${this.$backendURL}${this.messageURL}${this.id}`).then((response) => response.json())
@@ -135,9 +168,10 @@ export default {
                     return;
                   }
                   this.$set(this.message, 'replies', replies);
+                  this.targetQuote();
                 });
             } else {
-              window.location.href = '/not-found';
+              window.location.href = '/';
             }
           });
     },
@@ -197,7 +231,6 @@ export default {
       } else {
         typeCheckedReply = reply;
       }
-      console.log(this.message);
       if (this.message.replies === undefined) this.message.replies = []; 
       this.message.replies.push(typeCheckedReply);
     },
