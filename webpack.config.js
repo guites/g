@@ -185,6 +185,7 @@ if (process.env.NODE_ENV === 'production') {
     devServer: {
       historyApiFallback: true,
       noInfo: false,
+      host: '0.0.0.0',
     },
     devtool: '#eval-source-map',
     plugins: [
