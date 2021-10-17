@@ -290,7 +290,6 @@ export default {
       this.$emit('adcQuote', quote.target.getAttribute('data-quoteid'));
     },
     expandContent(ev) {
-      console.log(ev.target.parentElement);
       const textBlock = ev.target.parentElement.querySelector('.text-content');
       textBlock.scrollTop = 0;
       const btn = ev.target.querySelector('button');
