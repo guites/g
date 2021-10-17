@@ -14450,7 +14450,7 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_4d916ab7___ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_e871d49e___ = __webpack_require__(51);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__message_vue_vue_type_script_lang_js___ = __webpack_require__(16);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -14463,8 +14463,8 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 
 var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_1__message_vue_vue_type_script_lang_js___["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_4d916ab7___["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_4d916ab7___["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_e871d49e___["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_e871d49e___["b" /* staticRenderFns */],
   false,
   null,
   null,
@@ -15034,6 +15034,7 @@ if (window.__PRERENDER_INJECTED !== undefined) {
   document.body.innerHTML += `<p style='display: none;' id='injected_title'>${window['__PRERENDER_INJECTED'][post_id]['title']}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_content'>${window['__PRERENDER_INJECTED'][post_id]['content']}</p>`;
   document.body.innerHTML += `<p style='display: none;' id='injected_thumbnail'>${window['__PRERENDER_INJECTED'][post_id]['thumbnail']}</p>`;
+  document.body.innerHTML += `<p style='display: none;' id='injected_created'>${window['__PRERENDER_INJECTED'][post_id]['created']}</p>`;
 }
 
 /* harmony default export */ __webpack_exports__["a"] = ({
@@ -15069,38 +15070,69 @@ if (window.__PRERENDER_INJECTED !== undefined) {
       this.getThePost();
     }
   },
-  mounted() {
+  beforeMount() {
     this.getThePost();
     this.setInjectedData();
   },
   methods: {
+    targetQuote() {
+      this.$nextTick(() => {
+        const checkTarget = window.location.href.split('#');
+        if (checkTarget.length > 1) {
+          const targetQuote = checkTarget.splice(-1)[0];
+          const quoteElement = document.querySelector('#' + targetQuote);
+          if (quoteElement) {
+            quoteElement.scrollIntoView({ top: 0, behavior: 'smooth' });
+            quoteElement.classList.add('target');
+          }
+        }
+      });
+    },
     setInjectedData() {
-      const id = document.getElementById('injected_id').innerText;
-      const por = document.getElementById('injected_por').innerText;
-      const title = document.getElementById('injected_title').innerText;
-      const content = document.getElementById('injected_content').innerText;
-      const thumbnail = document.getElementById('injected_thumbnail').innerText;
 
-      // popula html do post
-      document.querySelector('.container h1').innerText = `Respondendo ao post #${id}`;
-      document.querySelector('.message-id').innerText = `${id} / `;
-      document.querySelector('.message-username').innerText = `por: ${por}`;
-      document.querySelector('.message-subject').innerText = `${title}`;
-      document.querySelector('.message-content').innerText = `${content}`;
-      document.querySelector('.img-thumbnail').src = thumbnail;
+      let id, por, title, content, thumbnail;
 
-      // atualiza metatags da página
-      document.querySelector('meta[name=title]').setAttribute("content", `gchan: ${title}`);
-      document.querySelector('meta[name=description]').setAttribute("content", `gchan: ${content.substr(0, 180)}`);
-      document.querySelector('title').innerText = `gchan: ${title}`;
+      const idEl = document.getElementById('injected_id');
+      const porEl = document.getElementById('injected_por');
+      const titleEl = document.getElementById('injected_title');
+      const contentEl = document.getElementById('injected_content');
+      const thumbnailEl = document.getElementById('injected_thumbnail');
+      const createdEl = document.getElementById('injected_created');
 
-      document.querySelector('meta[property="og:title"]').setAttribute("content", `gchan: ${title}`);
-      document.querySelector('meta[property="og:description"]').setAttribute("content", `gchan: ${content.substr(0, 180)}`);
-      document.querySelector('meta[property="og:image"]').setAttribute("content", thumbnail);
-
-      document.querySelector('meta[property="twitter:title"]').setAttribute("content", `gchan: ${title}`);
-      document.querySelector('meta[property="twitter:description"]').setAttribute("content", `gchan: ${content.substr(0, 180)}`);
-      document.querySelector('meta[property="twitter:image"]').setAttribute("content", thumbnail);
+      if (createdEl) {
+        created = createEl.innerText;
+        document.querySelector('#message-created').innerText = created;
+      }
+      if (idEl) {
+        id = idEl.innerText;
+        document.querySelector('.container h1').innerText = `Respondendo ao post #${id}`;
+        document.querySelector('.message-id').innerText = `${id} / `;
+      }
+      if (porEl) {
+        por = porEl.innerText;
+        document.querySelector('.message-username').innerText = `por: ${por}`;
+      }
+      if (titleEl) {
+        title = titleEl.innerText;
+        document.querySelector('.message-subject').innerText = `${title}`;
+        document.querySelector('meta[name=title]').setAttribute("content", `gchan: ${title}`);
+        document.querySelector('meta[property="twitter:title"]').setAttribute("content", `gchan: ${title}`);
+        document.querySelector('title').innerText = `gchan: ${title}`;
+        document.querySelector('meta[property="og:title"]').setAttribute("content", `gchan: ${title}`);
+      }
+      if (contentEl) {
+        content = contentEl.innerText;
+        document.querySelector('.message-content').innerText = `${content}`;
+        document.querySelector('meta[name=description]').setAttribute("content", `gchan: ${content.substr(0, 180)}`);
+        document.querySelector('meta[property="og:description"]').setAttribute("content", `gchan: ${content.substr(0, 180)}`);
+        document.querySelector('meta[property="twitter:description"]').setAttribute("content", `gchan: ${content.substr(0, 180)}`);
+      }
+      if (thumbnailEl) {
+        thumbnail = thumbnailEl.innerText;
+        document.querySelector('.img-thumbnail').src = thumbnail;
+        document.querySelector('meta[property="og:image"]').setAttribute("content", thumbnail);
+        document.querySelector('meta[property="twitter:image"]').setAttribute("content", thumbnail);
+      }
     },
     getThePost() {
       fetch(`${this.$backendURL}${this.messageURL}${this.id}`).then(response => response.json()).then(result => {
@@ -15111,9 +15143,10 @@ if (window.__PRERENDER_INJECTED !== undefined) {
               return;
             }
             this.$set(this.message, 'replies', replies);
+            this.targetQuote();
           });
         } else {
-          window.location.href = '/not-found';
+          window.location.href = '/';
         }
       });
     },
@@ -15173,7 +15206,6 @@ if (window.__PRERENDER_INJECTED !== undefined) {
       } else {
         typeCheckedReply = reply;
       }
-      console.log(this.message);
       if (this.message.replies === undefined) this.message.replies = [];
       this.message.replies.push(typeCheckedReply);
     }
@@ -19501,9 +19533,9 @@ var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_4d916ab7___ = __webpack_require__(52);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_4d916ab7___["a"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_4d916ab7___["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_e871d49e___ = __webpack_require__(52);
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_e871d49e___["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_e871d49e___["b"]; });
 
 
 /***/ }),
@@ -19513,7 +19545,7 @@ var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled d-flex flex-column align-items-center"},[_c('li',{staticClass:"media",attrs:{"id":'li_' + _vm.message.id}},[(_vm.message.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":_vm.message.imageurl,"alt":_vm.message.subject,"src":_vm.message.imageurl},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, _vm.message.id)},"load":function($event){return _vm.preventVideo($event)}}}):_c('img',{staticClass:"img-thumbnail placeholder",attrs:{"loading":"lazy","src":_vm.$backendURL+'placeholders',"alt":"post sem imagem"}}),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body"},[(_vm.messageFlash.header && _vm.messageFlash.messageID === _vm.message.id)?_c('div',{staticClass:"flash",class:_vm.messageFlash.type},[_c('button',{staticClass:"flash-btn",attrs:{"type":"button"},on:{"click":function($event){_vm.messageFlash.header = ''}}},[_vm._v("x")]),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.messageFlash.header))]),_vm._v("\n        "+_vm._s(_vm.messageFlash.text)+"\n        "),_c('a',{attrs:{"href":_vm.messageFlash.link}},[_vm._v(_vm._s(_vm.messageFlash.message))]),_vm._v(" "),_c('div',{staticClass:"opt-btns"},[_c('button',{attrs:{"type":"button"},on:{"click":function($event){return _vm.handleMessage(_vm.message.id,'delete',$event)}}},[_vm._v("\n            Deletar\n          ")])])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"edit_tab",attrs:{"data-message-id":_vm.message.id}},[_c('p',{staticClass:"message-username mt-0 mb-1 name"},[_vm._v("por: "+_vm._s(_vm.message.username))]),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"delete",attrs:{"type":"button"},on:{"click":function($event){return _vm.deleteMessage($event)}}},[_vm._v("deletar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"edit",attrs:{"type":"button"},on:{"click":function($event){return _vm.editMessage($event)}}},[_vm._v("editar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id !== _vm.auth.id && false)?_c('button',{staticClass:"react",attrs:{"type":"button"},on:{"click":function($event){return _vm.reactMessage($event)}}},[_vm._v("reagir")]):_vm._e(),_vm._v(" "),_c('button',{staticClass:"reply",attrs:{"type":"button","data-replyTo":_vm.message.id},on:{"click":function($event){return _vm.replyMessage($event)}}},[_vm._v("responder")]),_vm._v(" "),(_vm.replyCount && _vm.replyCount > 2 && _vm.isHome)?_c('button',{staticClass:"link",attrs:{"type":"button"}},[_c('a',{attrs:{"href":'/#/post/' + _vm.message.id}},[_vm._v("\n            ver respostas\n          ")])]):_vm._e()]),_vm._v(" "),(_vm.isHome && _vm.replyCount && _vm.replyCount > 2)?_c('div',{staticClass:"reply_count"},[_c('small',[_vm._v("Este post possui "+_vm._s(_vm.replyCount)+" respostas!")])]):_vm._e(),_vm._v(" "),_c('p',{staticClass:"mt-0 mb-1 subject"},[_c('span',{staticClass:"id message-id"},[_vm._v("#"+_vm._s(_vm.message.id)+" / ")]),_vm._v(" "),(_vm.message.subject)?_c('span',{staticClass:"message-subject"},[_vm._v(_vm._s(_vm.message.subject))]):_c('span',{staticClass:"id message-subject"},[_vm._v("gchan post")])]),_vm._v(" "),_c('p',{staticClass:"message-content",domProps:{"innerHTML":_vm._s(_vm.message.message)}}),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.message.yt_iframes)?_c('div',{ref:"yt_iframes",staticClass:"iframe-wrapper"},[_c('div')]):_vm._e(),_vm._v(" "),_c('small',[_vm._v(_vm._s(_vm.convertTZ(_vm.message.created)))]),_c('br'),_vm._v(" "),(_vm.message.gif_origin == 'giphy')?_c('img',{staticClass:"gif_origin",attrs:{"alt":"powered by GIPHY","src":__webpack_require__(53)}}):_vm._e()])]),_vm._v(" "),_vm._l((_vm.replies),function(reply){return _c('li',{key:reply.id,staticClass:"media reply-item"},[(reply.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":reply.imageurl,"src":reply.imageurl,"alt":""},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, false)},"load":function($event){return _vm.preventVideo($event)}}}):_vm._e(),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body",attrs:{"id":'quoted_' + reply.id}},[_c('div',{staticClass:"edit_tab"},[_c('p',{staticClass:"mt-0 mb-1"},[_vm._v(_vm._s(reply.username))]),_vm._v(" "),_c('button',{staticClass:"link link-reply",attrs:{"type":"button","data-quoteid":reply.id,"title":"citar esta resposta"},on:{"click":function($event){return _vm.adcQuote($event)}}},[_vm._v("\n          #"+_vm._s(reply.id)+"\n        ")])]),_vm._v(" "),_c('p',{staticClass:"text-content",domProps:{"innerHTML":_vm._s(reply.content)}}),_vm._v(" "),(_vm.checkContentLength(reply.content))?_c('div',{staticClass:"reply-warning",on:{"click":function($event){return _vm.expandContent($event)}}},[_c('em',[_vm._v("resposta truncada devido ao tamanho. clique para visualizar na íntegra.")]),_c('button',{staticClass:"button-link",attrs:{"type":"button"}},[_vm._v("expandir")])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"iframe-wrapper"}),_vm._v(" "),_c('small',[_vm._v(_vm._s(_vm.convertTZ(reply.created)))]),_c('br')])])}),_vm._v(" "),_c('hr')],2)}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled d-flex flex-column align-items-center"},[_c('li',{staticClass:"media",attrs:{"id":'li_' + _vm.message.id}},[(_vm.message.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":_vm.message.imageurl,"alt":_vm.message.subject,"src":_vm.message.imageurl},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, _vm.message.id)},"load":function($event){return _vm.preventVideo($event)}}}):_c('img',{staticClass:"img-thumbnail placeholder",attrs:{"loading":"lazy","src":_vm.$backendURL+'placeholders',"alt":"post sem imagem"}}),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body"},[(_vm.messageFlash.header && _vm.messageFlash.messageID === _vm.message.id)?_c('div',{staticClass:"flash",class:_vm.messageFlash.type},[_c('button',{staticClass:"flash-btn",attrs:{"type":"button"},on:{"click":function($event){_vm.messageFlash.header = ''}}},[_vm._v("x")]),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.messageFlash.header))]),_vm._v("\n        "+_vm._s(_vm.messageFlash.text)+"\n        "),_c('a',{attrs:{"href":_vm.messageFlash.link}},[_vm._v(_vm._s(_vm.messageFlash.message))]),_vm._v(" "),_c('div',{staticClass:"opt-btns"},[_c('button',{attrs:{"type":"button"},on:{"click":function($event){return _vm.handleMessage(_vm.message.id,'delete',$event)}}},[_vm._v("\n            Deletar\n          ")])])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"edit_tab",attrs:{"data-message-id":_vm.message.id}},[_c('p',{staticClass:"message-username mt-0 mb-1 name"},[_vm._v("por: "+_vm._s(_vm.message.username))]),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"delete",attrs:{"type":"button"},on:{"click":function($event){return _vm.deleteMessage($event)}}},[_vm._v("deletar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"edit",attrs:{"type":"button"},on:{"click":function($event){return _vm.editMessage($event)}}},[_vm._v("editar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id !== _vm.auth.id && false)?_c('button',{staticClass:"react",attrs:{"type":"button"},on:{"click":function($event){return _vm.reactMessage($event)}}},[_vm._v("reagir")]):_vm._e(),_vm._v(" "),_c('button',{staticClass:"reply",attrs:{"type":"button","data-replyTo":_vm.message.id},on:{"click":function($event){return _vm.replyMessage($event)}}},[_vm._v("responder")]),_vm._v(" "),(_vm.replyCount && _vm.replyCount > 2 && _vm.isHome)?_c('button',{staticClass:"link",attrs:{"type":"button"}},[_c('a',{attrs:{"href":'/#/post/' + _vm.message.id}},[_vm._v("\n            ver respostas\n          ")])]):_vm._e()]),_vm._v(" "),(_vm.isHome && _vm.replyCount && _vm.replyCount > 2)?_c('div',{staticClass:"reply_count"},[_c('small',[_vm._v("Este post possui "+_vm._s(_vm.replyCount)+" respostas!")])]):_vm._e(),_vm._v(" "),_c('p',{staticClass:"mt-0 mb-1 subject"},[_c('span',{staticClass:"id message-id"},[_vm._v("#"+_vm._s(_vm.message.id)+" / ")]),_vm._v(" "),(_vm.message.subject)?_c('span',{staticClass:"message-subject"},[_vm._v(_vm._s(_vm.message.subject))]):_c('span',{staticClass:"id message-subject"},[_vm._v("gchan post")])]),_vm._v(" "),_c('p',{staticClass:"message-content",domProps:{"innerHTML":_vm._s(_vm.message.message)}}),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.message.yt_iframes)?_c('div',{ref:"yt_iframes",staticClass:"iframe-wrapper"},[_c('div')]):_vm._e(),_vm._v(" "),(_vm.message.created)?_c('small',{attrs:{"id":"message-created"}},[_vm._v(_vm._s(_vm.convertTZ(_vm.message.created)))]):_vm._e(),_c('br'),_vm._v(" "),(_vm.message.gif_origin == 'giphy')?_c('img',{staticClass:"gif_origin",attrs:{"alt":"powered by GIPHY","src":__webpack_require__(53)}}):_vm._e()])]),_vm._v(" "),_vm._l((_vm.replies),function(reply){return _c('li',{key:reply.id,staticClass:"media reply-item"},[(reply.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":reply.imageurl,"src":reply.imageurl,"alt":""},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, false)},"load":function($event){return _vm.preventVideo($event)}}}):_vm._e(),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body",attrs:{"id":'quoted_' + reply.id}},[_c('div',{staticClass:"edit_tab"},[_c('p',{staticClass:"mt-0 mb-1"},[_vm._v(_vm._s(reply.username))]),_vm._v(" "),_c('button',{staticClass:"link link-reply",attrs:{"type":"button","data-quoteid":reply.id,"title":"citar esta resposta"},on:{"click":function($event){return _vm.adcQuote($event)}}},[_vm._v("\n          #"+_vm._s(reply.id)+"\n        ")])]),_vm._v(" "),_c('p',{staticClass:"text-content",domProps:{"innerHTML":_vm._s(reply.content)}}),_vm._v(" "),(_vm.checkContentLength(reply.content))?_c('div',{staticClass:"reply-warning",on:{"click":function($event){return _vm.expandContent($event)}}},[_c('em',[_vm._v("resposta truncada devido ao tamanho. clique para visualizar na íntegra.")]),_c('button',{staticClass:"button-link",attrs:{"type":"button"}},[_vm._v("expandir")])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"iframe-wrapper"}),_vm._v(" "),_c('small',[_vm._v(_vm._s(_vm.convertTZ(reply.created)))]),_c('br')])])}),_vm._v(" "),_c('hr')],2)}
 var staticRenderFns = []
 
 
@@ -19592,7 +19624,7 @@ module.exports = __webpack_require__.p + "volume-high.png?79ae6bdb759b3b6b1fa89a
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_69fbf2df___ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_e850a5d8___ = __webpack_require__(60);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Post_vue_vue_type_script_lang_js___ = __webpack_require__(20);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Post_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(62);
@@ -19607,8 +19639,8 @@ module.exports = __webpack_require__.p + "volume-high.png?79ae6bdb759b3b6b1fa89a
 
 var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_1__Post_vue_vue_type_script_lang_js___["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_69fbf2df___["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_69fbf2df___["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_e850a5d8___["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_e850a5d8___["b" /* staticRenderFns */],
   false,
   null,
   null,
@@ -19623,9 +19655,9 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_69fbf2df___ = __webpack_require__(61);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_69fbf2df___["a"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_69fbf2df___["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_e850a5d8___ = __webpack_require__(61);
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_e850a5d8___["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_e850a5d8___["b"]; });
 
 
 /***/ }),
