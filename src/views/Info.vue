@@ -21,16 +21,18 @@
         </form>
       </div>
     </section>
-    <!-- <section id="register">
+    <section id="register">
       <h3 v-if="!auth.loggedIn">Criar uma conta</h3>
       <h3 v-if="auth.loggedIn">Bem vindo, {{auth.username}}</h3>
       <form v-if="!auth.loggedIn" v-on:submit.prevent="register($event)">
-        <label for="name">nome</label>
-        <input type="text" name="name" id="name" v-model="name" required>
+        <label for="name">nick</label>
+        <input type="text" minlength=4 maxlength=20 name="name" id="name" v-model="name" required>
         <label for="email">email</label>
         <input type="email" name="email" id="email" v-model="email" required>
         <label for="password">senha</label>
-        <input type="password" name="password" id="password" v-model="password" required>
+        <input type="password" minlength=6 name="password" id="password" v-model="password" required>
+        <label for="password_confirm">confirme sua senha</label>
+        <input type="password" minlength=6 name="password_confirm" id="password_confirm" v-model="password_confirm" required>
         <div class="checkbox-wrapper">
           <input @change="showPassword()" type="checkbox" name="mostrar-senha" id="mostrar-senha">
           <label for="mostrar-senha">mostrar senha</label>
@@ -41,9 +43,9 @@
         <button class='flash-btn' type="button" v-on:click="signUpFlash.header = ''">x</button>
         <strong>{{signUpFlash.header}}</strong>
         {{signUpFlash.text}}
-        <a :href="signUpFlash.link">{{signUpFlash.message}}</a>
+        <a target="_blank" :href="signUpFlash.link">{{signUpFlash.message}}</a>
       </div>
-    </section> -->
+    </section>
   </div>
 </template>
 <script>
@@ -63,6 +65,7 @@ export default {
     name: '',
     email: '',
     password: '',
+    password_confirm: '',
     signUpFlash: {
       type: '',
       header: '',
@@ -96,16 +99,29 @@ export default {
       document.cookie = `cookie_consent_variable=${cookieConsent};expires=${expires};path=/;Secure`;
     },
     showPassword() {
-      const pwdField = document.querySelector('#password');
-      const type = pwdField.getAttribute('type');
-      if (type === 'password') {
-        pwdField.setAttribute('type', 'text');
-      } else {
-        pwdField.setAttribute('type', 'password');
-      }
+      const pwdField = document.querySelectorAll('#password,#password_confirm');
+      pwdField.forEach((pwd) => {
+        const type = pwd.getAttribute('type');
+        if (type === 'password') {
+          pwd.setAttribute('type', 'text');
+        } else {
+          pwd.setAttribute('type', 'password');
+        }
+      });
     },
     register(e) {
-      fetch(`${this.$backendURL}/register`, {
+      e.preventDefault();
+      const pwd = e.target.querySelector('#password');
+      const pwdConfirm = e.target.querySelector('#password_confirm');
+      if (pwd.value != pwdConfirm.value) {
+        this.signUpFlash.type = 'error';
+        this.signUpFlash.header = 'ow carai!';
+        this.signUpFlash.link = 'https://guites.github.io/pwdgen/';
+        this.signUpFlash.text = 'A senha não bate com a confirmação.\nVerifique plx. \n';
+        this.signUpFlash.message = '(‡▼益▼)';
+        return;
+      }
+      fetch(`${this.$backendURL}register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -114,12 +130,12 @@ export default {
       })
         .then((response) => response.json())
         .then((data) => {
-          if (!data) {
+          if (data.error) {
             this.signUpFlash.type = 'error';
             this.signUpFlash.header = 'Oh não!';
-            this.signUpFlash.link = '#contact';
-            this.signUpFlash.text = 'Ocorreu um erro ao realizar seu cadastro.\nAtualize a página ou \n';
-            this.signUpFlash.message = 'entre em contato.';
+            //this.signUpFlash.link = '#contact';
+            this.signUpFlash.text = `Oops: ${data.error}\n`;
+            this.signUpFlash.message = 'Não desista! (｀∀´)Ψ';
           } else if (data === 'success') {
             e.target.reset();
             this.signUpFlash.type = 'success';
@@ -128,12 +144,16 @@ export default {
             this.signUpFlash.message = 'Aguarde...';
             this.login();
           } else {
-            console.log(data);
+            this.signUpFlash.type = 'error';
+            this.signUpFlash.header = 'Oh-oh!';
+            this.signUpFlash.link = '/';
+            this.signUpFlash.text = `Ocorreu algum erro bizarro no processo.`;
+            this.signUpFlash.message = 'Faça um post reclamando! ٩(^ᴗ^)۶';
           }
         });
     },
     async login() {
-      fetch(`${this.$backendURL}/login`, {
+      fetch(`${this.$backendURL}login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

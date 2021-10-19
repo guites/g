@@ -12,8 +12,9 @@
           <input type="text" class="form-control" id="username"
           aria-describedby="usernameHelp"
           placeholder="anônimo"
-          v-model="message.username"
-          maxlength=30
+          v-model="auth.username || message.username"
+          minlength=4
+          maxlength=20
           >
           <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
@@ -260,9 +261,9 @@ export default {
       });
       return result;
     },
-    // username() {
-    //   return this.auth.username || this.message.username;
-    // },
+    username() {
+      return this.auth.username || this.message.username;
+    },
     smallUsernamePhrase() {
       const phrases = [
         { quote: 'o que é que há, pois, num nome?', reference: 'https://pt.wikipedia.org/wiki/William_Shakespeare' },

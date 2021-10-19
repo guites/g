@@ -12,10 +12,10 @@
                     <li><a href="/"><h1>gchan</h1><img src="@/assets/sham.png" alt="gchan logo"></a></li>
                     <li v-if="!isHome"><a href='/'>mensagens</a></li>
                     <li v-if="!isInfo"><a href='/#/info'>informações</a></li>
-                    <!-- <li>
+                    <li>
                       <button v-if="!auth.loggedIn" v-on:click="janitor=!janitor">login</button>
                       <button v-if="auth.loggedIn" v-on:click="logOut()">logout</button>
-                    </li> -->
+                    </li>
                 </ul>
             </nav>
             <template>
@@ -36,7 +36,7 @@
                 </SearchBar>
             </template>
         </div>
-        <!-- <transition name="fadeForm">
+        <transition name="fadeForm">
           <div class="janitor-login" v-if="janitor">
             <form v-if="!auth.loggedIn" v-on:submit.prevent="login($event)">
               <div class="fields">
@@ -46,7 +46,7 @@
                   id="janitor-login" v-model="username" required>
                 </div>
                 <div class="pwd-wrapper">
-                  <label for="janitor-pass">pass:</label>
+                  <label for="janitor-pass">senha:</label>
                   <input type="password" name="janitor-pass"
                   id="janitor-pass" v-model="password" required>
                 </div>
@@ -77,7 +77,7 @@
               <a :href="loginFlash.link">{{loginFlash.message}}</a>
             </div>
           </div>
-        </transition> -->
+        </transition>
         <div v-if="marquee"
         class="marquee">
           <p v-on:click="marqueeInput=!marqueeInput">⌨️</p>

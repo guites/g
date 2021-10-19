@@ -163,6 +163,14 @@ export default {
       var month = ("0" + (date_sp.getMonth() + 1)).slice(-2);
       return `${hour}:${min} ${day}/${month}/${date_sp.getFullYear()}`;
     },
+    deleteMessage(e) {
+      const messageId = e.target.closest('.edit_tab').getAttribute('data-message-id');
+      this.messageFlash.type = 'warning';
+      this.messageFlash.header = `Deletar post #${messageId}?`;
+      this.messageFlash.text = 'Esta ação não pode ser revertida! (╯ ͠° ͟ʖ ͡°)╯┻━┻';
+      //this.messageFlash.header && messageFlash.messageID === message.id
+      this.messageFlash.messageID = parseInt(messageId);
+    },
     handleMessage(messageID, action, e) {
       e.target.disabled = true;
       let method;

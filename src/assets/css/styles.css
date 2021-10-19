@@ -1289,8 +1289,22 @@ section .flash, .janitor-login .flash, .media-body .flash {
   padding: 30px 25px;
   border-radius: 4px;
   z-index: 2;
+  background-color: #444;
+  line-height: 1.5;
   display: flex;
   flex-direction: column;
+}
+section .flash.warning, .janitor-login .flash.warning, .media-body .flash.warning {
+  border: 1px solid #e74c3c;
+}
+section .flash.warning strong, .janitor-login .flash.warning strong, .media-body .flash.warning strong {
+  border-color: #e74c3c;
+}
+section .flash.warning button.flash-btn, .janitor-login .flash.warning button.flash-btn, .media-body .flash.warning button.flash-btn {
+  transition: all 300ms ease;
+}
+section .flash.warning button.flash-btn:hover, .janitor-login .flash.warning button.flash-btn:hover, .media-body .flash.warning button.flash-btn:hover {
+  color: #e74c3c;
 }
 section .flash.error, .janitor-login .flash.error, .media-body .flash.error {
   background-color: #e74c3c;
@@ -1317,23 +1331,29 @@ section .flash button.flash-btn, .janitor-login .flash button.flash-btn, .media-
 }
 section .flash .opt-btns, .janitor-login .flash .opt-btns, .media-body .flash .opt-btns {
   margin-top: 10px;
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
 }
 section .flash .opt-btns button, .janitor-login .flash .opt-btns button, .media-body .flash .opt-btns button {
-  padding: 12px 12px;
-  opacity: 0.6;
-  color: #fff;
+  opacity: 1;
+  border: none;
+  padding: 0;
+  color: #e74c3c;
+  background-color: transparent;
+  background-image: none;
   border-radius: 5px;
-  border: 2px solid #fff;
-  background-color: #e74c3c;
   transition: all 300ms ease;
-  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);
 }
 section .flash .opt-btns button:hover, .janitor-login .flash .opt-btns button:hover, .media-body .flash .opt-btns button:hover {
-  opacity: 1;
+  text-decoration: underline;
 }
 section .flash strong, .janitor-login .flash strong, .media-body .flash strong {
   font-weight: bolder;
   margin: 5px 0;
+  border-bottom: 2px solid #888;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
 }
 section .flash a, .janitor-login .flash a, .media-body .flash a {
   text-decoration: underline;
