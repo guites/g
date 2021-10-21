@@ -2,13 +2,14 @@
   <div>
      <section class="create-thread">
       <form @submit.prevent="addMessage()">
+        <h2 @click="focusMessage()">Poste no gchan</h2>
         <div v-if="error" class='alert-error'>
           <span v-on:click="error=''">x</span>
           <h4>Erro!</h4>
           <p>{{error}}</p>
        </div>
         <div class="form-group">
-          <label for="username">Usuário</label>
+          <label for="username">Nome <small>[opcional]</small></label>
           <input type="text" class="form-control" id="username"
           aria-describedby="usernameHelp"
           placeholder="anônimo"
@@ -41,50 +42,71 @@
           required maxlength=250>
           </textarea>
         </div>
-        <div class="form-group">
-          <label for="uploadIMG">
-            Envie uma imagem/gif/vídeo
-            <span
-            title="Erros podem ocorrer ¯\_(ツ)_/¯"
-            class='badge beta'>
-              BETA
-            </span>
-          </label>
-          <input type="file" name="uploadIMG" id="uploadIMG"
-          :disabled="this.optUpload === true"
-          @change="handleUpload($event)">
+        <div class="form-group media-type-radios" >
+          <div>
+            <input @change="mediaType" type="radio" id="upload-media" name="media-type" value="upload-media" checked>
+            <label for="upload-media">Enviar arquivo</label>
+          </div>
+          <div>
+            <input @change="mediaType" type="radio" id="link-media" name="media-type" value="link-media">
+            <label for="link-media">Colocar URL</label>
+          </div>
+          <div>
+            <input @change="mediaType" type="radio" id="search-media" name="media-type" value="search-media">
+            <label for="search-media">Buscar gif</label>
+          </div>
         </div>
-        <div class="form-group">
-          <label for="imageURL" v-if="!this.optUpload">
-            ou: digite a URL de uma imagem/gif/vídeo</label>
-          <label for="imageURL" class='upload-concluido'
-          v-else>Upload Concluído!</label>
-          <input v-model="message.imageURL" type="url" class="form-control"
-          id="imageURL" placeholder="https://~"
-          :readonly="this.optUpload === true"
-          >
-          <transition name="fade">
-            <div class="searchgifstuffs">
-              <label v-if='!this.optUpload' for='giphyURL'>ou: Busque um gif</label>
+        <!-- <transition name="fade"> -->
+          <div v-if="media_type == 'upload-media'" class="form-group">
+            <label for="uploadIMG">
+              envie uma imagem, gif ou vídeo
+              <span
+              title="Erros podem ocorrer ¯\_(ツ)_/¯"
+              class='badge beta'>
+                BETA
+              </span>
+            </label>
+            <input type="file" name="uploadIMG" id="uploadIMG"
+            :disabled="this.optUpload === true"
+            @change="handleUpload($event)">
+          </div>
+        <!-- </transition> -->
+        <!-- <div class="form-group"> -->
+          <!-- <transition name="fade"> -->
+            <div v-if="media_type == 'link-media'" class="form-group">
+              <label for="imageURL" v-if="!this.optUpload">
+                digite a URL de uma imagem, gif ou vídeo</label>
+              <label for="imageURL" class='upload-concluido'
+              v-else>Upload Concluído!</label>
+              <input style="width: 100%;" v-model="message.imageURL" type="url" class="form-control"
+              id="imageURL" placeholder="https://~"
+              :readonly="this.optUpload === true"
+              >
+            </div>
+              <!-- </transition> -->
+              <!-- <transition name="fade"> -->
+            <div v-if="media_type == 'search-media'" class="searchgifstuffs">
+              <label v-if='!this.optUpload' for='giphyURL'>digite algum termo no campo abaixo!</label>
               <input v-if='!this.optUpload'
               v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
               class="form-control" id="giphyURL" placeholder="cats">
+              <input style="visibility: hidden;" v-model="message.imageURL" type="url" class="form-control" id="imageURL" readonly>
               <div v-if='!this.optUpload' class="gif-search-toggle" data-toggle="buttons">
-                <input v-on:change="searchGif" type="radio" name="options" id="option1"
+                <input class="gif-type" v-on:change="searchGif" type="radio" name="options" id="option1"
                 autocomplete="off" checked value="giphy">
                 <label for ='option1' class="btn btn-primary">
                   Giphy
                 </label>
-                <input v-on:change="searchGif" type="radio" name="options" id="option2"
+                <input class="gif-type" v-on:change="searchGif" type="radio" name="options" id="option2"
                 autocomplete="off" value="gfycat">
                 <label for='option2' class="btn btn-primary">
                   gfycat
                 </label>
               </div>
             </div>
-          </transition>
-        </div>
-        <button type="submit" class="btn btn-primary">Enviar</button>
+            <!-- </transition> -->
+            <!-- </div> -->
+        <button type="submit" class="btn btn-primary create-post">Postar</button>
     </form>
     <div v-if="isPreviewing" class="imagePreview">
       <button type='button' v-if='this.optUpload'
@@ -116,16 +138,16 @@
             <img src="@/assets/giphy-attr.png" alt="Powered by GIPHY">
           </a>
         </div>
-        <div class='paginate-arrows'>
-          <ul v-if='hasPag' class="pagination">
-            <div>
-              <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
-              class="page-item" :class="{ 'active' : currPage == index}">
-                <p class="page-link">{{index}}</p>
-              </li>
-            </div>
-          </ul>
-        </div>
+      </div>
+      <div class='paginate-arrows'>
+        <ul v-if='hasPag' class="pagination">
+          <div>
+            <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
+            class="page-item" :class="{ 'active' : currPage == index}">
+              <p class="page-link">{{index}}</p>
+            </li>
+          </div>
+        </ul>
       </div>
     </div>
     </section>
@@ -210,6 +232,7 @@ export default {
     hasPag: '',
     gifs: [],
     hasSubject: false,
+    media_type: 'upload-media',
     message: {
       username: '',
       subject: '',
@@ -353,6 +376,13 @@ export default {
       });
   },
   methods: {
+    mediaType() {
+      const type = document.querySelector('input[name="media-type"]:checked');
+      this.media_type = type.value;
+    },
+    focusMessage() {
+      document.querySelector('#message').focus();
+    },
     convertTZ(date) {
       //source: https://stackoverflow.com/a/54127122/14427854
       var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
@@ -568,16 +598,19 @@ export default {
       this.message.recaptcha_token = '';
       this.isPreviewing = '';
       this.isGifBeingSearched = '';
-      document.querySelector('#uploadIMG').value = '';
+      const uploadIMG = document.querySelector('#uploadIMG');
+      if (uploadIMG) {
+        uploadIMG.value = '';
+      }
       this.optUpload = '';
     },
     addMessage() {
+      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
+      submitButton.disabled = true;
       grecaptcha.ready(() => {
         grecaptcha.execute(this.$captchaClient, {action: 'post'}).then((token) => token)
         .then((token) => {
           this.message.recaptcha_token = token;
-          const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
-          submitButton.disabled = true;
           if (this.auth.username) {
             this.message.username = this.auth.username;
             this.message.user_id = parseInt(this.auth.id, 10);
@@ -703,7 +736,7 @@ export default {
       } else {
         this.hasPag = '1';
       }
-      switch (document.querySelector("input[type='radio']:checked").value) {
+      switch (document.querySelector(".gif-search-toggle input[type='radio']:checked").value) {
         default:
           this.apiRoute = 'giphy';
           fetch(`https://api.giphy.com/v1/gifs/search?api_key=5KnNW5U9nJ2Xjnas3lugKxMIXVdCsrqF&q=${searchString}&limit=${this.gifsPerPage}&offset=${(this.currPage - 1) * this.gifsPerPage}`)
@@ -766,6 +799,12 @@ export default {
       const originalUrl = e.target.getAttribute('data-original');
       document.querySelector('#imageURL').value = originalUrl;
       this.message.imageURL = originalUrl;
+      const clickedImg = e.target;
+      const lastClicked = clickedImg.closest('.gifBox').querySelector('.clicked');
+      if (lastClicked) {
+        lastClicked.classList.remove('clicked');
+      }
+      clickedImg.parentElement.classList.add('clicked');
     },
     paginateGif(e) {
       this.currPage = e.target.innerText;

@@ -17,7 +17,10 @@ body{
 .fadeForm-enter, .fadeForm-leave-to /* .fade-leave-active below version 2.1.8 */ {
   max-height:0px;
 }
-.fade-enter-active, .fade-leave-active {
+.fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter-active {
   transition: opacity .5s;
 }
 .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
@@ -141,6 +144,9 @@ button[type="submit"], input[type="submit"]{
     color: #fff;
     background-color: #2b4764;
     border-color: #28415b;
+  }
+  &.create-post {
+    margin: 15px 0 25px;
   }
 }
 .gif-search-toggle{
@@ -609,10 +615,20 @@ section.create-thread{
   max-width:1200px;
   width:100%;
   margin:0 auto;
+  h2 {
+    text-decoration: underline;
+    margin: 15px 0;
+    cursor: pointer;
+  }
   form{
       max-width: 500px;
       width:100%;
+      border-bottom: 5px dotted #b9b9b9;
+      margin-bottom: 25px;
       .form-group, .searchgifstuffs{
+        &.media-type-radios {
+          flex-direction: row; margin: 10px 0;
+        }
           display:flex;
           flex-direction:column;
           max-width: 500px;
@@ -639,7 +655,10 @@ section.create-thread{
           textarea{
             max-width:100%;
           }
-          input[type="radio"]{
+          input[type="radio"]:not(.gif-type) {
+            min-height: initial;
+          }
+          input[type="radio"].gif-type{
             opacity:0;
             position:absolute;
             &:checked + label{
@@ -652,6 +671,22 @@ section.create-thread{
               outline-offset:1px;
               outline-style:auto;
             }
+          }
+          input[type="file"] {
+            display: block;
+            width: 100%;
+            padding: 0 0 1rem 0;
+            font-size: 1rem;
+            font-weight: 400;
+            line-height: 1.5;
+            background-clip: padding-box;
+            border: 0 solid #fff;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            cursor: pointer;
           }
           .gif-search-toggle{
               .btn{
@@ -685,10 +720,10 @@ section.create-thread{
     height:480px;
     position:relative;
     .paginate-arrows{
-        position:absolute;
-        bottom:0%;
-        left:50%;
-        transform:translate(-50%,0);
+        //position:absolute;
+        //bottom:0%;
+        //left:50%;
+        //transform:translate(-50%,0);
         ul{
             display:flex;
             list-style:none;
@@ -759,6 +794,7 @@ section.create-thread{
     .gifBox{
         width:100%;
         height:100%;
+        min-height: 250px;
         display:flex;
         flex-wrap:wrap;
         border:2px solid gray;
@@ -774,6 +810,9 @@ section.create-thread{
             &:hover{
                 border-color:#fff;
                 cursor:pointer;
+            }
+            &.clicked {
+                border-color:#fff;
             }
             img{
                 width:100%;
@@ -1570,6 +1609,14 @@ header{
       }
   }
 }
+@media screen and (max-width: 525px){
+  section.create-thread{
+    form {
+      width: 95%;
+    }
+  }
+
+}
 @media screen and (max-width: 479px){
   div{
       li{
@@ -1577,5 +1624,17 @@ header{
               width:100%;
           }
       }
+  }
+  section.create-thread{
+    form {
+      .form-group {
+        &.media-type-radios {
+          flex-direction: column;
+          > div {
+            padding: 10px 0;
+          }
+        }
+      }
+    }
   }
 }
