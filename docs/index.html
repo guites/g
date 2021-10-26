@@ -45,7 +45,11 @@ body {
   max-height: 0px;
 }
 
-.fade-enter-active, .fade-leave-active {
+.fade-leave-active {
+  transition: opacity 0.5s;
+}
+
+.fade-enter-active {
   transition: opacity 0.5s;
 }
 
@@ -172,6 +176,9 @@ form button[type=submit]:hover, form input[type=submit]:hover {
   color: #fff;
   background-color: #2b4764;
   border-color: #28415b;
+}
+form button[type=submit].create-post, form input[type=submit].create-post {
+  margin: 15px 0 25px;
 }
 form .gif-search-toggle label {
   cursor: pointer;
@@ -558,14 +565,25 @@ section.create-thread {
   width: 100%;
   margin: 0 auto;
 }
+section.create-thread h2 {
+  text-decoration: underline;
+  margin: 15px 0;
+  cursor: pointer;
+}
 section.create-thread form {
   max-width: 500px;
   width: 100%;
+  border-bottom: 5px dotted #b9b9b9;
+  margin-bottom: 25px;
 }
 section.create-thread form .form-group, section.create-thread form .searchgifstuffs {
   display: flex;
   flex-direction: column;
   max-width: 500px;
+}
+section.create-thread form .form-group.media-type-radios, section.create-thread form .searchgifstuffs.media-type-radios {
+  flex-direction: row;
+  margin: 10px 0;
 }
 section.create-thread form .form-group .form-subject, section.create-thread form .searchgifstuffs .form-subject {
   display: flex;
@@ -590,19 +608,38 @@ section.create-thread form .form-group input:not([type=file]), section.create-th
 section.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs textarea {
   max-width: 100%;
 }
-section.create-thread form .form-group input[type=radio], section.create-thread form .searchgifstuffs input[type=radio] {
+section.create-thread form .form-group input[type=radio]:not(.gif-type), section.create-thread form .searchgifstuffs input[type=radio]:not(.gif-type) {
+  min-height: initial;
+}
+section.create-thread form .form-group input[type=radio].gif-type, section.create-thread form .searchgifstuffs input[type=radio].gif-type {
   opacity: 0;
   position: absolute;
 }
-section.create-thread form .form-group input[type=radio]:checked + label, section.create-thread form .searchgifstuffs input[type=radio]:checked + label {
+section.create-thread form .form-group input[type=radio].gif-type:checked + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:checked + label {
   background-color: #313131;
   border-color: #ffff00ad;
   color: #ff0;
 }
-section.create-thread form .form-group input[type=radio]:focus + label, section.create-thread form .searchgifstuffs input[type=radio]:focus + label {
+section.create-thread form .form-group input[type=radio].gif-type:focus + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:focus + label {
   outline: 1px solid #ffa500cc;
   outline-offset: 1px;
   outline-style: auto;
+}
+section.create-thread form .form-group input[type=file], section.create-thread form .searchgifstuffs input[type=file] {
+  display: block;
+  width: 100%;
+  padding: 0 0 1rem 0;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  background-clip: padding-box;
+  border: 0 solid #fff;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  cursor: pointer;
 }
 section.create-thread form .form-group .gif-search-toggle .btn, section.create-thread form .searchgifstuffs .gif-search-toggle .btn {
   display: inline-block;
@@ -628,12 +665,6 @@ section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
 }
 section.create-thread .gifBoxWrapper div.error-wrap a, section.create-thread .imagePreview div.error-wrap a {
   padding: 10px;
-}
-section.create-thread .gifBoxWrapper .paginate-arrows, section.create-thread .imagePreview .paginate-arrows {
-  position: absolute;
-  bottom: 0%;
-  left: 50%;
-  transform: translate(-50%, 0);
 }
 section.create-thread .gifBoxWrapper .paginate-arrows ul, section.create-thread .imagePreview .paginate-arrows ul {
   display: flex;
@@ -696,6 +727,7 @@ section.create-thread .gifBoxWrapper .emptyGifResults img, section.create-thread
 section.create-thread .gifBoxWrapper .gifBox, section.create-thread .imagePreview .gifBox {
   width: 100%;
   height: 100%;
+  min-height: 250px;
   display: flex;
   flex-wrap: wrap;
   border: 2px solid gray;
@@ -713,6 +745,9 @@ section.create-thread .gifBoxWrapper .gifBox .gifBoxGif, section.create-thread .
 section.create-thread .gifBoxWrapper .gifBox .gifBoxGif:hover, section.create-thread .imagePreview .gifBox .gifBoxGif:hover {
   border-color: #fff;
   cursor: pointer;
+}
+section.create-thread .gifBoxWrapper .gifBox .gifBoxGif.clicked, section.create-thread .imagePreview .gifBox .gifBoxGif.clicked {
+  border-color: #fff;
 }
 section.create-thread .gifBoxWrapper .gifBox .gifBoxGif img, section.create-thread .imagePreview .gifBox .gifBoxGif img {
   width: 100%;
@@ -1465,9 +1500,21 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
     margin-bottom: 5px;
   }
 }
+@media screen and (max-width: 525px) {
+  section.create-thread form {
+    width: 95%;
+  }
+}
 @media screen and (max-width: 479px) {
   div li img {
     width: 100%;
+  }
+
+  section.create-thread form .form-group.media-type-radios {
+    flex-direction: column;
+  }
+  section.create-thread form .form-group.media-type-radios > div {
+    padding: 10px 0;
   }
 }</style><style type="text/css">
 .text-warning { color: #f39c12;

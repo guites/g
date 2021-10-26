@@ -22,3 +22,9 @@ Depois,
     npm run dev
 
 Antes de dar push no master, leia as instruções em client-deploy.sh
+
+### Prints
+
+Projeto em 10/2021
+
+![print do topo da home em 10/2021](prints/20102021-fs8.png)
