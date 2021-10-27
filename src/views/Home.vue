@@ -642,6 +642,10 @@ export default {
                 if (result.code === '23505') {
                   this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
                 }
+              } else if (result.origin === 'recaptcha') {
+                if (result.code === 'failure') {
+                  this.error = 'Captcha inválido!\nCertifique-se de estar acessando via gchan.com.br!';
+                }
               }
             } else {
               this.error = '';
