@@ -7,6 +7,9 @@ body{
   background-color:#222;
   color:#b9b9b9;
 }
+#search-form { flex-direction:column; justify-content:center;} 
+#search-form div:nth-child(2) { margin-top: 5px; min-height: 20px;}
+#search-form div small span { color: #2c81ba; }
 
 //* TRANSIÇÕES *//
 .fadeForm-enter-active, .fadeForm-leave-active {
@@ -278,16 +281,34 @@ header{
         &.fields{
           input{
             width:calc(100% - 62px);
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+            border-left: none;
           }
         }
         &.btns{
           display: flex;
-          flex-direction:column;
           align-items:center;
+          flex-wrap: wrap;
           position:relative;
           input,button{
+          font-size: 16px;
             margin:10px 5px;
-            width:150px;
+            &[type="submit"] {
+              cursor: pointer;
+              width: 100%;
+              background-color: #222;
+              border-color: #333;
+              &:hover {
+                background-color: #333;
+              }
+            }
+            &:disabled {
+              opacity: 0.5;
+              cursor: wait;
+            }
           }
           a, button.goto-form{
             text-decoration:underline;
@@ -298,6 +319,7 @@ header{
             opacity: 0.6;
             color: white;
             transition: all 300ms ease;
+            width: initial;
             &:hover{
               opacity:0.75;
             }
@@ -309,23 +331,6 @@ header{
             width:75px;
             height:30px;
           }
-          .img-wrapper{
-            position:absolute;
-            right:0;
-            height:36.5px;
-            width:48px;
-            padding:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            cursor:pointer;
-            background-color: #375a7f;
-            border-color: #2b476482;
-            border-radius: 5px;
-            img{
-              width:16px;
-            }
-          }
         }
         div{
           display:flex;
@@ -335,6 +340,11 @@ header{
             padding:10px;
             width:62px;
             display:block;
+            background-color: #222;
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            height: 36.5px;
+            color: #fff;
           }
         }
       }
@@ -1468,9 +1478,15 @@ position:relative;
   }
   &.error{
     background-color:#e74c3c;
+    strong {
+      border-bottom: 1px solid #fff;
+    }
   }
   &.success{
     background-color:#00bc8c;
+    strong {
+      border-bottom: 1px solid #fff;
+    }
   }
   button{
     &.flash-btn{
