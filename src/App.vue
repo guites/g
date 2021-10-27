@@ -1,11 +1,6 @@
-<style>
-  #search-form { flex-direction:column; justify-content:center;} 
-  #search-form div:nth-child(2) { margin-top: 5px; min-height: 20px;}
-  #search-form div small span { color: #2c81ba; }
-</style>
 <template>
   <div id="app">
-   <header>
+   <header v-on:click="removeFlash($event)">
         <div class="inner-header">
             <nav>
                 <ul>
@@ -13,8 +8,8 @@
                     <li v-if="!isHome"><a href='/'>mensagens</a></li>
                     <li v-if="!isInfo"><a href='/#/info'>informações</a></li>
                     <li>
-                      <button v-if="!auth.loggedIn" v-on:click="janitor=!janitor">login</button>
-                      <button v-if="auth.loggedIn" v-on:click="logOut()">logout</button>
+                      <a href='javascript:void(0)' v-if="!auth.loggedIn" v-on:click="janitor=!janitor">login</a>
+                      <a href='javascript:void(0)' v-if="auth.loggedIn" v-on:click="logOut()">logout</a>
                     </li>
                 </ul>
             </nav>
@@ -41,27 +36,23 @@
             <form v-if="!auth.loggedIn" v-on:submit.prevent="login($event)">
               <div class="fields">
                 <div class="login-wrapper">
-                  <label for="janitor-login">email:</label>
+                  <label for="janitor-login">email</label>
                   <input type="email" name="janitor-login"
                   id="janitor-login" v-model="username" required>
                 </div>
                 <div class="pwd-wrapper">
-                  <label for="janitor-pass">senha:</label>
+                  <label for="janitor-pass">senha</label>
                   <input type="password" name="janitor-pass"
                   id="janitor-pass" v-model="password" required>
                 </div>
               </div>
               <div class="btns">
                 <button type="submit">entrar</button>
-                <button type="button" v-if="showOptions">recuperar senha</button>
-                <button type="button" class='img-wrapper' title="Informações"
-                v-on:click="showOptions=!showOptions">
-                  <img src="@/assets/information.png" alt="Registro/Alterar senha">
-                </button>
-                <a href='/#/info' v-if="isHome && showOptions && !this.auth.loggedIn">
+                <button type="button" class="goto-form">recuperar senha</button>
+                <a href='/#/info' v-if="isHome && !this.auth.loggedIn">
                   criar conta
                 </a>
-                <button v-if="isInfo && showOptions && !this.auth.loggedIn"
+                <button v-if="isInfo && !this.auth.loggedIn"
                 type="button"
                 class="goto-form"
                 title="ir para o formulário"
@@ -176,7 +167,6 @@ export default {
     error: '',
     username: '',
     password: '',
-    showOptions: '',
     auth: {
       loggedIn: '',
       username: '',
@@ -233,7 +223,9 @@ export default {
         this.ajaxGtmRequest();
       }
     },
-    async login() {
+    async login(e) {
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      submitBtn.disabled = 'true';
       fetch(`${this.$backendURL}login`, {
         method: 'POST',
         headers: {
@@ -249,9 +241,9 @@ export default {
             this.auth.username = data.name;
             this.auth.id = data.id;
             this.loginFlash.type = 'success';
-            this.loginFlash.header = 'Parabéns!';
+            this.loginFlash.header = 'Olá, ' + data.name + '!';
             this.loginFlash.link = '/';
-            this.loginFlash.text = 'Login realizado com sucesso!\nVocê já pode postar.\n';
+            this.loginFlash.text = 'Seu login foi realizado!\nVocê já pode postar.\n';
             this.username = '';
             this.password = '';
           } else if (data.message) {
@@ -259,6 +251,7 @@ export default {
             this.loginFlash.header = 'Oh não!';
             this.loginFlash.text = `${data.message}\nTente novamente!\n`;
           }
+          submitBtn.disabled = false;
         });
     },
     checkLogin() {
@@ -276,6 +269,15 @@ export default {
             this.auth.loggedIn = '';
           }
         });
+    },
+    removeFlash(e) {
+      if (e.target.classList.contains('flash') || e.target.closest('.flash')) {
+        // caso clicar no popup, só fecha se for no Xzinho
+        return;
+      }
+      if (this.loginFlash.header != '') {
+        this.loginFlash.header = '';
+      }
     },
     logOut() {
       fetch(`${this.$backendURL}logout`, {
