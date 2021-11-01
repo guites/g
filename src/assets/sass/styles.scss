@@ -1373,6 +1373,8 @@ section#cookie_consent{
 }
 section#cookies{
 text-align:left;
+max-width: 767px;
+margin: 0 auto;
 h2{
   font-size:28px;
   margin:15px;
@@ -1387,7 +1389,7 @@ p{
   }
 }
 form{
-  margin:20px;
+  margin:20px 0;
   #cookie-consent{
     border: 1px solid #444;
     padding: 10px;
@@ -1397,53 +1399,65 @@ form{
 }
 }
 section#register{
-h3{
-  text-align:center;
-  font-size:28px;
-  margin:15px;
-}
-form{
-  display:flex;
-  flex-direction:column;
-  align-items:flex-start;
-  justify-content:center;
-  max-width:320px;
-  margin:0 auto;
-  padding:15px;
-  border-radius:5px;
-  border:1px solid transparent;
-  transition: border-color 0.1s;
-  &:focus-within{
-    border-color: #555;
+  max-width: 767px;
+  margin: 0 auto;
+  h3{
+    text-align:center;
+    font-size:28px;
+    margin:15px;
   }
-  .checkbox-wrapper{
+  #create-an-acc {
+    //text-decoration: underline;
+  }
+  ul {
+    list-style-type: square;
+    padding: 20px 0 20px 20px ;
+  }
+  form{
+    legend {
+      margin-bottom: 15px;
+      font-style: italic;
+    }
     display:flex;
-    align-items:center;
-    label{
-      margin-left:5px;
+    flex-direction:column;
+    align-items:flex-start;
+    justify-content:center;
+    margin:0 auto;
+    padding:15px;
+    border-radius:5px;
+    border:1px solid transparent;
+    transition: border-color 0.1s;
+    &:focus-within{
+      border-color: #555;
     }
-  }
-  > div{
-    // margin-top:10px;
+    .checkbox-wrapper{
+      display:flex;
+      align-items:center;
+      label{
+        margin-left:5px;
+      }
+    }
+    > div{
+      // margin-top:10px;
+      input{
+        margin:0;
+        height:30px;
+      }
+    }
+    input[type="submit"]{
+      height: 36.5px;
+      background-color: #2b4764;
+      border-color: #2b476482;
+      border-radius: 5px;
+      color: #fff;
+      cursor: pointer;
+      padding: 5px;
+      width:100px;
+    }
     input{
-      margin:0;
-      height:30px;
+      margin:10px 0 10px 0;
     }
   }
-  input[type="submit"]{
-    height: 36.5px;
-    background-color: #2b4764;
-    border-color: #2b476482;
-    border-radius: 5px;
-    color: #fff;
-    cursor: pointer;
-    padding: 5px;
-    width:100px;
-  }
-  input{
-    margin:10px 0 10px 0;
-  }
-}
 }
 section, .janitor-login, .media-body{
 position:relative;

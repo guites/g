@@ -340,7 +340,10 @@ export default {
       }
     },
     focusForm() {
-      document.querySelector('#register form #name').focus();
+      const regForm = document.querySelector('#register form');
+      if (regForm) {
+        regForm.scrollIntoView({behavior: "smooth"});
+      }
     },
   },
   beforeMount() {

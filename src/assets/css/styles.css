@@ -1262,6 +1262,8 @@ section#cookie_consent .cookie_consent_wrapper .cookie-btns .cookie_btn_wrapper 
 
 section#cookies {
   text-align: left;
+  max-width: 767px;
+  margin: 0 auto;
 }
 section#cookies h2 {
   font-size: 28px;
@@ -1277,7 +1279,7 @@ section#cookies p a:visited {
   color: #888;
 }
 section#cookies form {
-  margin: 20px;
+  margin: 20px 0;
 }
 section#cookies form #cookie-consent {
   border: 1px solid #444;
@@ -1286,22 +1288,33 @@ section#cookies form #cookie-consent {
   border-radius: 5px;
 }
 
+section#register {
+  max-width: 767px;
+  margin: 0 auto;
+}
 section#register h3 {
   text-align: center;
   font-size: 28px;
   margin: 15px;
+}
+section#register ul {
+  list-style-type: square;
+  padding: 20px 0 20px 20px;
 }
 section#register form {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  max-width: 320px;
   margin: 0 auto;
   padding: 15px;
   border-radius: 5px;
   border: 1px solid transparent;
   transition: border-color 0.1s;
+}
+section#register form legend {
+  margin-bottom: 15px;
+  font-style: italic;
 }
 section#register form:focus-within {
   border-color: #555;

@@ -1,17 +1,20 @@
 <template>
   <div class="about">
     <h1>Bem-vindo ao gchan!</h1>
-    <img src="@/assets/gchan_hero.jpg" alt="poste no gchan">
+    <!-- <img src="@/assets/gchan_hero.jpg" alt="poste no gchan"> -->
     <img style="display: none;" src="@/assets/volume-high.png" alt="Volume">
     <section id="cookies">
       <div id="cookies-text">
-        <p>o <b>gchan</b> usa o
+        <p>O <b>gchan</b> usa o
         <a href="https://twitter.com/googleanalytics" target="_blank"
-        rel="noreferrer">google analytics</a>
-        para contabilizar os acessos e as ações mais frequentes realizadas no site.<br/>
+                                                      rel="noreferrer">google analytics</a>.</p>
+        <p>
+        Contabilizamos os acessos e as ações mais frequentes realizadas no site.
+        </p>
+        <p>
         Fique à vontade para bloquear a coleta dos dados.
         </p>
-        <p>você pode alterar suas preferências abaixo.</p>
+        <p><small>você pode alterar suas preferências abaixo.</small></p>
         <form>
           <select name="cookie-consent" id="cookie-consent"
           @change="selectCookieConsent($event)" v-model="cookie_consent_computed">
@@ -24,21 +27,32 @@
     <section id="register">
       <h3 v-if="!auth.loggedIn">Criar uma conta</h3>
       <h3 v-if="auth.loggedIn">Bem vindo, {{auth.username}}</h3>
-      <form v-if="!auth.loggedIn" v-on:submit.prevent="register($event)">
-        <label for="name">nick</label>
-        <input type="text" minlength=4 maxlength=20 name="name" id="name" v-model="name" required>
-        <label for="email">email</label>
-        <input type="email" name="email" id="email" v-model="email" required>
-        <label for="password">senha</label>
-        <input type="password" minlength=6 name="password" id="password" v-model="password" required>
-        <label for="password_confirm">confirme sua senha</label>
-        <input type="password" minlength=6 name="password_confirm" id="password_confirm" v-model="password_confirm" required>
-        <div class="checkbox-wrapper">
-          <input @change="showPassword()" type="checkbox" name="mostrar-senha" id="mostrar-senha">
-          <label for="mostrar-senha">mostrar senha</label>
-        </div>
-        <input type="submit" value="Enviar">
-      </form>
+      <div v-if="!auth.loggedIn">
+        <p id="create-an-acc">Crie uma conta no <b>gchan</b>! Com uma conta você pode:</p>
+        <ul>
+          <li>Identificar suas postagens</li>
+          <li>Manter um histórico e contagem de posts</li>
+          <li>Receber um alerta quando alguém responder uma postagem, ou citar um resposta sua</li>
+          <li>Taggear postagens</li>
+        </ul>
+        <h4>Preencha o formulário abaixo</h4>
+        <form  v-on:submit.prevent="register($event)">
+          <legend>Criar conta no gchan</legend>
+          <label for="name">nick</label>
+          <input type="text" minlength=4 maxlength=20 name="name" id="name" v-model="name" required>
+          <label for="email">email</label>
+          <input type="email" name="email" id="email" v-model="email" required>
+          <label for="password">senha</label>
+          <input type="password" minlength=6 name="password" id="password" v-model="password" required>
+          <label for="password_confirm">confirme sua senha</label>
+          <input type="password" minlength=6 name="password_confirm" id="password_confirm" v-model="password_confirm" required>
+          <div class="checkbox-wrapper">
+            <input @change="showPassword()" type="checkbox" name="mostrar-senha" id="mostrar-senha">
+            <label for="mostrar-senha">mostrar senha</label>
+          </div>
+          <input type="submit" value="Criar conta">
+        </form>
+      </div>
       <div class="flash" :class="signUpFlash.type" v-if="signUpFlash.header">
         <button class='flash-btn' type="button" v-on:click="signUpFlash.header = ''">x</button>
         <strong>{{signUpFlash.header}}</strong>
