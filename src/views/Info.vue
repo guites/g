@@ -32,25 +32,36 @@
         <ul>
           <li>Identificar suas postagens</li>
           <li>Manter um histórico e contagem de posts</li>
-          <li>Receber um alerta quando alguém responder uma postagem, ou citar um resposta sua</li>
+          <li>Receber um alerta quando alguém responder uma postagem, ou citar uma resposta sua</li>
           <li>Taggear postagens</li>
+          <li>Ver o autor das postagens no site</li>
         </ul>
         <h4>Preencha o formulário abaixo</h4>
         <form  v-on:submit.prevent="register($event)">
-          <legend>Criar conta no gchan</legend>
-          <label for="name">nick</label>
-          <input type="text" minlength=4 maxlength=20 name="name" id="name" v-model="name" required>
-          <label for="email">email</label>
-          <input type="email" name="email" id="email" v-model="email" required>
-          <label for="password">senha</label>
-          <input type="password" minlength=6 name="password" id="password" v-model="password" required>
-          <label for="password_confirm">confirme sua senha</label>
-          <input type="password" minlength=6 name="password_confirm" id="password_confirm" v-model="password_confirm" required>
-          <div class="checkbox-wrapper">
-            <input @change="showPassword()" type="checkbox" name="mostrar-senha" id="mostrar-senha">
-            <label for="mostrar-senha">mostrar senha</label>
+          <legend v-if="!showCaptcha">criar conta no gchan</legend>
+          <div v-if="!showCaptcha" id="first-step-register">
+            <label for="name">nick</label>
+            <input type="text" minlength=4 maxlength=20 name="name" id="name" v-model="name" required>
+            <label for="email">email</label>
+            <input type="email" name="email" id="email" v-model="email" required>
+            <label for="password">senha</label>
+            <input type="password" minlength=6 name="password" id="password" v-model="password" required>
+            <label for="password_confirm">confirme sua senha</label>
+            <input type="password" minlength=6 name="password_confirm" id="password_confirm" v-model="password_confirm" required>
+            <div class="checkbox-wrapper">
+              <input @change="showPassword()" type="checkbox" name="mostrar-senha" id="mostrar-senha">
+              <label for="mostrar-senha">mostrar senha</label>
+            </div>
+            <input type="submit" value="Criar conta">
           </div>
-          <input type="submit" value="Criar conta">
+          <div v-else>
+            <legend id="captchaLegend" v-if="showCaptcha">Resolva o desafio captcha pra concluir o cadastro!</legend>
+            <div id="registerFormCaptcha" class="g-recaptcha" data-theme="dark" data-sitekey="6LcAPgsdAAAAAEBmxZEvuXyMr0HygtjsLbm8DPKS"></div>
+            <div class="btnWrapper">
+              <button type="button" @click="goBackToRegisterForm()">Voltar</button>
+              <input type="submit" value="Confirmar captcha">
+            </div>
+          </div>
         </form>
       </div>
       <div class="flash" :class="signUpFlash.type" v-if="signUpFlash.header">
@@ -80,6 +91,7 @@ export default {
     email: '',
     password: '',
     password_confirm: '',
+    showCaptcha: '',
     signUpFlash: {
       type: '',
       header: '',
@@ -100,6 +112,9 @@ export default {
     },
   },
   methods: {
+    goBackToRegisterForm() {
+      this.showCaptcha = '';
+    },
     selectCookieConsent(e) {
       const domain = window.location.hostname;
       const expires = new Date(new Date().getTime() + 365 * 24 * 60 * 60 * 1000).toGMTString();
@@ -124,47 +139,71 @@ export default {
       });
     },
     register(e) {
-      e.preventDefault();
-      const pwd = e.target.querySelector('#password');
-      const pwdConfirm = e.target.querySelector('#password_confirm');
-      if (pwd.value != pwdConfirm.value) {
-        this.signUpFlash.type = 'error';
-        this.signUpFlash.header = 'ow carai!';
-        this.signUpFlash.link = 'https://guites.github.io/pwdgen/';
-        this.signUpFlash.text = 'A senha não bate com a confirmação.\nVerifique plx. \n';
-        this.signUpFlash.message = '(‡▼益▼)';
-        return;
-      }
-      fetch(`${this.$backendURL}register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: `name=${this.name}&email=${this.email}&password=${this.password}`,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.error) {
-            this.signUpFlash.type = 'error';
-            this.signUpFlash.header = 'Oh não!';
-            //this.signUpFlash.link = '#contact';
-            this.signUpFlash.text = `Oops: ${data.error}\n`;
-            this.signUpFlash.message = 'Não desista! (｀∀´)Ψ';
-          } else if (data === 'success') {
-            e.target.reset();
-            this.signUpFlash.type = 'success';
-            this.signUpFlash.header = 'Bem vindo!';
-            this.signUpFlash.text = `Cadastro realizado com sucesso, ${this.username}!\nRealizando login...\n`;
-            this.signUpFlash.message = 'Aguarde...';
-            this.login();
-          } else {
-            this.signUpFlash.type = 'error';
-            this.signUpFlash.header = 'Oh-oh!';
-            this.signUpFlash.link = '/';
-            this.signUpFlash.text = `Ocorreu algum erro bizarro no processo.`;
-            this.signUpFlash.message = 'Faça um post reclamando! ٩(^ᴗ^)۶';
+      if (!this.showCaptcha) {
+        const pwd = e.target.querySelector('#password');
+        const pwdConfirm = e.target.querySelector('#password_confirm');
+        if (pwd.value != pwdConfirm.value) {
+          this.signUpFlash.type = 'error';
+          this.signUpFlash.header = 'ow carai!';
+          this.signUpFlash.link = 'https://guites.github.io/pwdgen/';
+          this.signUpFlash.text = 'A senha não bate com a confirmação.\nVerifique plx. \n';
+          this.signUpFlash.message = '(‡▼益▼)';
+        }
+        const captchaV2Script = document.createElement('script');
+        captchaV2Script.src = 'https://www.google.com/recaptcha/api.js';
+        document.head.appendChild(captchaV2Script);
+        this.showCaptcha = true;
+        console.log(this.email, this.name, this.password);
+      } else {
+        const captchaLegend = document.querySelector('#captchaLegend');
+        const captchaDiv = document.querySelector('#registerFormCaptcha');
+        const btns = document.querySelectorAll('.btnWrapper *');
+        if (grecaptcha.getResponse()) {
+          if (captchaLegend.classList.contains('error')) {
+            captchaLegend.classList.remove('error');
           }
-        });
+          btns.forEach((btn) => {
+            btn.disabled = true;
+            btn.classList.add('disabled');
+          });
+          captchaLegend.innerText = 'Enviando. Aguarde...';
+          captchaDiv.classList.add('sent');
+        fetch(`${this.$backendURL}register`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: `name=${this.name}&email=${this.email}&password=${this.password}`,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              this.signUpFlash.type = 'error';
+              this.signUpFlash.header = 'Oh não!';
+              //this.signUpFlash.link = '#contact';
+              this.signUpFlash.text = `Oops: ${data.error}\n`;
+              this.signUpFlash.message = 'Não desista! (｀∀´)Ψ';
+            } else if (data === 'success') {
+              e.target.reset();
+              this.signUpFlash.type = 'success';
+              this.signUpFlash.header = 'Bem vindo!';
+              this.signUpFlash.text = `Cadastro realizado com sucesso, ${this.username}!\nRealizando login...\n`;
+              this.signUpFlash.message = 'Aguarde...';
+              this.login();
+            } else {
+              this.signUpFlash.type = 'error';
+              this.signUpFlash.header = 'Oh-oh!';
+              this.signUpFlash.link = '/';
+              this.signUpFlash.text = `Ocorreu algum erro bizarro no processo.`;
+              this.signUpFlash.message = 'Faça um post reclamando! ٩(^ᴗ^)۶';
+            }
+          });
+        } else {
+          if (!captchaLegend.classList.contains('error')) {
+            captchaLegend.classList.add('error');
+          }
+        }
+      }
     },
     async login() {
       fetch(`${this.$backendURL}login`, {

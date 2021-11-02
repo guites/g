@@ -1406,6 +1406,9 @@ section#register{
     font-size:28px;
     margin:15px;
   }
+  h4 {
+    margin: 0 0 15px 0;
+  }
   #create-an-acc {
     //text-decoration: underline;
   }
@@ -1414,10 +1417,6 @@ section#register{
     padding: 20px 0 20px 20px ;
   }
   form{
-    legend {
-      margin-bottom: 15px;
-      font-style: italic;
-    }
     display:flex;
     flex-direction:column;
     align-items:flex-start;
@@ -1427,6 +1426,37 @@ section#register{
     border-radius:5px;
     border:1px solid transparent;
     transition: border-color 0.1s;
+
+    > div {
+      #registerFormCaptcha {
+        min-height: 78px;
+        &.sent {
+          opacity: 0.5;
+        }
+      }
+      input, button{
+        margin:10px 0 10px 0;
+      }
+      button {
+        margin-right: 20px;
+      }
+      .btnWrapper {
+        display: flex;
+      }
+    }
+    #first-step-register {
+      display: flex;
+      flex-direction: column;
+    }
+    legend {
+      margin-bottom: 15px;
+      font-style: italic;
+      &.error {
+        border-bottom: 1px solid #e74c3c;
+        font-weight: bold;
+        color: #e74c3c;
+      }
+    }
     &:focus-within{
       border-color: #555;
     }
@@ -1437,14 +1467,14 @@ section#register{
         margin-left:5px;
       }
     }
-    > div{
+    > div.checkbox-wrapper{
       // margin-top:10px;
       input{
         margin:0;
         height:30px;
       }
     }
-    input[type="submit"]{
+    input[type="submit"], button{
       height: 36.5px;
       background-color: #2b4764;
       border-color: #2b476482;
@@ -1452,10 +1482,7 @@ section#register{
       color: #fff;
       cursor: pointer;
       padding: 5px;
-      width:100px;
-    }
-    input{
-      margin:10px 0 10px 0;
+      //width:100px;
     }
   }
 }
