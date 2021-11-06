@@ -1069,28 +1069,28 @@ div{
             &:hover {
               color:#e12e1c;
             }
-            span {
-              position: absolute;
-              top: calc(50%);
-              left: calc(100% + 10px);
-              pointer-events: none;
-              transform: translateY(-50%);
-              z-index:1;
-              width:200px;
-              background-color: #111;
-              font-size: 13px;
-              padding: 10px;
-              border-radius: 5px;
-              border: 1px solid #333;
-            }
+          }
+          span.yt-warning {
+            position: absolute;
+            //top: calc(50%);
+            //left: calc(100% + 10px);
+            //transform: translateY(-50%);
+            pointer-events: none;
+            z-index:1;
+            width:200px;
+            background-color: #111;
+            font-size: 13px;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #333;
           }
           img.yt-thumb {
             width: 250px;
             position: absolute;
-            top: calc(50%);
-            left: calc(100% + 10px);
+            //top: calc(50%);
+            //left: calc(100% + 10px);
+            //transform: translateY(-50%);
             pointer-events: none;
-            transform: translateY(-50%);
             z-index:1;
           }
         }

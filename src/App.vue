@@ -220,7 +220,6 @@ export default {
     },
     checkCookies() {
       const consentCookie = this.getCookieValue('cookie_consent_variable');
-      console.log(consentCookie);
       if (consentCookie !== '') {
         if (consentCookie === 'true') {
           this.ajaxGtmRequest();

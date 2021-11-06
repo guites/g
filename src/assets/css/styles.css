@@ -962,12 +962,9 @@ div li div p a {
 div li div p a:hover {
   color: #e12e1c;
 }
-div li div p a span {
+div li div p span.yt-warning {
   position: absolute;
-  top: 50%;
-  left: calc(100% + 10px);
   pointer-events: none;
-  transform: translateY(-50%);
   z-index: 1;
   width: 200px;
   background-color: #111;
@@ -979,10 +976,7 @@ div li div p a span {
 div li div p img.yt-thumb {
   width: 250px;
   position: absolute;
-  top: 50%;
-  left: calc(100% + 10px);
   pointer-events: none;
-  transform: translateY(-50%);
   z-index: 1;
 }
 div li div img {
