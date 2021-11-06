@@ -35,25 +35,33 @@ body {
   visibility: hidden;
 }
 
-.alert-error {
+.alert {
   position: absolute;
-  background-color: #e74c3c;
   max-width: 500px;
   width: 100%;
   color: #fff;
   padding: 20px;
   border-radius: 3px;
 }
-.alert-error h4 {
+.alert.alert-info {
+  background-color: #842cb0;
+}
+.alert.alert-error {
+  background-color: #e74c3c;
+}
+.alert.alert-success {
+  background-color: #72ab00;
+}
+.alert h4 {
   position: relative;
   font-size: 22px;
   margin-bottom: 15px;
 }
-.alert-error p {
+.alert p {
   font-size: 18px;
   margin-bottom: 15px;
 }
-.alert-error span {
+.alert span {
   text-align: right;
   width: 100%;
   opacity: 0.6;
@@ -67,7 +75,7 @@ body {
   right: 0;
   z-index: 1;
 }
-.alert-error span:hover {
+.alert span:hover {
   opacity: 0.95;
 }
 
@@ -154,31 +162,43 @@ form button[type=submit]:hover, form input[type=submit]:hover {
 form button[type=submit].create-post, form input[type=submit].create-post {
   margin: 15px 0 25px;
 }
+form button[type=submit].disabled, form input[type=submit].disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
 form .gif-search-toggle label {
   cursor: pointer;
 }
 form textarea {
   height: 100px;
 }
-form .alert-error {
+form .alert {
   position: absolute;
-  background-color: #e74c3c;
   max-width: 500px;
   width: 100%;
-  color: #fff;
   padding: 20px;
+  color: #fff;
   border-radius: 3px;
 }
-form .alert-error h4 {
+form .alert.alert-info {
+  background-color: #842cb0;
+}
+form .alert.alert-error {
+  background-color: #e74c3c;
+}
+form .alert.alert-success {
+  background-color: #72ab00;
+}
+form .alert h4 {
   position: relative;
   font-size: 22px;
   margin-bottom: 15px;
 }
-form .alert-error p {
+form .alert p {
   font-size: 18px;
   margin-bottom: 15px;
 }
-form .alert-error span {
+form .alert span {
   text-align: right;
   width: 100%;
   opacity: 0.6;
@@ -192,7 +212,7 @@ form .alert-error span {
   right: 0;
   z-index: 1;
 }
-form .alert-error span:hover {
+form .alert span:hover {
   opacity: 0.95;
 }
 
