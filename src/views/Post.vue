@@ -97,6 +97,173 @@ export default {
     this.setInjectedData();
   },
   methods: {
+    sanitizeSingleMessage(message) {
+      const sanitized = message;
+      if (message.message) {
+        sanitized.message = message.message.replace(/</g, '&lt;');
+        sanitized.message = message.message.replace(/>/g, '&gt;');
+      } else {
+        sanitized.content = message.content.replace(/</g, '&lt;');
+        sanitized.content = message.content.replace(/>/g, '&gt;');
+      }
+      return sanitized;
+    },
+    sanitizedMessages(messagesArray) {
+      // transforma todas as < e > em texto
+      const sanitized = [];
+      messagesArray.forEach((message) => {
+        sanitized.push(this.sanitizeSingleMessage(message));
+      });
+      return sanitized;
+    },
+    convertTZ(date) {
+      //source: https://stackoverflow.com/a/54127122/14427854
+      var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+      var hour = ("0" + date_sp.getHours()).slice(-2);
+      var min = ("0" + date_sp.getMinutes()).slice(-2);
+      var day = ("0" + date_sp.getDate()).slice(-2);
+      var month = ("0" + (date_sp.getMonth() + 1)).slice(-2);
+      return `${hour}:${min} ${day}/${month}/${date_sp.getFullYear()}`;
+    },
+    filteredReps(reps) {
+      for (let i = 0; i < reps.length; i++) {
+        reps[i] = this.filterMessage(reps[i]);
+      }
+      return reps;
+    },
+    escapeRegExp(stringToGoIntoTheRegex) {
+      // https://stackoverflow.com/a/17886301/14427854
+      return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+    },
+    filterMessage(index) {
+      const isReply = typeof index === 'object' && index !== null;
+      let messageIndexForReplies;
+      // const yt_rgx = /(?:https?:\/\/)?(?:m\.)?(?:www\.)?youtu\.?be(?:\.com)?\/?\S*(?:watch|embed)?(?:\S*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
+      const yt_rgx = /(?:https?:\/\/)?(?:m\.)?(?:www\.)?youtu\.?be(?:\.com)?\/?\S*(?:watch|embed)?(?:\S*v=|v\/|\/)([\w\-]+)(?:[\&\?]?([\w\-]+)?=?([\w\%\-]+)?)+/g;
+      const quotes_rgx = new RegExp("&gt;&gt;([0-9]{1,5}):", "g");
+      let string;
+      if (isReply) {
+        string = index.content;
+      } else {
+        string = this.message.message;
+      }
+      const matches = string.match(yt_rgx);
+      const quote_matches = string.matchAll(quotes_rgx);
+      if (quote_matches !== null || matches !== null) {
+        if (isReply) {
+          if (index.filtered === '1') return;
+          index.yt_iframes = [];
+          index.filtered = 1;
+        } else {
+          if (this.message.filtered === '1') return;
+          this.$set(this.message, 'yt_thumbnails', []);
+          this.$set(this.message, 'yt_iframes', []);
+          this.$set(this.message, 'filtered', '1');
+        }
+
+        if (matches !== null) {
+          if (matches.length > 0) {
+            for (let i = 0; i < matches.length; i += 1) {
+              fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
+                .then(async (response) => {
+                  if (response.ok) {
+                    const result = await response.json();
+                    const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.nextElementSibling.style='display:block;'" onmouseout="this.nextElementSibling.style='display:none;'" onclick="
+                    this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
+                    const current_li = this.closest('li');
+                    // seleciona, se existir, o iframe que estiver carregado
+                    const current_frame = current_li.querySelector('iframe');
+                    if (current_frame) {
+                      const div_data_checkiframe = current_frame.parentElement.getAttribute('data-checkiframe');
+                      if( div_data_checkiframe == '${result.thumbnail_url}') {
+                        current_frame.remove();
+                        return;
+                      } else {
+                        const atag_to_current_frame = current_li.querySelector(\`a[data-thumb='\${div_data_checkiframe}']\`);
+                        atag_to_current_frame.childNodes[0].textContent = 'mostrar';
+                      }
+                      current_frame.remove();
+                    }
+                    this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
+                    ">mostrar</a><img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}">]`;
+                    const checkUrlRgx = new RegExp(this.escapeRegExp(`data-link="${matches[i]}"`));
+                    if (isReply) {
+                      if (!checkUrlRgx.test(index.content)) {
+                        index.content = index.content.replaceAll(matches[i], htmlString);
+                      }
+                    } else {
+                      if (!checkUrlRgx.test(this.message.message)) {
+                        this.message.message = this.message.message.replaceAll(matches[i], htmlString);
+                      }
+                    }
+                  } else {
+                    let htmlString;
+                    if (matches[i].startsWith('http://') || matches[i].startsWith('https://')) {
+                      if (response.status === 400) {
+                        htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.nextElementSibling.style='display:block;'" onmouseout="this.nextElementSibling.style='display:none;'">youtube?</a>]<span class="yt-warning" style="display:none;">não conseguimos verificar este link. Tenha cautela!</span>`;
+                      } else if (response.status === 404) {
+                        htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?</a>]<span class="yt-warning" style="display:none;">não conseguimos verificar este link. Tenha cautela!</span>`;
+                      } else {
+                        return
+                      }
+                      if (isReply) {
+                        index.content = index.content.replace(matches[i], htmlString);
+                      } else {
+                        this.message.message = this.message.message.replace(matches[i], htmlString);
+                      }
+                    } else {
+                      return;
+                    }
+                  }
+                });
+            }
+          }
+        }
+
+        // filtra menção a outras respostas
+        if (isReply) {
+          if (quote_matches != null) {
+            for (const quote_match of quote_matches) {
+              const current_quote = quote_match[0];
+              const reply_id = quote_match[1];
+              if (reply_id) {
+                fetch(`${this.$backendURL}reply/${reply_id}`)
+                  .then((response) => {
+                    if (response.ok) {
+                      return response.json();
+                    } else {
+                      throw new Error(response.status);
+                    }
+                  })
+                  .then((r) => {
+                    const sanitizedQuoteMsg = this.sanitizeSingleMessage(r.results[0]);
+                    let quote_content = sanitizedQuoteMsg.content;
+                    if (quote_content.length > 250) {
+                      quote_content = quote_content.substring(0, 220);
+                      quote_content += '<i style="font-size: 11px;">[... resposta truncada devido ao tamanho]</i>';
+                    }
+                    const quote_message_id = sanitizedQuoteMsg.message_id;
+                    let htmlString = `<a class="quote" href='/post/${quote_message_id}#quoted_${reply_id}'>${current_quote}</a><li class="media reply-item quote-hidden" id="quoted_hidden_${reply_id}">`;
+                    if (sanitizedQuoteMsg.imageurl != '') {
+                      htmlString += `<img onerror="this.src='/nao_tem_preview.jpg'; this.onerror=null;" loading="lazy" data-src="${sanitizedQuoteMsg.imageurl}" src="${sanitizedQuoteMsg.imageurl}" alt="" class="img-thumbnail">`;
+                    }
+                    htmlString += `<div class="align-self-center media-body"><div class="edit_tab"><p class="mt-0 mb-1">${sanitizedQuoteMsg.username}</p><button class="link link-reply">#${sanitizedQuoteMsg.id}</button></div><p class="text-content is-quoted">${quote_content}</p><small>${this.convertTZ(sanitizedQuoteMsg.created)}</small><br/></div></li>`;
+                    if (isReply) {
+                      index.content = index.content.replaceAll(current_quote, htmlString);
+                    } else {
+                      this.message.message = this.message.message.replace(current_quote, htmlString);
+                    }
+                  })
+                  .catch((err) => {
+                    console.log('resposta de id '+reply_id+' não encontrada.');
+                  });
+              }
+            }
+          }
+        }
+      }
+      return index;
+    },
     targetQuote() {
       this.$nextTick(() => {
         const checkTarget = window.location.href.split('#');
@@ -106,6 +273,12 @@ export default {
           if (quoteElement) {
             quoteElement.scrollIntoView({top: 0, behavior: 'smooth'});
             quoteElement.classList.add('target');
+            document.querySelector('body').addEventListener('click', function(e) {
+              const checkTarget = document.querySelector('.target');
+              if (checkTarget) {
+                checkTarget.classList.remove('target');
+              }
+            });
           }
         }
       });
@@ -167,7 +340,8 @@ export default {
                   if (replies.error) {
                     return;
                   }
-                  this.$set(this.message, 'replies', replies);
+                  this.$set(this.message, 'replies', this.sanitizedMessages(replies));
+                  this.message.replies = this.filteredReps(replies);
                   this.targetQuote();
                 });
             } else {
@@ -197,24 +371,6 @@ export default {
       if (window.innerWidth < 767) return;
       e.target.children[0].style = 'display:none;';
     },
-    toggleYoutubeFrame(e) {
-      const button = e.target;
-      const iframeWrapper = document.querySelector(`#li_${this.message.id} .iframe-wrapper`);
-      const iframe = iframeWrapper.children[0];
-      if (window.innerWidth > 640) {
-        iframe.width = '640';
-        iframe.height = '360';
-      } else {
-        iframe.width = window.innerWidth * 0.95;
-        iframe.height = iframe.width / 2 + 20;
-      }
-      iframeWrapper.classList.toggle('open');
-      if (button.innerText === 'youtube:mostrar') {
-        button.innerHTML = button.innerHTML.replace('youtube:mostrar', 'esconder');
-      } else {
-        button.innerHTML = button.innerHTML.replace('esconder', 'youtube:mostrar');
-      }
-    },
     replyMessage(reply) {
       this.messageToReplyTo = reply;
     },
@@ -232,7 +388,7 @@ export default {
         typeCheckedReply = reply;
       }
       if (this.message.replies === undefined) this.message.replies = []; 
-      this.message.replies.push(typeCheckedReply);
+      this.message.replies.push(this.filterMessage(this.sanitizeSingleMessage(typeCheckedReply)));
     },
   },
 };
