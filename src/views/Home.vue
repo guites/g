@@ -1,12 +1,12 @@
 <template>
   <div>
-     <section class="create-thread">
+     <section @click="removeWarning($event)" class="create-thread">
       <form @submit.prevent="addMessage()">
         <h2 @click="focusMessage()">Poste no gchan</h2>
-        <div v-if="error" class='alert-error'>
-          <span v-on:click="error=''">x</span>
-          <h4>Erro!</h4>
-          <p>{{error}}</p>
+        <div v-if="warning.message" :class="'alert ' + warning.type">
+          <span v-on:click="warning.message=''">x</span>
+          <h4></h4>
+          <p>{{warning.message}}</p>
        </div>
         <div class="form-group">
           <label for="username">Nome <small>[opcional]</small></label>
@@ -225,7 +225,10 @@ export default {
     gifsPerPage: 4,
     currPage: 1,
     numPages: 5,
-    error: '',
+    warning: {
+      type: '',
+      message: '',
+    },
     apiRoute: 'giphy',
     isGifBeingSearched: '',
     emptyGifResults: '',
@@ -597,9 +600,21 @@ export default {
       }
       this.optUpload = '';
     },
+    removeWarning(e) {
+      if (e.target.classList.contains('alert') || e.target.closest('.alert')) {
+        // caso clicar no popup, só fecha se for no Xzinho
+        return;
+      }
+      if (this.warning.message != '' && this.warning.type != 'alert-info') {
+        this.warning.message = '';
+      }
+    },
     addMessage() {
       const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
       submitButton.disabled = true;
+      submitButton.classList.add('disabled');
+      this.warning.message = "Enviando, aguarde...";
+      this.warning.type = "alert-info";
       grecaptcha.ready(() => {
         grecaptcha.execute(this.$captchaClient, {action: 'post'}).then((token) => token)
         .then((token) => {
@@ -607,17 +622,6 @@ export default {
           if (this.auth.username) {
             this.message.username = this.auth.username;
             this.message.user_id = parseInt(this.auth.id, 10);
-          }
-          if (/giphy/.test(this.message.imageURL)) {
-            this.message.gif_origin = 'giphy';
-          } else if (/gfycat/.test(this.message.imageURL)) {
-            this.message.gif_origin = 'gfycat';
-          } else if (/tenor/.test(this.message.imageURL)) {
-            this.message.gif_origin = 'tenor';
-          } else if (/imgur/.test(this.message.imageURL)) {
-            this.message.gif_origin = 'imgur';
-          } else {
-            this.message.gif_origin = 'outro';
           }
           fetch(`${this.$backendURL}${this.apiURL}`, {
             method: 'POST',
@@ -628,15 +632,18 @@ export default {
           }).then((response) => response.json()).then((result) => {
             if (result.details) {
               const error = result.details.map((detail) => detail.message).join('.');
-              this.error = error;
+              this.warning.message = error;
+              this.warning.type = 'alert-error';
             } else if (result.error) {
               if (result.origin === 'psql') {
                 if (result.code === '23505') {
-                  this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                  this.warning.message = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                  this.warning.type = 'alert-error';
                 }
               }
             } else {
-              this.error = '';
+              this.warning.message = 'Post enviado!';
+              this.warning.type = 'alert-success';
               const parsedResult = JSON.parse(result);
               parsedResult.isNew = true;
               this.messages.unshift(this.sanitizeSingleMessage(parsedResult));
@@ -644,6 +651,7 @@ export default {
               this.clearMsgForm();
             }
             submitButton.disabled = false;
+            submitButton.classList.remove('disabled');
           });
         });
       });
@@ -891,7 +899,7 @@ export default {
             const removeBtn = mediaDiv.querySelector('button');
             removeBtn.setAttribute('data-deletehash', result.data.deletehash);
           } else if (result.status === 500 && result.success === false) {
-            this.error = `
+            this.warning.message = `
               Erro no servidor de upload! :(\n
               Tente subir sua imagem em outro lugar\n
               e poste usando o link!\n
@@ -899,12 +907,14 @@ export default {
               https://imgur.com/upload,\n
               https://giphy.com/upload,\n etc)
               `;
+            this.warning.type = 'alert-error';
             this.isPreviewing = '';
           } else {
-            this.error = `
+            this.warning.message = `
               Aceitamos apenas imagens no formato\n
               JPEG, PNG, GIF, APNG e TIFF!
             `;
+            this.warning.type = 'alert-error';
             this.isPreviewing = '';
           }
           submitButton.disabled = false;
@@ -946,18 +956,20 @@ export default {
           imagePreviewDiv.children[0].src = objUrl;
           await this.uploadToImgur('video', file);
         } else {
-          this.error = `
+          this.warning.message = `
             Formato de vídeo não aceito!\n
             Funciona apenas com os formatos abaixo:\n
             ${this.allowedUploadVideoFormats.join(', ')}
           `;
+          this.warning.type = 'alert-error';
           input.value = '';
         }
       } else {
-        this.error = `
+        this.warning.message = `
           Aceitamos apenas imagens,\n
           gifs e vídeos!
         `;
+        this.warning.type = 'alert-error';
         input.value = '';
       }
     },

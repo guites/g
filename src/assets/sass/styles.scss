@@ -32,9 +32,17 @@ body{
 .grecaptcha-badge { 
     visibility: hidden;
 }
-.alert-error{
+.alert {
+  &.alert-info {
+    background-color: rgb(132, 44, 176);
+  }
+  &.alert-error {
+    background-color:#e74c3c;
+  }
+  &.alert-success {
+    background-color: rgb(114, 171, 0);
+  }
   position:absolute;
-  background-color:#e74c3c;
   max-width:500px;
   width:100%;
   color:#fff;
@@ -65,7 +73,7 @@ body{
       &:hover{
           opacity:0.95;
       }
-  }
+    }
 }
 .badge{
   display: inline-block;
@@ -106,92 +114,102 @@ form{
       padding:10px 0;
     }
   }
-  textarea {
-  }
-textarea, input[type="email"],input[type="password"],input[type="text"],input[type="url"]{
-  height:36.5px;
-  border:1px solid #222;
-  border-radius:4px;
-  background-color:#fff;
-  font-size:15px;
-  padding:6px 12px;
-  line-height: 1.5;
-  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  &:focus{
-    color:#444;
+  textarea, input[type="email"],input[type="password"],input[type="text"],input[type="url"]{
+    height:36.5px;
+    border:1px solid #222;
+    border-radius:4px;
     background-color:#fff;
-    border-color:#739ac2;
-    outline:0;
-    box-shadow:0 0 0 0.2rem rgba(55, 90, 127, 0.25);
+    font-size:15px;
+    padding:6px 12px;
+    line-height: 1.5;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    &:focus{
+      color:#444;
+      background-color:#fff;
+      border-color:#739ac2;
+      outline:0;
+      box-shadow:0 0 0 0.2rem rgba(55, 90, 127, 0.25);
+    }
   }
-}
-button[type="submit"], input[type="submit"]{
-  height: 36.5px;
-  background-color: rgb(55, 90, 127);
-  border-color: #2b476482;
-  border-radius: 5px;
-  color: #fff;
-  cursor: pointer;
-  padding: 10px 15px;
-  font-size:15px;
-  font-weight:bold;
-  margin:15px 0;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  transition: all 300ms ease;
-  &:hover{
+  button[type="submit"], input[type="submit"]{
+    height: 36.5px;
+    background-color: rgb(55, 90, 127);
+    border-color: #2b476482;
+    border-radius: 5px;
     color: #fff;
-    background-color: #2b4764;
-    border-color: #28415b;
+    cursor: pointer;
+    padding: 10px 15px;
+    font-size:15px;
+    font-weight:bold;
+    margin:15px 0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition: all 300ms ease;
+    &:hover{
+      color: #fff;
+      background-color: #2b4764;
+      border-color: #28415b;
+    }
+    &.create-post {
+      margin: 15px 0 25px;
+    }
+    &.disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
   }
-  &.create-post {
-    margin: 15px 0 25px;
-  }
-}
-.gif-search-toggle{
-  label{
-    cursor:pointer;
-  }
-}
-textarea{
-  height:100px;
-}
-.alert-error{
-  position:absolute;
-  background-color:#e74c3c;
-  max-width:500px;
-  width:100%;
-  color:#fff;
-  padding:20px;
-  border-radius:3px;
-  h4{
-      position:relative;
-      font-size:22px;
-      margin-bottom:15px;
-  }
-  p{
-      font-size:18px;
-      margin-bottom:15px;
-  }
-  span{
-      text-align:right;
-      width:100%;
-      opacity:0.6;
-      font-size:22px;
-      padding:0 5px 0;
-      transition:opacity 300ms ease;
+  .gif-search-toggle{
+    label{
       cursor:pointer;
-      position:absolute;
-      padding:3px 14px;
-      top:0;
-      right:0;
-      z-index:1;
-      &:hover{
-          opacity:0.95;
-      }
+    }
   }
-}
+  textarea{
+    height:100px;
+  }
+  .alert{
+    position:absolute;
+    max-width:500px;
+    width:100%;
+    padding:20px;
+    color:#fff;
+    border-radius:3px;
+    &.alert-info {
+      background-color: rgb(132, 44, 176);
+    }
+    &.alert-error {
+      background-color:#e74c3c;
+    }
+    &.alert-success {
+      background-color: rgb(114, 171, 0);
+    }
+    h4{
+        position:relative;
+        font-size:22px;
+        margin-bottom:15px;
+    }
+    p{
+        font-size:18px;
+        margin-bottom:15px;
+    }
+    span{
+        text-align:right;
+        width:100%;
+        opacity:0.6;
+        font-size:22px;
+        padding:0 5px 0;
+        transition:opacity 300ms ease;
+        cursor:pointer;
+        position:absolute;
+        padding:3px 14px;
+        top:0;
+        right:0;
+        z-index:1;
+        &:hover{
+            opacity:0.95;
+        }
+    }
+  }
 }
 header{
   width:100vw;

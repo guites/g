@@ -1,9 +1,9 @@
 <template>
   <div ref="replybox" id="replybox" v-if="messageToReplyTo">
-    <div v-if="error" class='alert-error'>
-      <span v-on:click="error=''">x</span>
-      <h4>Erro!</h4>
-      <p>{{error}}</p>
+    <div v-if="warning.message" :class="'alert ' + warning.type">
+      <span v-on:click="warning.message=''">x</span>
+      <h4></h4>
+      <p>{{warning.message}}</p>
     </div>
     <div id="replybox-head">
       <span class="noselect"
@@ -16,7 +16,7 @@
         x
       </button>
     </div>
-    <form id="replyForm" @submit.prevent="addReply()">
+    <form id="replyForm" @submit.prevent="addReply($event)">
       <div class="form-group">
         <label for="username">Usuário</label>
         <input type="text" class="form-control" id="username"
@@ -57,7 +57,7 @@
         :readonly="this.optUpload === true"
         >
       </div>
-      <button type="submit" class="btn btn-primary">Enviar</button>
+      <button id="submitReply" type="submit" class="btn btn-primary">Enviar</button>
     </form>
   </div>
 </template>
@@ -88,7 +88,10 @@ export default {
       user_id: 0,
       recaptcha_token: ''
     },
-    error: '',
+    warning: {
+      type: '',
+      message: '',
+    },
     optUpload: false,
   }),
   watch: {
@@ -238,13 +241,16 @@ export default {
       document.querySelector('#replyIMG').value = '';
       this.optUpload = false;
     },
-    addReply() {
+    addReply(e) {
+      const submitButton = document.getElementById('submitReply');
+      submitButton.classList.add('disabled');
+      submitButton.disabled = true;
+      this.warning.message = "Enviando, aguarde...";
+      this.warning.type = 'alert-info';
       grecaptcha.ready(() => {
         grecaptcha.execute(this.$captchaClient, { action: 'reply' }).then((token) => token)
           .then((token) => {
             this.replyMessage.recaptcha_token = token;
-            const submitButton = document.querySelector('#replybox form button[type="submit"]');
-            submitButton.disabled = true;
             this.replyMessage.message_id = this.messageToReplyTo;
             fetch(`${this.$backendURL}replies`, {
               method: 'POST',
@@ -256,20 +262,23 @@ export default {
               const parseResult = result;
               if (parseResult.details) {
                 const error = parseResult.details.map((detail) => detail.message).join('.');
-                this.error = error;
+                this.warning.message = error;
+                this.warning.type = 'alert-error';
               } else if (parseResult.error) {
                 if (parseResult.origin === 'psql') {
                   if (parseResult.code === '23505') {
-                    this.error = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                    this.warning.message = 'Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ';
+                    this.warning.type = 'error';
                   }
                 }
               } else {
-                this.error = '';
+                this.warning.message = '';
                 // aqui tem que disponibilizar o conteúdo do reply na Home.vue
                 this.addReplyToThread(parseResult);
                 this.clearReplyForm();
                 this.closeReply();
               }
+              submitButton.classList.remove('disabled');
               submitButton.disabled = false;
             });
           });
@@ -283,17 +292,12 @@ export default {
         if (this.allowedUploadVideoFormats.includes(file.type)) {
           await this.uploadToImgur('video', file);
         } else {
-          this.error = `
-            Formato de vídeo não aceito!\n
-            Funciona apenas com os formatos abaixo:\n
-            ${this.allowedUploadVideoFormats.join(', ')}
-          `;
+          this.warning.type = 'alert-error';
+          this.warning.message = `Formato de vídeo não aceito! Funciona apenas com os formatos abaixo: ${this.allowedUploadVideoFormats.join(', ')}`;
         }
       } else {
-        this.error = `
-          Aceitamos apenas imagens,\n
-          gifs e vídeos!
-        `;
+        this.warning.message = `Aceitamos apenas imagens, gifs e vídeos!`;
+        this.warning.type = 'alert-error';
       }
     },
     async postImgGif(formData, url) {
@@ -310,7 +314,8 @@ export default {
             // trava o input file e deixa o campo de URL como read only
             this.optUpload = true;
           } else if (result.status === 500 && result.success === false) {
-            this.error = `
+            this.warning.type = 'alert-error';
+            this.warning.message = `
               Erro no servidor de upload! :(\n
               Tente subir sua imagem em outro lugar\n
               e poste usando o link!\n
@@ -319,7 +324,8 @@ export default {
               https://giphy.com/upload,\n etc)
               `;
           } else {
-            this.error = `
+            this.warning.type = 'alert-error';
+            this.warning.message = `
               Aceitamos apenas imagens no formato\n
               JPEG, PNG, GIF, APNG e TIFF!
               `;
