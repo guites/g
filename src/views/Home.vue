@@ -472,13 +472,15 @@ export default {
                     }
                     this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
                     ">mostrar</a><img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}">]`;
+                    const checkUrlRgx = new RegExp(this.escapeRegExp(`data-link="${matches[i]}"`));
                     if (isReply) {
-                      const checkUrlRgx = new RegExp(this.escapeRegExp(`data-link="${matches[i]}"`));
                       if (!checkUrlRgx.test(this.messages[messageIndexForReplies].replies[replyIndex].content)) {
                         this.messages[messageIndexForReplies].replies[replyIndex].content = this.messages[messageIndexForReplies].replies[replyIndex].content.replaceAll(matches[i], htmlString);
                       }
                     } else {
-                      this.messages[index].message = this.messages[index].message.replace(matches[i], htmlString);
+                      if (!checkUrlRgx.test(this.messages[index].message)) {
+                        this.messages[index].message = this.messages[index].message.replaceAll(matches[i], htmlString);
+                      }
                     }
                   } else {
                     let htmlString;
