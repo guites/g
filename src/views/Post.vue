@@ -286,6 +286,7 @@ export default {
                   checkTarget.classList.remove('target');
                 }
               } else {
+                // clicou num link de quote
                 e.preventDefault();
                 const checkTarget = e.target.href.split('#');
                 if (checkTarget.length > 1) {
@@ -297,6 +298,8 @@ export default {
                     if (lastTarget) lastTarget.classList.remove('target');
                     quoteElement.classList.add('target');
                     history.replaceState(null, '', e.target.href);
+                  } else {
+                    window.location.href = e.target.href;
                   }
                 }
               }
