@@ -1262,7 +1262,7 @@ div{
         border: 2px solid #444;
         background-color: #333;
         padding:10px 10px 0;
-        &:target, &.target {
+        &.target {
           border: 2px dashed #888;
           background-color: #101010;
         }
