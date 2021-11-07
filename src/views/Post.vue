@@ -96,6 +96,12 @@ export default {
     this.getThePost();
     this.setInjectedData();
   },
+  mounted() {
+    document.querySelector('body').addEventListener('click', function(e) {
+      if (e.target.classList.contains('quote')) {
+      }
+    });
+  },
   methods: {
     sanitizeSingleMessage(message) {
       const sanitized = message;
@@ -274,9 +280,28 @@ export default {
             quoteElement.scrollIntoView({top: 0, behavior: 'smooth'});
             quoteElement.classList.add('target');
             document.querySelector('body').addEventListener('click', function(e) {
-              const checkTarget = document.querySelector('.target');
-              if (checkTarget) {
-                checkTarget.classList.remove('target');
+              if (!e.target.classList.contains('quote')) {
+                const checkTarget = document.querySelector('.target');
+                if (checkTarget) {
+                  checkTarget.classList.remove('target');
+                }
+              } else {
+                // clicou num link de quote
+                e.preventDefault();
+                const checkTarget = e.target.href.split('#');
+                if (checkTarget.length > 1) {
+                  const targetQuote = checkTarget.splice(-1)[0];
+                  const quoteElement = document.querySelector('#'+targetQuote);
+                  if (quoteElement) {
+                    quoteElement.scrollIntoView({top: 0, behavior: 'smooth'});
+                    const lastTarget = document.querySelector('.target');
+                    if (lastTarget) lastTarget.classList.remove('target');
+                    quoteElement.classList.add('target');
+                    history.replaceState(null, '', e.target.href);
+                  } else {
+                    window.location.href = e.target.href;
+                  }
+                }
               }
             });
           }
