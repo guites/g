@@ -727,16 +727,33 @@ section.create-thread{
           }
       }
   }
+  .gifBoxWrapper {
+    min-height: 590px;
+  }
+  .imagePreview {
+    height: 480px;
+  }
   .gifBoxWrapper, .imagePreview{
+    width:calc(100% - 500px);
+    max-width: 480px;
+    .gif-info {
+      color: rgb(132, 44, 176);
+      margin: 15px 0;
+    }
+    .gif-success {
+      color: rgb(114, 171, 0);
+      margin: 15px 0;
+      display: flex;
+      justify-content: space-between;
+      a {
+        color: #e74c3c;
+      }
+    }
     div.error-wrap{
       a{
         padding:10px;
       }
     }
-    width:calc(100% - 500px);
-    max-width: 480px;
-    height:480px;
-    position:relative;
     .paginate-arrows{
         //position:absolute;
         //bottom:0%;
@@ -747,6 +764,7 @@ section.create-thread{
             list-style:none;
             div{
                 display:flex;
+                margin: 0 auto;
             }
             li.page-item{
                 &:nth-child(1) a{
@@ -811,14 +829,32 @@ section.create-thread{
     }
     .gifBox{
         width:100%;
-        height:100%;
+        height: 480px;
+        //height:100%;
         min-height: 250px;
         display:flex;
         flex-wrap:wrap;
         border:2px solid gray;
         border-radius:4px;
+        position:relative;
+        .expandedGif {
+          position: absolute;
+          top: 0;
+          bottom: 0;
+          left: 0;
+          right: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            max-height: 480px;
+          }
+        }
         .gifBoxGif{
-            border:1px solid gray;
+            border:3px solid gray;
             width:50%;
             height: 50%;
             display: flex;
@@ -826,11 +862,13 @@ section.create-thread{
             justify-content: center;
             transition:all 300ms ease;
             &:hover{
-                border-color:#fff;
+              border-color: #842cb0;
+                //border-color:#fff;
                 cursor:pointer;
             }
             &.clicked {
-                border-color:#fff;
+              border-color: #842cb0;
+                //border-color:#fff;
             }
             img{
                 width:100%;
@@ -1530,7 +1568,7 @@ position:relative;
       margin-bottom:50px;
       .gifBoxWrapper, .imagePreview{
           width:100%;
-          height:initial;
+          //height:initial;
       }
   }
   #replybox{
