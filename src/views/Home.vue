@@ -88,18 +88,28 @@
             <div v-if="media_type == 'search-media'" class="searchgifstuffs">
               <label v-if='!this.optUpload' for='giphyURL'>digite algum termo no campo abaixo!</label>
               <input v-if='!this.optUpload'
-              v-on:keyup="searchGif" v-model="message.giphyURL" type="text"
+              @keyup="setGifSearchText($event)"
+              @touchend="setGifSearchText($event)"
+              v-model="message.giphyURL" type="text"
               class="form-control" id="giphyURL" placeholder="cats">
               <input style="visibility: hidden;" v-model="message.imageURL" type="url" class="form-control" id="imageURL" readonly>
+              <Gifbox
+              v-bind:gifSearch="gifSearch"
+              v-bind:imageURL="message.imageURL"
+              @setGifAsImageURL="setGifAsImageURL"
+              v-if="screenSize <= 979"
+              ></Gifbox>
               <div v-if='!this.optUpload' class="gif-search-toggle" data-toggle="buttons">
-                <input class="gif-type" v-on:change="searchGif" type="radio" name="options" id="option1"
+                <!-- v-on:change="searchGif" -->
+                <input v-model="gifSearch.gif_origin" class="gif-type" type="radio" name="options" id="option_giphy"
                 autocomplete="off" checked value="giphy">
-                <label for ='option1' class="btn btn-primary">
+                <label for ='option_giphy' class="btn btn-primary">
                   Giphy
                 </label>
-                <input class="gif-type" v-on:change="searchGif" type="radio" name="options" id="option2"
+                <!-- v-on:change="searchGif" -->
+                <input v-model="gifSearch.gif_origin" class="gif-type" type="radio" name="options" id="option_gfycat"
                 autocomplete="off" value="gfycat">
-                <label for='option2' class="btn btn-primary">
+                <label for='option_gfycat' class="btn btn-primary">
                   gfycat
                 </label>
               </div>
@@ -123,33 +133,12 @@
       <p v-else>Formato não suportado! ::(</p>
       <!-- <button type="button"></button> -->
     </div>
-    <div v-if="isGifBeingSearched" class='gifBoxWrapper'>
-      <div v-if="emptyGifResults" class='emptyGifResults'>
-        <img src="http://via.placeholder.com/480?text=nenhum gif :(" class="emptyGifResultsImg">
-      </div>
-      <div v-if="emptyGifResults === ''" class="gifBox">
-        <div v-for="gif in uniqueGifs" :key="gif.id" class="gifBoxGif">
-          <img class="gif-thumb" v-on:click="selectGif"
-          :data-original="gif.originalUrl" :src="gif.thumbUrl">
-        </div>
-        <div class="gif-attribute">
-          <a href="https://giphy.com/" v-if="this.apiRoute === 'giphy'"
-          title="Visitar giphy.com" target="_blank">
-            <img src="@/assets/giphy-attr.png" alt="Powered by GIPHY">
-          </a>
-        </div>
-      </div>
-      <div class='paginate-arrows'>
-        <ul v-if='hasPag' class="pagination">
-          <div>
-            <li v-for="index in numPages" :key="index" v-on:click="paginateGif"
-            class="page-item" :class="{ 'active' : currPage == index}">
-              <p class="page-link">{{index}}</p>
-            </li>
-          </div>
-        </ul>
-      </div>
-    </div>
+    <Gifbox
+    v-bind:gifSearch="gifSearch"
+    v-bind:imageURL="message.imageURL"
+    @setGifAsImageURL="setGifAsImageURL"
+    v-if="screenSize > 979"
+    ></Gifbox>
     </section>
     <Message
     v-for="message in messages"
@@ -179,6 +168,7 @@
 <script>
 import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
+import Gifbox from '../components/gifbox.vue';
 
 function showThumbImg(e) {
   if (window.innerWidth < 767) return;
@@ -200,6 +190,7 @@ export default {
   components: {
     ReplyBox,
     Message,
+    Gifbox
   },
   props: {
     auth: {
@@ -222,18 +213,18 @@ export default {
     replyObserver: null,
     messageToReplyTo: '',
     quotesToAdd: '',
-    gifsPerPage: 4,
-    currPage: 1,
-    numPages: 5,
     warning: {
       type: '',
       message: '',
     },
-    apiRoute: 'giphy',
-    isGifBeingSearched: '',
-    emptyGifResults: '',
-    hasPag: '',
-    gifs: [],
+    gifSearch: {
+      gif_origin: 'giphy',
+      isBeingSearched: '',
+      gifsPerPage: 4,
+      numPages: 5,
+      value: '',
+    },
+    screenSize: '',
     hasSubject: false,
     media_type: 'upload-media',
     message: {
@@ -259,33 +250,18 @@ export default {
     messagesBatchSize: 15,
   }),
   watch: {
-    isGifBeingSearched(val) {
-      if (val !== '') {
-        this.isPreviewing = '';
-      }
-    },
+      'gifSearch.isBeingSearched': function(newVal, oldVal) {
+        if (newVal !== '') {
+          this.isPreviewing = '';
+        }
+      },
     isPreviewing(val) {
       if (val !== '') {
-        this.isGifBeingSearched = '';
+        this.gifSearch.isBeingSearched = '';
       }
     },
   },
   computed: {
-    uniqueGifs() {
-      const result = [];
-      const map = new Map();
-      this.gifs.forEach((el) => {
-        if (!map.has(el.id)) {
-          map.set(el.id, true);
-          result.push({
-            id: el.id,
-            thumbUrl: el.thumbUrl,
-            originalUrl: el.originalUrl,
-          });
-        }
-      });
-      return result;
-    },
     // username() {
     //   return this.auth.username || this.message.username;
     // },
@@ -377,11 +353,30 @@ export default {
             }
           });
       });
+    this.screenSize = window.innerWidth;
+    window.addEventListener('resize', this.onResize);
+  },
+  beforeDestroy() {
+    window.removeEventListener('resize', this.onResize);
   },
   methods: {
+    setGifSearchText(e) {
+      this.gifSearch.value = e.target.value;
+    },
+    onResize(event) {
+      this.screenSize = event.target.innerWidth;
+    },
     mediaType() {
       const type = document.querySelector('input[name="media-type"]:checked');
       this.media_type = type.value;
+      if (this.media_type == 'search-media') {
+        window.setTimeout(() => {
+          const inputText = document.querySelector('#giphyURL');
+          if (inputText) {
+            inputText.focus();
+          }
+        }, 300);
+      }
     },
     focusMessage() {
       document.querySelector('#message').focus();
@@ -594,7 +589,7 @@ export default {
       this.message.user_id = 0;
       this.message.recaptcha_token = '';
       this.isPreviewing = '';
-      this.isGifBeingSearched = '';
+      this.gifSearch.isBeingSearched = '';
       const uploadIMG = document.querySelector('#uploadIMG');
       if (uploadIMG) {
         uploadIMG.value = '';
@@ -667,6 +662,9 @@ export default {
     reactMessage() {
       alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
     },
+    setGifAsImageURL(imageURL) {
+      this.message.imageURL = imageURL;
+    },
     replyMessage(reply) {
       this.messageToReplyTo = reply;
     },
@@ -721,98 +719,6 @@ export default {
       this.messageFlash.text = text;
       this.messageFlash.message = message;
       this.messageFlash.messageID = parseInt(messageID, 10);
-    },
-    searchGif(e) {
-      let searchString;
-
-      if (e.target.id === 'giphyURL') {
-        searchString = e.target.value;
-        if (searchString === '') {
-          this.isGifBeingSearched = '';
-        } else {
-          this.isGifBeingSearched = 1;
-        }
-      } else {
-        searchString = document.querySelector('#giphyURL').value;
-      }
-      if (searchString === '') {
-        this.hasPag = '';
-      } else {
-        this.hasPag = '1';
-      }
-      switch (document.querySelector(".gif-search-toggle input[type='radio']:checked").value) {
-        default:
-          this.apiRoute = 'giphy';
-          fetch(`https://api.giphy.com/v1/gifs/search?api_key=5KnNW5U9nJ2Xjnas3lugKxMIXVdCsrqF&q=${searchString}&limit=${this.gifsPerPage}&offset=${(this.currPage - 1) * this.gifsPerPage}`)
-            .then((response) => response.json())
-            .then((result) => {
-              const obj = result.data;
-              if (obj.length === 0) {
-                this.emptyGifResults = 1;
-              } else {
-                this.emptyGifResults = '';
-              }
-              this.gifs = [];
-              obj.forEach((el) => {
-                this.gifs.push({
-                  id: el.id,
-                  thumbUrl: el.images.preview_webp.url,
-                  originalUrl: el.images.original.webp,
-                });
-              });
-            })
-            .catch(() => {
-              this.emptyGifResults = 1;
-            });
-          break;
-        case 'gfycat':
-          this.apiRoute = 'gfycat';
-          fetch(`https://api.gfycat.com/v1/gfycats/search?count=${this.gifsPerPage * this.numPages}&search_text='${searchString}`)
-            .then((response) => response.json())
-            .then((result) => {
-              const obj = result.gfycats;
-              this.gfycatCursor = result.cursor;
-              if (obj.length === 0) {
-                this.emptyGifResults = 1;
-              } else {
-                this.emptyGifResults = '';
-              }
-              const startingPoint = (this.currPage - 1) * this.gifsPerPage;
-              const endingPoint = startingPoint + this.gifsPerPage;
-              this.gifs = [];
-              let counter = 0;
-              obj.forEach((el) => {
-                if (counter >= startingPoint && counter < endingPoint) {
-                  this.gifs.push({
-                    id: el.gfyId,
-                    thumbUrl: el.max1mbGif,
-                    originalUrl: el.webpUrl,
-                  });
-                }
-                counter += 1;
-              });
-            })
-            .catch((error) => {
-              console.error(error);
-              this.emptyGifResults = 1;
-            });
-          break;
-      }
-    },
-    selectGif(e) {
-      const originalUrl = e.target.getAttribute('data-original');
-      document.querySelector('#imageURL').value = originalUrl;
-      this.message.imageURL = originalUrl;
-      const clickedImg = e.target;
-      const lastClicked = clickedImg.closest('.gifBox').querySelector('.clicked');
-      if (lastClicked) {
-        lastClicked.classList.remove('clicked');
-      }
-      clickedImg.parentElement.classList.add('clicked');
-    },
-    paginateGif(e) {
-      this.currPage = e.target.innerText;
-      this.searchGif(e);
     },
     fullSize(e) {
       e.target.classList.toggle('fullsize');
@@ -884,7 +790,6 @@ export default {
           if (result.status === 200
           && result.success === true) {
             this.message.imageURL = result.data.link;
-            this.gif_origin = 'imgur';
             // remove a pesquisa por gifs
             this.optUpload = true;
             await this.sleep(100);
