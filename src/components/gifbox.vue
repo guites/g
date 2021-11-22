@@ -1,5 +1,5 @@
 <template>
-  <div class='gifBoxWrapper'>
+  <div v-if="gifSearch.isBeingSearched" class='gifBoxWrapper'>
     <div v-if="!imageURL" class="gif-info">Clique na miniatura para ver o gif completo!</div>
     <div v-else class="gif-success"><p>Gif selecionado para o post!</p><a v-on:click="unselectGif($event)" href="javascript:void(0);">cancelar</a></div>
     <div v-if="emptyGifResults" class='emptyGifResults'>
@@ -39,6 +39,11 @@
       hasPag: '',
       currPage: 1,
     }),
+    mounted() {
+      if (this.gifSearch.isBeingSearched) {
+        this.searchGif();
+      }
+    },
     methods: {
       selectGif(e) {
         const originalUrl = e.target.getAttribute('data-original');
@@ -65,8 +70,10 @@
         let searchString;
         searchString = document.querySelector('#giphyURL').value;
         if (searchString === '') {
+          this.$emit('gifIsBeingSearched', '');
           this.hasPag = '';
         } else {
+          this.$emit('gifIsBeingSearched', 1);
           this.hasPag = '1';
         }
         switch (this.gifSearch.gif_origin) {
@@ -152,7 +159,7 @@
       },
       'gifSearch.gif_origin': function(newVal, oldVal) {
         this.searchGif();
-      }
+      },
     },
   }
 </script>

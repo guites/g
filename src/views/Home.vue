@@ -96,6 +96,7 @@
               <Gifbox
               v-bind:gifSearch="gifSearch"
               v-bind:imageURL="message.imageURL"
+              @gifIsBeingSearched="gifIsBeingSearched"
               @setGifAsImageURL="setGifAsImageURL"
               v-if="screenSize <= 979"
               ></Gifbox>
@@ -136,6 +137,7 @@
     <Gifbox
     v-bind:gifSearch="gifSearch"
     v-bind:imageURL="message.imageURL"
+    @gifIsBeingSearched="gifIsBeingSearched"
     @setGifAsImageURL="setGifAsImageURL"
     v-if="screenSize > 979"
     ></Gifbox>
@@ -661,6 +663,9 @@ export default {
     },
     reactMessage() {
       alert('o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ');
+    },
+    gifIsBeingSearched(isIt) {
+      this.gifSearch.isBeingSearched = isIt;
     },
     setGifAsImageURL(imageURL) {
       this.message.imageURL = imageURL;
