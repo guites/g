@@ -677,11 +677,28 @@ section.create-thread form .form-group .gif-search-toggle .btn-primary, section.
   color: #fff;
   border-color: #444;
 }
+section.create-thread .gifBoxWrapper {
+  min-height: 590px;
+}
+section.create-thread .imagePreview {
+  height: 480px;
+}
 section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
   width: calc(100% - 500px);
   max-width: 480px;
-  height: 480px;
-  position: relative;
+}
+section.create-thread .gifBoxWrapper .gif-info, section.create-thread .imagePreview .gif-info {
+  color: #842cb0;
+  margin: 15px 0;
+}
+section.create-thread .gifBoxWrapper .gif-success, section.create-thread .imagePreview .gif-success {
+  color: #72ab00;
+  margin: 15px 0;
+  display: flex;
+  justify-content: space-between;
+}
+section.create-thread .gifBoxWrapper .gif-success a, section.create-thread .imagePreview .gif-success a {
+  color: #e74c3c;
 }
 section.create-thread .gifBoxWrapper div.error-wrap a, section.create-thread .imagePreview div.error-wrap a {
   padding: 10px;
@@ -692,6 +709,7 @@ section.create-thread .gifBoxWrapper .paginate-arrows ul, section.create-thread 
 }
 section.create-thread .gifBoxWrapper .paginate-arrows ul div, section.create-thread .imagePreview .paginate-arrows ul div {
   display: flex;
+  margin: 0 auto;
 }
 section.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:nth-child(1) a, section.create-thread .imagePreview .paginate-arrows ul li.page-item:nth-child(1) a {
   border-radius: 4px;
@@ -746,15 +764,32 @@ section.create-thread .gifBoxWrapper .emptyGifResults img, section.create-thread
 }
 section.create-thread .gifBoxWrapper .gifBox, section.create-thread .imagePreview .gifBox {
   width: 100%;
-  height: 100%;
+  height: 480px;
   min-height: 250px;
   display: flex;
   flex-wrap: wrap;
   border: 2px solid gray;
   border-radius: 4px;
+  position: relative;
+}
+section.create-thread .gifBoxWrapper .gifBox .expandedGif, section.create-thread .imagePreview .gifBox .expandedGif {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+section.create-thread .gifBoxWrapper .gifBox .expandedGif img, section.create-thread .imagePreview .gifBox .expandedGif img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  max-height: 480px;
 }
 section.create-thread .gifBoxWrapper .gifBox .gifBoxGif, section.create-thread .imagePreview .gifBox .gifBoxGif {
-  border: 1px solid gray;
+  border: 3px solid gray;
   width: 50%;
   height: 50%;
   display: flex;
@@ -763,11 +798,11 @@ section.create-thread .gifBoxWrapper .gifBox .gifBoxGif, section.create-thread .
   transition: all 300ms ease;
 }
 section.create-thread .gifBoxWrapper .gifBox .gifBoxGif:hover, section.create-thread .imagePreview .gifBox .gifBoxGif:hover {
-  border-color: #fff;
+  border-color: #842cb0;
   cursor: pointer;
 }
 section.create-thread .gifBoxWrapper .gifBox .gifBoxGif.clicked, section.create-thread .imagePreview .gifBox .gifBoxGif.clicked {
-  border-color: #fff;
+  border-color: #842cb0;
 }
 section.create-thread .gifBoxWrapper .gifBox .gifBoxGif img, section.create-thread .imagePreview .gifBox .gifBoxGif img {
   width: 100%;
@@ -1445,7 +1480,6 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
   }
   section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
     width: 100%;
-    height: initial;
   }
 
   #replybox {
