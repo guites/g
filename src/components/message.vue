@@ -54,7 +54,7 @@
           <button type="button"
           @click="replyMessage($event)"
           :data-replyTo="message.id"
-          class='reply'>responder</button>
+          class='reply'>responder <img style="width: 16px;" src="@/assets/reply.white.png" loading="lazy"><img style="width: 16px;" src="@/assets/reply.grey.png" loading="lazy"></button>
           <button type="button" class='link'
           v-if="replyCount && replyCount > 2 && isHome">
             <a :href="'/#/post/' + message.id">

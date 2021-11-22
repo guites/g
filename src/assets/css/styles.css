@@ -1070,8 +1070,23 @@ div li div.edit_tab button.reply {
   color: #999;
   border-color: #444;
 }
+div li div.edit_tab button.reply img {
+  margin: 0;
+}
+div li div.edit_tab button.reply img:nth-child(1) {
+  display: none;
+}
+div li div.edit_tab button.reply img:nth-child(2) {
+  display: initial;
+}
 div li div.edit_tab button.reply:hover {
   background-color: #444;
+}
+div li div.edit_tab button.reply:hover img:nth-child(1) {
+  display: initial;
+}
+div li div.edit_tab button.reply:hover img:nth-child(2) {
+  display: none;
 }
 div li div.edit_tab button.link-reply {
   color: #00bc8c;
@@ -1079,13 +1094,16 @@ div li div.edit_tab button.link-reply {
   border-color: transparent;
   min-width: 50px;
 }
+div li div.edit_tab button.link-reply img {
+  margin: 0;
+}
 div li div.edit_tab button.link-reply:hover {
   color: #00bc8c;
   background-color: #444;
   border-color: #00bc8c;
 }
 div li div.edit_tab button.link {
-  padding: 0;
+  padding: 0 5px;
 }
 div li div.edit_tab button.link a {
   width: 100%;

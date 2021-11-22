@@ -97,7 +97,7 @@ export default {
   watch: {
     messageToReplyTo(val) {
       if (val !== '') {
-        setTimeout(() => document.querySelector('#replyForm #username').focus(), 100);
+        setTimeout(() => document.querySelector('#replyForm #message').focus(), 100);
       }
     },
     quotesToAdd(val) {
