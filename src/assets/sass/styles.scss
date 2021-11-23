@@ -1247,6 +1247,7 @@ div{
               min-width:50px;
               img {
                 margin: 0;
+                pointer-events: none;
               }
               &:hover{
                 color:#00bc8c;
