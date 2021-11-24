@@ -24,9 +24,13 @@
       <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
       :allowedUploadVideoFormats="this.allowedUploadVideoFormats"
+      :quotesToAdd="this.quotesToAdd"
+      :rememberedUsername="this.rememberedUsername"
+      :rememberMe="this.rememberMe"
       @closeReply="this.closeReply"
       @addReplyToThread="this.addReplyToThread"
-      :quotesToAdd="this.quotesToAdd"
+      @updateUsername="this.updateUsername"
+      @updateRememberMe="this.updateRememberMe"
       >
       </ReplyBox>
     </template>
@@ -73,7 +77,17 @@ export default {
   data: () => ({
     messageURL: 'message/',
     repliesURL: 'replies',
-    message: '',
+    message: {
+      username: '',
+      subject: '',
+      message: '',
+      imageURL: '',
+      user_id: 0,
+      gif_origin: 'none',
+    },
+    replierUsername: '',
+    rememberMe: 1,
+    rememberedUsername: '',
     quotesToAdd: '',
     messageToReplyTo: '',
     allowedUploadVideoFormats: [
@@ -88,6 +102,9 @@ export default {
     ],
   }),
   watch: {
+    'replierUsername': function (newVal, oldVal) {
+      this.rememberUsername();
+    },
     id(val) {
         this.getThePost();
     },
@@ -97,12 +114,22 @@ export default {
     this.setInjectedData();
   },
   mounted() {
-    document.querySelector('body').addEventListener('click', function(e) {
-      if (e.target.classList.contains('quote')) {
-      }
-    });
+    // loads username from localStorage
+    const rememberedUsername = localStorage.getItem('gchan_username');
+    if (rememberedUsername) this.replierUsername = rememberedUsername;
   },
   methods: {
+    rememberUsername() {
+        if (this.replierUsername !== '' && this.rememberMe) {
+          localStorage.setItem('gchan_username', this.replierUsername);
+        } else {
+          const getUsername = localStorage.getItem('gchan_username');
+          if (getUsername) {
+            localStorage.removeItem('gchan_username');
+          }
+        }
+        this.rememberedUsername = this.replierUsername;
+    },
     sanitizeSingleMessage(message) {
       const sanitized = message;
       if (message.message) {
@@ -401,6 +428,12 @@ export default {
     },
     adcQuote(quote) {
       this.quotesToAdd = quote;
+    },
+    updateUsername(username) {
+      this.replierUsername = username;
+    },
+    updateRememberMe(remember) {
+      this.rememberMe = remember;
     },
     closeReply() {
       this.messageToReplyTo = '';

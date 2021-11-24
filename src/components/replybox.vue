@@ -18,13 +18,19 @@
     </div>
     <form id="replyForm" @submit.prevent="addReply($event)">
       <div class="form-group">
-        <label for="username">Usuário</label>
+        <div style="display: flex; align-items: center;">
+          <label for="username">Usuário</label>
+          <div v-if="rememberedUsername" class="form-subject" style="margin-left: 15px;">
+            <label for="remember-me-reply"><small>lembrar meu nome</small></label>
+            <input type="checkbox" name="remember-me-reply"
+            id="remember-me-reply" v-model="replyRememberMe" checked="checked">
+          </div>
+        </div>
         <input type="text" class="form-control" id="username"
         aria-describedby="usernameHelp"
-        placeholder="Anonymous"
+        placeholder="anônimo"
         v-model="replyMessage.username"
-        maxlength=30
-        required>
+        maxlength=30>
       </div>
       <div class="form-group">
         <label for="message">Mensagem</label>
@@ -65,7 +71,13 @@
 <script>
 export default {
   name: 'ReplyBox',
-  props: ['messageToReplyTo', 'allowedUploadVideoFormats', 'quotesToAdd'],
+  props: [
+    'messageToReplyTo',
+    'allowedUploadVideoFormats',
+    'quotesToAdd',
+    'rememberedUsername',
+    'rememberMe'
+  ],
   data: () => ({
     replyTo: {
       message_id: '',
@@ -81,13 +93,14 @@ export default {
       dragging: false,
     },
     replyMessage: {
-      username: 'anônimo',
+      username: '',
       content: '',
       imageURL: '',
       message_id: '',
       user_id: 0,
       recaptcha_token: ''
     },
+    replyRememberMe: 1,
     warning: {
       type: '',
       message: '',
@@ -95,6 +108,20 @@ export default {
     optUpload: false,
   }),
   watch: {
+    rememberMe(newVal, oldVal) {
+      if (newVal != oldVal) {
+        this.replyRememberMe = newVal;
+      }
+    },
+    replyRememberMe(newVal, oldVal) {
+      this.$emit('updateRememberMe', newVal);
+    },
+    'replyMessage.username': function(newVal, oldVal) {
+      this.$emit('updateUsername', newVal);
+    },
+    rememberedUsername() {
+      this.replyMessage.username = this.rememberedUsername;
+    },
     messageToReplyTo(val) {
       if (val !== '') {
         setTimeout(() => document.querySelector('#replyForm #message').focus(), 100);
@@ -234,7 +261,9 @@ export default {
     },
     clearReplyForm() {
       this.replyMessage.message_id = '';
-      this.replyMessage.username = 'anônimo';
+      if (!this.rememberMe) {
+        this.replyMessage.username = '';
+      }
       this.replyMessage.content = '';
       this.replyMessage.imageURL = '';
       this.replyMessage.user_id = 0;
