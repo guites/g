@@ -1223,6 +1223,7 @@ div{
               border-color:#444;
               img {
                 margin: 0;
+                pointer-events: none;
               }
               img:nth-child(1) {
                 display: none;
