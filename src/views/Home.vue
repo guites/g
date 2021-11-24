@@ -9,14 +9,23 @@
           <p>{{warning.message}}</p>
        </div>
         <div class="form-group">
-          <label for="username">Nome <small>[opcional]</small></label>
+          <div style="display: flex;">
+            <label for="username">
+              Nome <small>[opcional]</small>
+            </label>
+            <div v-if="message.username !== ''" class="form-subject">
+              <label for="remember-me"><small>lembrar meu nome</small></label>
+              <input type="checkbox" name="remember-me"
+              id="remember-me" checked="checked" v-model="rememberMe">
+            </div>
+          </div>
           <input type="text" class="form-control" id="username"
           aria-describedby="usernameHelp"
           placeholder="anônimo"
           v-model="message.username"
           maxlength=30
           >
-          <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
+          <small v-if="message.username !== ''" id="usernameHelp" class="form-text text-muted">
             anonimato é para os fracos
           </small>
           <small v-else id="usernameHelp" class="form-text text-muted">
@@ -158,9 +167,13 @@
       <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
       :allowedUploadVideoFormats="this.allowedUploadVideoFormats"
+      :quotesToAdd="this.quotesToAdd"
+      :rememberedUsername="this.rememberedUsername"
+      :rememberMe="this.rememberMe"
       @closeReply="this.closeReply"
       @addReplyToThread="this.addReplyToThread"
-      :quotesToAdd="this.quotesToAdd"
+      @updateUsername="this.updateUsername"
+      @updateRememberMe="this.updateRememberMe"
       >
       </ReplyBox>
     </template>
@@ -237,6 +250,8 @@ export default {
       user_id: 0,
       gif_origin: 'none',
     },
+    rememberMe: 1,
+    rememberedUsername: '',
     isPreviewing: '',
     allowedUploadVideoFormats: [
       'video/mp4',
@@ -252,6 +267,9 @@ export default {
     messagesBatchSize: 15,
   }),
   watch: {
+      'message.username': function (newVal, oldVal) {
+        this.rememberUsername();
+      },
       'gifSearch.isBeingSearched': function(newVal, oldVal) {
         if (newVal !== '') {
           this.isPreviewing = '';
@@ -357,11 +375,25 @@ export default {
       });
     this.screenSize = window.innerWidth;
     window.addEventListener('resize', this.onResize);
+    // loads username from localStorage
+    const rememberedUsername = localStorage.getItem('gchan_username');
+    if (rememberedUsername) this.message.username = rememberedUsername;
   },
   beforeDestroy() {
     window.removeEventListener('resize', this.onResize);
   },
   methods: {
+    rememberUsername() {
+        if (this.message.username !== '' && this.rememberMe) {
+          localStorage.setItem('gchan_username', this.message.username);
+        } else {
+          const getUsername = localStorage.getItem('gchan_username');
+          if (getUsername) {
+            localStorage.removeItem('gchan_username');
+          }
+        }
+        this.rememberedUsername = this.message.username;
+    },
     setGifSearchText(e) {
       this.gifSearch.value = e.target.value;
     },
@@ -584,7 +616,9 @@ export default {
       return true;
     },
     clearMsgForm() {
-      this.message.username = 'anônimo';
+      if (!this.rememberMe) {
+        this.message.username = '';
+      }
       this.message.subject = '';
       this.message.message = '';
       this.message.imageURL = '';
@@ -675,6 +709,12 @@ export default {
     },
     adcQuote(quote) {
       this.quotesToAdd = quote;
+    },
+    updateUsername(username) {
+      this.message.username = username;
+    },
+    updateRememberMe(remember) {
+      this.rememberMe = remember;
     },
     closeReply() {
       this.messageToReplyTo = '';
