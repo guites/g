@@ -730,9 +730,6 @@ section.create-thread{
   .gifBoxWrapper {
     min-height: 590px;
   }
-  .imagePreview {
-    height: 480px;
-  }
   .gifBoxWrapper, .imagePreview{
     width:calc(100% - 500px);
     max-width: 480px;
@@ -889,10 +886,20 @@ section.create-thread{
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-direction: column;
+    p {
+      &.info {
+        color: rgb(132, 44, 176);
+      }
+      &.success {
+        color:#00bc8c;
+      }
+      &.error {
+        color: #e74c3c;
+      }
+    }
     button:not(.volume) {
-      position: absolute;
-      top: 5px;
-      right: 5px;
+      margin: 0 0 10px auto;
       background-color: #e74c3c;
       border-color: #e74c3c;
       border: 1px solid transparent;
@@ -907,6 +914,10 @@ section.create-thread{
       &:hover{
         background-color: #e12e1c;
         border-color: #d62c1a;
+      }
+      &:disabled {
+        opacity: 0.5;
+        cursor: wait;
       }
     }
     p{

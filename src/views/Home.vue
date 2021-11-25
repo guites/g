@@ -110,13 +110,11 @@
               v-if="screenSize <= 979"
               ></Gifbox>
               <div v-if='!this.optUpload' class="gif-search-toggle" data-toggle="buttons">
-                <!-- v-on:change="searchGif" -->
                 <input v-model="gifSearch.gif_origin" class="gif-type" type="radio" name="options" id="option_giphy"
                 autocomplete="off" checked value="giphy">
                 <label for ='option_giphy' class="btn btn-primary">
                   Giphy
                 </label>
-                <!-- v-on:change="searchGif" -->
                 <input v-model="gifSearch.gif_origin" class="gif-type" type="radio" name="options" id="option_gfycat"
                 autocomplete="off" value="gfycat">
                 <label for='option_gfycat' class="btn btn-primary">
@@ -126,11 +124,20 @@
             </div>
             <!-- </transition> -->
             <!-- </div> -->
-        <button type="submit" class="btn btn-primary create-post">Postar</button>
+        <button type="submit" :disabled="uploadStatus == 'loading'" :class="[uploadStatus === 'loading' ? 'disabled' : '', 'btn btn-primary create-post']">Postar</button>
     </form>
     <div v-if="isPreviewing" class="imagePreview">
-      <button type='button' v-if='this.optUpload'
-      @click="removeUpload($event)">Cancelar</button>
+      <div style="width: 100%; align-items: center; display: flex; justify-content: space-between;">
+        <p v-if="uploadStatus == 'loading'" class="info">Aguarde...</p>
+        <p v-if="uploadStatus == 'success'" class="success">Upload concluído!</p>
+        <p v-if="uploadStatus == 'error'" class="error">Erro ao realizar o upload!</p>
+        <button type='button' v-if='this.optUpload'
+        :class="[uploadStatus === 'loading' ? 'disabled' : '']"
+        :disabled="uploadStatus == 'loading'"
+        @click="removeUpload($event)">
+          Remover arquivo
+        </button>
+      </div>
       <img v-if="isPreviewing === 'image'" src="" id="imageToUpload"
       alt="pré-visualização de imagem para upload">
       <video v-else-if="isPreviewing === 'video'"
@@ -141,7 +148,6 @@
       muted="true"
       playsinline="true"></video>
       <p v-else>Formato não suportado! ::(</p>
-      <!-- <button type="button"></button> -->
     </div>
     <Gifbox
     v-bind:gifSearch="gifSearch"
@@ -253,6 +259,7 @@ export default {
     rememberMe: 1,
     rememberedUsername: '',
     isPreviewing: '',
+    uploadStatus: '',
     allowedUploadVideoFormats: [
       'video/mp4',
       'video/webm',
@@ -801,23 +808,18 @@ export default {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
     async uploadToImgur(kind, arquivo) {
-      document.querySelector('.imagePreview').children[0].classList.add('uploading');
-      const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
-      submitButton.disabled = true;
-      // blank line
+      const imgPreviewWrapper = document.querySelector('.imagePreview');
+      const mediaInUse = imgPreviewWrapper.querySelector('img,video');
+      mediaInUse.classList.add('uploading');
+      //const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
+      //submitButton.disabled = true;
+      //submitButton.classList.add('disabled');
+
       let postURL;
       const formData = new FormData();
       if (kind === 'image') {
-        if (true) {
-        // if (arquivo.type === 'image/gif') {
-          formData.append('image', arquivo);
-          postURL = `${this.$backendURL}${this.imgurURLgif}`;
-        } else {
-          const file = document.querySelector('#imageToUpload').src;
-          const base64result = file.split(',')[1];
-          postURL = `${this.$backendURL}${this.imgurURLimg}`;
-          formData.append('image', base64result);
-        }
+        formData.append('image', arquivo);
+        postURL = `${this.$backendURL}${this.imgurURLgif}`;
       } else {
         formData.append('video', arquivo);
         postURL = `${this.$backendURL}${this.imgurURLupload}`;
@@ -830,8 +832,6 @@ export default {
       fetch(postURL, requestOptions)
         .then((response) => response.json())
         .then(async (result) => {
-          const mediaDiv = document.querySelector('.imagePreview');
-          const mediaInUse = mediaDiv.children[0];
           if (result.status === 200
           && result.success === true) {
             this.message.imageURL = result.data.link;
@@ -847,7 +847,7 @@ export default {
               mediaInUse.src = result.data.link;
             }
             mediaInUse.classList.remove('uploading');
-            const removeBtn = mediaDiv.querySelector('button');
+            const removeBtn = imgPreviewWrapper.querySelector('button');
             removeBtn.setAttribute('data-deletehash', result.data.deletehash);
           } else if (result.status === 500 && result.success === false) {
             this.warning.message = `
@@ -868,9 +868,14 @@ export default {
             this.warning.type = 'alert-error';
             this.isPreviewing = '';
           }
-          submitButton.disabled = false;
+          //submitButton.disabled = false;
+          //submitButton.classList.remove('disabled');
+          this.uploadStatus = 'success';
         })
-        .catch((error) => console.log('error', error));
+        .catch((error) => {
+          this.uploadStatus = 'error';
+          console.log('error', error);
+        });
     },
     readAsDataURL(file, img) {
       return new Promise((resolve) => {
@@ -888,6 +893,7 @@ export default {
       });
     },
     async handleUpload(e) {
+      this.uploadStatus = 'loading';
       let imagePreviewDiv;
       const file = e.target.files[0];
       const input = document.querySelector('#uploadIMG');
@@ -895,18 +901,18 @@ export default {
         this.isPreviewing = 'image';
         await this.sleep(100);
         imagePreviewDiv = document.querySelector('.imagePreview');
-        await this.readAsDataURL(file, imagePreviewDiv.children[0]);
+        await this.readAsDataURL(file, imagePreviewDiv.querySelector('img'));
         await this.uploadToImgur('image', file);
       } else if (file.type.startsWith('video/')) {
         if (this.allowedUploadVideoFormats.includes(file.type)) {
           this.isPreviewing = 'video';
           await this.sleep(100);
           imagePreviewDiv = document.querySelector('.imagePreview');
-          // await this.readAsDataURL(file, imagePreviewDiv.children[0]);
           const objUrl = URL.createObjectURL(file);
           imagePreviewDiv.children[0].src = objUrl;
           await this.uploadToImgur('video', file);
         } else {
+          this.uploadStatus = 'error';
           this.warning.message = `
             Formato de vídeo não aceito!\n
             Funciona apenas com os formatos abaixo:\n
@@ -925,6 +931,7 @@ export default {
       }
     },
     removeUpload(e) {
+      this.uploadStatus = 'loading';
       const deleteHash = e.target.getAttribute('data-deletehash').trim();
       fetch(`${this.$backendURL}imgur/${deleteHash}`, {
         method: 'DELETE',
@@ -936,6 +943,7 @@ export default {
         .then((response) => response.json())
         .then((r) => {
           if (r.data === true && r.success === true) {
+            this.uploadStatus = '';
             this.optUpload = false;
             this.isPreviewing = '';
             this.message.imageURL = '';
