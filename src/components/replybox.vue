@@ -16,7 +16,7 @@
         x
       </button>
     </div>
-    <form id="replyForm" @submit.prevent="addReply($event)">
+    <form v-if="!checkPreview" id="replyForm" @submit.prevent="addReply($event)">
       <div class="form-group">
         <div style="display: flex; align-items: center;">
           <label for="username">Usuário</label>
@@ -40,7 +40,37 @@
         required>
         </textarea>
       </div>
-      <div class="form-group">
+      <p v-if="isUploading" class="info">Aguarde...</p>
+      <div v-if="!isPreviewing" class="form-group row">
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          type="button" @click="toggleInputFile($event);">
+          Enviar arquivo
+          <input type="file" name="replyIMG" id="replyIMG" @change="handleUpload($event)">
+        </button>
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          type="button">Buscar gif</button>
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          type="button">Digitar URL</button>
+      </div>
+      <div v-if="isPreviewing" class="form-group">
+        <p v-if="(isPreviewing === 'image' || isPreviewing === 'video') && !isUploading" class="success">Upload concluído!</p>
+        <p v-if="isPreviewing === 'gif'" class="success">Gif selecionado!</p>
+        <p v-if="isPreviewing === 'url'" class="success">URL carregada!</p>
+        <div class="form-group row justify-center">
+          <button 
+            :disabled="this.isUploading !== ''"
+            :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+            type="button" @click="visualizePreview()">Visualizar preview</button>
+          <!-- <button
+            :disabled="this.isUploading !== ''"
+            :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only ml-15']"
+            type="button" @click="removeUpload()">Remover</button> -->
+        </div>
+      </div>
+      <!-- <div class="form-group">
         <label for="replyIMG">
           Envie uma imagem/gif/vídeo
           <span
@@ -62,9 +92,29 @@
         id="imageURL" placeholder="https://~"
         :readonly="this.optUpload === true"
         >
-      </div>
-      <button id="submitReply" type="submit" class="btn btn-primary">Enviar</button>
+      </div> -->
+      <button id="submitReply" type="submit" class="btn btn-primary">Enviar resposta</button>
     </form>
+    <div v-if="checkPreview" class="previewImg">
+      <img v-if="isPreviewing === 'image'" :src="isPreviewingSrc">
+      <video v-if="isPreviewing === 'video'"
+      id="videoToUpload"
+      :src="isPreviewingSrc"
+      autoplay="true"
+      loop="true"
+      muted="true"
+      playsinline="true"></video>
+      <div class="form-group row justify-center">
+        <button 
+          :disabled="this.isUploading !== ''"
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          type="button" @click="visualizePreview()">Confirmar</button>
+        <button 
+          :disabled="this.isUploading !== ''"
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only ml-15']"
+          type="button" @click="removeUpload()" >Remover</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -106,6 +156,11 @@ export default {
       message: '',
     },
     optUpload: false,
+    uploadDeleteHash: '',
+    isUploading: '',
+    isPreviewing: '',
+    isPreviewingSrc: '',
+    checkPreview: '',
   }),
   watch: {
     rememberMe(newVal, oldVal) {
@@ -147,6 +202,38 @@ export default {
     },
   },
   methods: {
+    removeUpload() {
+      if (this.uploadDeleteHash) {
+        this.isUploading = true;
+        fetch(`${this.$backendURL}imgur/${this.uploadDeleteHash}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: 'Client-ID 3435e574a9859d1',
+          },
+          redirect: 'follow',
+        })
+          .then((response) => response.json())
+          .then((r) => {
+            if (r.data === true && r.success === true) {
+              this.optUpload = false;
+              this.isPreviewing = '';
+              this.isPreviewingSrc = '';
+              this.checkPreview = '';
+              this.replyMessage.imageURL = '';
+              this.isUploading = '';
+            }
+          });
+      }
+    },
+    visualizePreview() {
+      this.checkPreview = !this.checkPreview;
+    },
+    toggleInputFile(e) {
+      const inputFile = e.target.querySelector('input[type="file"]');
+      if (inputFile) {
+        inputFile.click();
+      }
+    },
     dragMouseDown(event) {
       event.preventDefault();
       // get the mouse cursor position at startup:
@@ -267,8 +354,11 @@ export default {
       this.replyMessage.content = '';
       this.replyMessage.imageURL = '';
       this.replyMessage.user_id = 0;
-      document.querySelector('#replyIMG').value = '';
       this.optUpload = false;
+      this.isUploading = '';
+      this.isPreviewing = '';
+      this.isPreviewingSrc = '';
+      this.uploadDeleteHash = '';
     },
     addReply(e) {
       const submitButton = document.getElementById('submitReply');
@@ -331,6 +421,7 @@ export default {
     },
     async postImgGif(formData, url) {
       const submitButton = document.querySelector('#replyForm button');
+      this.isUploading = true;
       return fetch(url, {
         method: 'POST',
         body: formData,
@@ -342,6 +433,10 @@ export default {
             this.replyMessage.imageURL = result.data.link;
             // trava o input file e deixa o campo de URL como read only
             this.optUpload = true;
+            this.isUploading = '';
+            this.isPreviewing = 'image';
+            this.isPreviewingSrc = result.data.link;
+            this.uploadDeleteHash = result.data.deletehash;
           } else if (result.status === 500 && result.success === false) {
             this.warning.type = 'alert-error';
             this.warning.message = `
@@ -369,19 +464,8 @@ export default {
       // blank line
       const formData = new FormData();
       if (kind === 'image') {
-        // if (file.type === 'image/gif') {
-        if (true) {
-          formData.append('image', file);
-          await this.postImgGif(formData,`${this.$backendURL}gifupload`);
-        } else {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            const base64result = reader.result.split(',')[1];
-            formData.append('image', base64result);
-            await this.postImgGif(formData, `${this.$backendURL}imgupload`);
-          };
-          reader.readAsDataURL(file);
-        }
+        formData.append('image', file);
+        await this.postImgGif(formData,`${this.$backendURL}gifupload`);
       } else {
         formData.append('video', file);
         fetch(`${this.$backendURL}videoupload`, {

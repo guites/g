@@ -1568,3 +1568,84 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
     padding: 10px 0;
   }
 }
+/* mobile keyboard adaptation test */
+@media screen and (max-height: 540px), screen and (max-width: 479px) {
+  #replybox {
+    max-width: 100%;
+    width: 100%;
+  }
+  #replybox .previewImg {
+    display: flex;
+    flex-direction: column;
+  }
+  #replybox .previewImg img, #replybox .previewImg video {
+    max-height: calc(100vh - 37.5px - 66px - 30px);
+    object-fit: contain;
+  }
+  #replybox p {
+    text-align: center;
+    margin-top: 5px;
+  }
+  #replybox p.info {
+    color: #842cb0;
+  }
+  #replybox p.success {
+    color: #00bc8c;
+  }
+  #replybox p.error {
+    color: #e74c3c;
+  }
+  #replybox button.mobile-only {
+    height: 36.5px;
+    background-color: #444;
+    border-color: #444;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px 15px;
+    font-size: 15px;
+    font-weight: bold;
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 300ms ease;
+  }
+  #replybox button.mobile-only.ml-15 {
+    margin-left: 15px;
+  }
+  #replybox button.mobile-only:hover {
+    color: #fff;
+    background-color: #2b4764;
+    border-color: #28415b;
+  }
+  #replybox button.mobile-only.create-post {
+    margin: 15px 0 25px;
+  }
+  #replybox button.mobile-only.disabled {
+    opacity: 0.5;
+    cursor: wait;
+  }
+  #replybox button.mobile-only input[type=file] {
+    display: none;
+  }
+  #replybox .form-group {
+    display: flex;
+    padding: 0;
+  }
+  #replybox .form-group.row {
+    flex-direction: row;
+    justify-content: space-around;
+  }
+  #replybox .form-group.justify-center {
+    justify-content: center;
+  }
+  #replybox .form-group div {
+    padding: 0;
+  }
+}
+@media screen and (max-width: 400px) {
+  #replybox button.mobile-only {
+    font-size: 13px;
+  }
+}
