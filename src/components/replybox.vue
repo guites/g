@@ -41,7 +41,7 @@
         </textarea>
       </div>
       <p v-if="isUploading" class="info">Aguarde...</p>
-      <div v-if="!isPreviewing" class="form-group row">
+      <div v-if="!isPreviewing && !isTypingUrl" class="form-group row">
         <button :disabled="this.isUploading !== ''" 
           :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
           type="button" @click="toggleInputFile($event);">
@@ -53,7 +53,19 @@
           type="button">Buscar gif</button>
         <button :disabled="this.isUploading !== ''" 
           :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          v-on:click="setTypingInput()"
           type="button">Digitar URL</button>
+      </div>
+      <div v-if="!isPreviewing && isTypingUrl" class="form-group row">
+        <input type="url" class="form-control"
+        id="input_url" name="input_url"
+        placeholder="ex: https://i.imgur.com/BTNIDBR.gif"
+        v-model="typingUrl"
+        >
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only cancel-url']"
+          v-on:click="setTypingInput()"
+          type="button">Cancelar</button>
       </div>
       <div v-if="isPreviewing" class="form-group">
         <p v-if="(isPreviewing === 'image' || isPreviewing === 'video') && !isUploading" class="success">Upload concluído!</p>
@@ -165,6 +177,9 @@ export default {
     isPreviewingSrc: '',
     checkPreview: '',
     boxMinHeight: '',
+    isTypingUrl: false,
+    typingUrl: '',
+    typedMediaIsValid: false,
   }),
   watch: {
     rememberMe(newVal, oldVal) {
@@ -206,6 +221,19 @@ export default {
     },
   },
   methods: {
+    setTypingInput() {
+      this.isTypingUrl = !this.isTypingUrl;
+      if (this.isTypingUrl) {
+        setTimeout(() => {
+          const input_url = document.querySelector('#input_url');
+          if (input_url) {
+            input_url.focus();
+          }
+        },
+        100
+        );
+      }
+    },
     removeUpload() {
       if (this.uploadDeleteHash) {
         this.isUploading = true;
@@ -373,9 +401,21 @@ export default {
       this.uploadDeleteHash = '';
     },
     addReply(e) {
-      const submitButton = document.getElementById('submitReply');
-      submitButton.classList.add('disabled');
-      submitButton.disabled = true;
+      //const submitButton = document.getElementById('submitReply');
+      //submitButton.classList.add('disabled');
+      //submitButton.disabled = true;
+
+      if (this.isTypingUrl) {
+        // user checked that wants to type an url
+        if (!this.typingUrl || !this.typedMediaIsValid) {
+          // user didnt fill url input or url didnt generate preview correctly
+          this.warning.type = 'alert-error';
+          this.warning.message = `Digite uma URL válida! Verifique também se o preview foi gerado corretamente.`;
+          return;
+        }
+        this.replyMessage.imageURL = this.typingUrl;
+      }
+      this.isUploading = true;
       this.warning.message = "Enviando, aguarde...";
       this.warning.type = 'alert-info';
       grecaptcha.ready(() => {
@@ -409,8 +449,9 @@ export default {
                 this.clearReplyForm();
                 this.closeReply();
               }
-              submitButton.classList.remove('disabled');
-              submitButton.disabled = false;
+              this.isUploading = '';
+              // submitButton.classList.remove('disabled');
+              // submitButton.disabled = false;
             });
           });
       });
@@ -432,7 +473,6 @@ export default {
       }
     },
     async postImgGif(formData, url) {
-      const submitButton = document.querySelector('#replyForm button');
       this.isUploading = true;
       return fetch(url, {
         method: 'POST',
@@ -466,19 +506,17 @@ export default {
               JPEG, PNG, GIF, APNG e TIFF!
               `;
           }
-          // libera o botão de enviar
-          submitButton.disabled = false;
+          this.isUploading = '';
         });
     },
     async uploadToImgur(kind, file) {
-      const submitButton = document.querySelector('#replyForm button');
-      submitButton.disabled = true;
       // blank line
       const formData = new FormData();
       if (kind === 'image') {
         formData.append('image', file);
         await this.postImgGif(formData,`${this.$backendURL}gifupload`);
       } else {
+        this.isUploading = true;
         formData.append('video', file);
         fetch(`${this.$backendURL}videoupload`, {
           method: 'POST',
@@ -489,8 +527,7 @@ export default {
           .then((result) => {
             if (result.status === 200 && result.success === true) {
               this.replyMessage.imageURL = result.data.link;
-              // libera o botão de enviar
-              submitButton.disabled = false;
+              this.isUploading = '';
               // trava o input file e deixa o campo de URL como read only
               this.optUpload = true;
             } else {

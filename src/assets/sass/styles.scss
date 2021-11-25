@@ -1705,6 +1705,12 @@ header{
 
 }
 @media screen and (max-width: 479px){
+  .alert {
+    max-width: calc(100% - 40px);
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
   div{
       li{
           img{
@@ -1811,5 +1817,5 @@ header{
       font-size: 13px;
     }
   }
-
 }
+#input_url { margin: 15px 0; }
