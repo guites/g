@@ -1571,6 +1571,9 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
 /* mobile keyboard adaptation test */
 @media screen and (max-height: 540px), screen and (max-width: 479px) {
   #replybox {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     max-width: 100%;
     width: 100%;
   }

@@ -1,5 +1,5 @@
 <template>
-  <div ref="replybox" id="replybox" v-if="messageToReplyTo">
+  <div ref="replybox" id="replybox" v-if="messageToReplyTo" v-bind:style="{ minHeight: boxMinHeight + 'px'}">
     <div v-if="warning.message" :class="'alert ' + warning.type">
       <span v-on:click="warning.message=''">x</span>
       <h4></h4>
@@ -93,7 +93,10 @@
         :readonly="this.optUpload === true"
         >
       </div> -->
-      <button id="submitReply" type="submit" class="btn btn-primary">Enviar resposta</button>
+      <button id="submitReply" type="submit"
+        :disabled="this.isUploading !== ''"
+        :class="[isUploading !== '' ? 'disabled' : '', 'btn btn-primary']"
+        >Enviar resposta</button>
     </form>
     <div v-if="checkPreview" class="previewImg">
       <img v-if="isPreviewing === 'image'" :src="isPreviewingSrc">
@@ -161,6 +164,7 @@ export default {
     isPreviewing: '',
     isPreviewingSrc: '',
     checkPreview: '',
+    boxMinHeight: '',
   }),
   watch: {
     rememberMe(newVal, oldVal) {
@@ -227,6 +231,14 @@ export default {
     },
     visualizePreview() {
       this.checkPreview = !this.checkPreview;
+      if (this.checkPreview) {
+        const replyBox = document.querySelector('#replybox');
+        if (replybox) {
+          this.boxMinHeight = replybox.getBoundingClientRect().height; 
+        }
+      } else {
+        this.boxMinheight = '';
+      }
     },
     toggleInputFile(e) {
       const inputFile = e.target.querySelector('input[type="file"]');
