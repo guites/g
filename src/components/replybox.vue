@@ -48,9 +48,9 @@
           Enviar arquivo
           <input type="file" name="replyIMG" id="replyIMG" @change="handleUpload($event)">
         </button>
-        <button :disabled="this.isUploading !== ''" 
+        <!-- <button :disabled="this.isUploading !== ''" 
           :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
-          type="button">Buscar gif</button>
+          type="button">Buscar gif</button> -->
         <button :disabled="this.isUploading !== ''" 
           :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
           v-on:click="setTypingInput()"
