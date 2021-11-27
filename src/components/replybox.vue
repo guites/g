@@ -1,5 +1,5 @@
 <template>
-  <div ref="replybox" id="replybox" v-if="messageToReplyTo">
+  <div v-on:click="removeWarnings($event)" ref="replybox" id="replybox" v-if="messageToReplyTo" v-bind:style="{ minHeight: boxMinHeight + 'px'}">
     <div v-if="warning.message" :class="'alert ' + warning.type">
       <span v-on:click="warning.message=''">x</span>
       <h4></h4>
@@ -16,7 +16,7 @@
         x
       </button>
     </div>
-    <form id="replyForm" @submit.prevent="addReply($event)">
+    <form v-if="!checkPreview" id="replyForm" @submit.prevent="addReply($event)">
       <div class="form-group">
         <div style="display: flex; align-items: center;">
           <label for="username">Usuário</label>
@@ -40,31 +40,76 @@
         required>
         </textarea>
       </div>
-      <div class="form-group">
-        <label for="replyIMG">
-          Envie uma imagem/gif/vídeo
-          <span
-          title="Erros podem ocorrer ¯\_(ツ)_/¯"
-          class='badge beta'>
-            BETA
-          </span>
-        </label>
-        <input type="file" name="replyIMG" id="replyIMG"
-        :disabled="this.optUpload === true"
-        @change="handleUpload($event)">
+      <p v-if="isUploading" class="info">Aguarde...</p>
+      <div v-if="!isPreviewing && !isTypingUrl" class="form-group row">
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          type="button" @click="toggleInputFile($event);">
+          Enviar arquivo
+          <input type="file" name="replyIMG" id="replyIMG" @change="handleUpload($event)">
+        </button>
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          type="button">Buscar gif</button>
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          v-on:click="setTypingInput()"
+          type="button">Digitar URL</button>
       </div>
-      <div class="form-group">
-        <label for="imageURL" v-if="!this.optUpload">
-          ou: digite a URL de uma imagem/gif/vídeo</label>
-        <label for="imageURL" class='upload-concluido'
-        v-else>Upload Concluído!</label>
-        <input v-model="replyMessage.imageURL" type="url" class="form-control"
-        id="imageURL" placeholder="https://~"
-        :readonly="this.optUpload === true"
+      <div v-if="!isPreviewing && isTypingUrl" class="form-group row">
+        <input type="url" class="form-control"
+        id="input_url" name="input_url"
+        placeholder="ex: https://i.imgur.com/BTNIDBR.gif"
+        required
+        v-model="typingUrl"
+        v-on:invalid="warnInvalidUrl($event)"
+        v-on:blur="previewFromUrl($event)"
         >
+        <button :disabled="this.isUploading !== ''" 
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only cancel-url']"
+          v-on:click="setTypingInput()"
+          type="button">Cancelar</button>
       </div>
-      <button id="submitReply" type="submit" class="btn btn-primary">Enviar</button>
+      <div v-if="isPreviewing" class="form-group">
+        <p v-if="(isPreviewing === 'image' || isPreviewing === 'video') && !isUploading" class="success">Upload concluído!</p>
+        <p v-if="isPreviewing === 'gif'" class="success">Gif selecionado!</p>
+        <p v-if="isPreviewing === 'url'" class="success">URL carregada!</p>
+        <div class="form-group row justify-center">
+          <button 
+            :disabled="this.isUploading !== ''"
+            :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+            type="button" @click="visualizePreview()">Visualizar preview</button>
+        </div>
+      </div>
+      <button id="submitReply" type="submit"
+        :disabled="this.isUploading !== ''"
+        :class="[isUploading !== '' ? 'disabled' : '', 'btn btn-primary']"
+        >Enviar resposta</button>
     </form>
+    <div v-if="checkPreview" class="previewImg">
+      <img @load="validateTypedUrl()"
+      @error="setVideoSrc()"
+      v-if="isPreviewing === 'image'" :src="isPreviewingSrc">
+      <video v-if="isPreviewing === 'video'"
+      id="videoToUpload"
+      :src="isPreviewingSrc"
+      @load="validateTypedUrl()"
+      @error="videoErrorCallback()"
+      autoplay="true"
+      loop="true"
+      muted="true"
+      playsinline="true"></video>
+      <div class="form-group row justify-center">
+        <button 
+          :disabled="this.isUploading !== ''"
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only']"
+          type="button" @click="visualizePreview()">Confirmar</button>
+        <button 
+          :disabled="this.isUploading !== ''"
+          :class="[isUploading !== '' ? 'disabled' : '', 'mobile-only ml-15']"
+          type="button" @click="removeUpload()" >Remover</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -104,8 +149,17 @@ export default {
     warning: {
       type: '',
       message: '',
+      preventClose: false,
     },
-    optUpload: false,
+    uploadDeleteHash: '',
+    isUploading: '',
+    isPreviewing: '',
+    isPreviewingSrc: '',
+    checkPreview: '',
+    boxMinHeight: '',
+    isTypingUrl: false,
+    typingUrl: '',
+    typedMediaIsValid: false,
   }),
   watch: {
     rememberMe(newVal, oldVal) {
@@ -147,6 +201,112 @@ export default {
     },
   },
   methods: {
+    videoErrorCallback() {
+      this.checkPreview = false;
+      this.isPreviewing = '';
+      this.warning.type = 'alert-error';
+      this.warning.message = 'Não conseguimos verificar sua URL! Certifique-se de que ela se trata de uma imagem, gif ou vídeo.';
+    },
+
+    setVideoSrc() {
+      // when this function is called, url given couldnt generate an img tag
+      this.isPreviewing = 'video';
+    },
+    removeWarnings(e) {
+      if (this.warning.type !== '' && this.warning.message !== '') {
+        if (!e.target.closest('.alert')) {
+          // prevents warning instantly closing out of input focus into click
+          if (this.warning.preventClose) {
+            this.warning.preventClose = false;
+            return;
+          }
+          this.warning.type = '';
+          this.warning.message = '';
+        }
+      }
+    },
+    warnInvalidUrl(e) {
+      const inputUrl = e.target;
+      this.warning.preventClose = true;
+      this.warning.type = 'alert-error';
+      this.warning.message = 'Digite uma URL válida! Verifique também se o preview foi gerado corretamente.';
+    },
+    validateTypedUrl() {
+      if (this.typingUrl !== '') {
+        this.typedMediaIsValid = true;
+      }
+    },
+    previewFromUrl(e) {
+      const inputUrl = e.target;
+      if (this.typingUrl !== '') {
+        inputUrl.setCustomValidity('');
+        if (inputUrl.checkValidity()) {
+          this.visualizePreview();
+          //this.checkPreview = true;
+          this.isPreviewing = 'image';
+          this.isPreviewingSrc = this.typingUrl;
+        }
+      }
+    },
+    setTypingInput() {
+      this.isTypingUrl = !this.isTypingUrl;
+      if (this.isTypingUrl) {
+        setTimeout(() => {
+          const input_url = document.querySelector('#input_url');
+          if (input_url) {
+            input_url.focus();
+          }
+        },
+        100
+        );
+      }
+    },
+    removeUpload() {
+      if (this.uploadDeleteHash) {
+        // if image was uploaded
+        this.isUploading = true;
+        fetch(`${this.$backendURL}imgur/${this.uploadDeleteHash}`, {
+          method: 'DELETE',
+          headers: {
+            Authorization: 'Client-ID 3435e574a9859d1',
+          },
+          redirect: 'follow',
+        })
+          .then((response) => response.json())
+          .then((r) => {
+            if (r.data === true && r.success === true) {
+              this.replyMessage.imageURL = '';
+              this.isUploading = '';
+              this.isPreviewing = '';
+              this.isPreviewingSrc = '';
+              this.uploadDeleteHash = '';
+              this.checkPreview = '';
+            }
+          });
+      } else {
+        this.typedMediaIsValid = false;
+        this.typingUrl = '';
+        this.isPreviewing = '';
+        this.checkPreview = '';
+      }
+    },
+    visualizePreview() {
+      this.checkPreview = !this.checkPreview;
+      if (this.checkPreview) {
+        const replyBox = document.querySelector('#replybox');
+        if (replybox) {
+          this.boxMinHeight = replybox.getBoundingClientRect().height; 
+        }
+      } else {
+        this.boxMinHeight = '';
+      }
+    },
+    toggleInputFile(e) {
+      const inputFile = e.target.querySelector('input[type="file"]');
+      if (inputFile) {
+        inputFile.click();
+      }
+    },
     dragMouseDown(event) {
       event.preventDefault();
       // get the mouse cursor position at startup:
@@ -264,16 +424,29 @@ export default {
       if (!this.rememberMe) {
         this.replyMessage.username = '';
       }
+      this.boxMinHeight = '';
       this.replyMessage.content = '';
       this.replyMessage.imageURL = '';
       this.replyMessage.user_id = 0;
-      document.querySelector('#replyIMG').value = '';
-      this.optUpload = false;
+      this.isUploading = '';
+      this.isPreviewing = '';
+      this.isPreviewingSrc = '';
+      this.uploadDeleteHash = '';
+      this.typingUrl = '';
+      this.isTypingUrl = '';
     },
     addReply(e) {
-      const submitButton = document.getElementById('submitReply');
-      submitButton.classList.add('disabled');
-      submitButton.disabled = true;
+      if (this.isTypingUrl) {
+        // user checked that wants to type an url
+        if (!this.typedMediaIsValid) {
+          // user didnt fill url input or url didnt generate preview correctly
+          this.warning.type = 'alert-error';
+          this.warning.message = `Digite uma URL válida! Verifique também se o preview foi gerado corretamente.`;
+          return;
+        }
+        this.replyMessage.imageURL = this.typingUrl;
+      }
+      this.isUploading = true;
       this.warning.message = "Enviando, aguarde...";
       this.warning.type = 'alert-info';
       grecaptcha.ready(() => {
@@ -307,8 +480,7 @@ export default {
                 this.clearReplyForm();
                 this.closeReply();
               }
-              submitButton.classList.remove('disabled');
-              submitButton.disabled = false;
+              this.isUploading = '';
             });
           });
       });
@@ -330,7 +502,7 @@ export default {
       }
     },
     async postImgGif(formData, url) {
-      const submitButton = document.querySelector('#replyForm button');
+      this.isUploading = true;
       return fetch(url, {
         method: 'POST',
         body: formData,
@@ -340,8 +512,10 @@ export default {
         .then((result) => {
           if (result.status === 200 && result.success === true) {
             this.replyMessage.imageURL = result.data.link;
-            // trava o input file e deixa o campo de URL como read only
-            this.optUpload = true;
+            this.isUploading = '';
+            this.isPreviewing = 'image';
+            this.isPreviewingSrc = result.data.link;
+            this.uploadDeleteHash = result.data.deletehash;
           } else if (result.status === 500 && result.success === false) {
             this.warning.type = 'alert-error';
             this.warning.message = `
@@ -359,30 +533,17 @@ export default {
               JPEG, PNG, GIF, APNG e TIFF!
               `;
           }
-          // libera o botão de enviar
-          submitButton.disabled = false;
+          this.isUploading = '';
         });
     },
     async uploadToImgur(kind, file) {
-      const submitButton = document.querySelector('#replyForm button');
-      submitButton.disabled = true;
       // blank line
       const formData = new FormData();
       if (kind === 'image') {
-        // if (file.type === 'image/gif') {
-        if (true) {
-          formData.append('image', file);
-          await this.postImgGif(formData,`${this.$backendURL}gifupload`);
-        } else {
-          const reader = new FileReader();
-          reader.onload = async () => {
-            const base64result = reader.result.split(',')[1];
-            formData.append('image', base64result);
-            await this.postImgGif(formData, `${this.$backendURL}imgupload`);
-          };
-          reader.readAsDataURL(file);
-        }
+        formData.append('image', file);
+        await this.postImgGif(formData,`${this.$backendURL}gifupload`);
       } else {
+        this.isUploading = true;
         formData.append('video', file);
         fetch(`${this.$backendURL}videoupload`, {
           method: 'POST',
@@ -393,13 +554,15 @@ export default {
           .then((result) => {
             if (result.status === 200 && result.success === true) {
               this.replyMessage.imageURL = result.data.link;
-              // libera o botão de enviar
-              submitButton.disabled = false;
-              // trava o input file e deixa o campo de URL como read only
-              this.optUpload = true;
+              this.isUploading = '';
+              this.isPreviewing = 'video';
+              this.isPreviewingSrc = result.data.link;
+              this.uploadDeleteHash = result.data.deletehash;
             } else {
               console.log('handle video upload error');
-            }
+              this.warning.type = 'alert-error';
+              this.warning.message = 'Ocorreu um erro ao subir seu vídeo! Por favor, faça o upload diretamente em https://imgur.com/upload e poste usando o link.';
+              }
           });
       }
     },

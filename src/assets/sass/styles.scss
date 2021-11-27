@@ -33,6 +33,15 @@ body{
     visibility: hidden;
 }
 .alert {
+  max-width: calc(100% - 40px);
+  top: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  position:absolute;
+  width:100%;
+  color:#fff;
+  padding:20px;
+  border-radius:3px;
   &.alert-info {
     background-color: rgb(132, 44, 176);
   }
@@ -42,12 +51,6 @@ body{
   &.alert-success {
     background-color: rgb(114, 171, 0);
   }
-  position:absolute;
-  max-width:500px;
-  width:100%;
-  color:#fff;
-  padding:20px;
-  border-radius:3px;
   h4{
       position:relative;
       font-size:22px;
@@ -1345,6 +1348,9 @@ div{
   }
 }
 #replybox{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   position:fixed;
   top:0%;
   left:50%;
@@ -1353,6 +1359,75 @@ div{
   padding:15px;
   max-width:650px;
   max-height:100vh;
+  .form-group {
+    display: flex;
+    padding: 0;
+    &.row {
+      flex-direction: row;
+      justify-content: space-around;
+    }
+    &.justify-center {
+      justify-content: center;
+    }
+    div {
+      padding: 0;
+    }
+  }
+  .previewImg {
+    display: flex;
+    flex-direction: column;
+    img, video {
+      max-height: calc(100vh - 37.5px - 66px - 30px);
+      object-fit: contain;
+    }
+  }
+  p {
+    text-align: center;
+    margin-top: 5px;
+    &.info {
+      color: rgb(132, 44, 176);
+    }
+    &.success {
+      color:#00bc8c;
+    }
+    &.error {
+      color: #e74c3c;
+    }
+  }
+  button.mobile-only {
+    &.ml-15 {
+      margin-left: 15px;
+    }
+    height: 36.5px;
+    background-color: #444;
+    border-color: #444;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    padding: 10px 15px;
+    font-size:15px;
+    font-weight:bold;
+    margin:15px 0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    transition: all 300ms ease;
+    &:hover{
+      color: #fff;
+      background-color: #2b4764;
+      border-color: #28415b;
+    }
+    &.create-post {
+      margin: 15px 0 25px;
+    }
+    &.disabled {
+      opacity: 0.5;
+      cursor: wait;
+    }
+    input[type="file"] {
+      display: none;
+    }
+  }
   #replybox-head{
     width: 100%;
     border-bottom: 2px solid #444;
@@ -1725,3 +1800,19 @@ header{
     }
   }
 }
+
+/* mobile keyboard adaptation test */
+@media screen and (max-height: 540px), screen and (max-width: 479px) {
+  #replybox {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+@media screen and (max-width: 400px) {
+  #replybox {
+    button.mobile-only {
+      font-size: 13px;
+    }
+  }
+}
+#input_url { margin: 15px 0; }
