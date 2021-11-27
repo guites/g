@@ -241,7 +241,8 @@ export default {
       if (this.typingUrl !== '') {
         inputUrl.setCustomValidity('');
         if (inputUrl.checkValidity()) {
-          this.checkPreview = true;
+          this.visualizePreview();
+          //this.checkPreview = true;
           this.isPreviewing = 'image';
           this.isPreviewingSrc = this.typingUrl;
         }
@@ -296,7 +297,7 @@ export default {
           this.boxMinHeight = replybox.getBoundingClientRect().height; 
         }
       } else {
-        this.boxMinheight = '';
+        this.boxMinHeight = '';
       }
     },
     toggleInputFile(e) {
@@ -422,6 +423,7 @@ export default {
       if (!this.rememberMe) {
         this.replyMessage.username = '';
       }
+      this.boxMinHeight = '';
       this.replyMessage.content = '';
       this.replyMessage.imageURL = '';
       this.replyMessage.user_id = 0;
@@ -429,6 +431,8 @@ export default {
       this.isPreviewing = '';
       this.isPreviewingSrc = '';
       this.uploadDeleteHash = '';
+      this.typingUrl = '';
+      this.isTypingUrl = '';
     },
     addReply(e) {
       if (this.isTypingUrl) {
@@ -476,8 +480,6 @@ export default {
                 this.closeReply();
               }
               this.isUploading = '';
-              // submitButton.classList.remove('disabled');
-              // submitButton.disabled = false;
             });
           });
       });
