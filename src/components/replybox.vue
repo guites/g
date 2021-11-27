@@ -275,11 +275,12 @@ export default {
           .then((response) => response.json())
           .then((r) => {
             if (r.data === true && r.success === true) {
-              this.isPreviewing = '';
-              this.isPreviewingSrc = '';
-              this.checkPreview = '';
               this.replyMessage.imageURL = '';
               this.isUploading = '';
+              this.isPreviewing = '';
+              this.isPreviewingSrc = '';
+              this.uploadDeleteHash = '';
+              this.checkPreview = '';
             }
           });
       } else {
@@ -437,7 +438,7 @@ export default {
     addReply(e) {
       if (this.isTypingUrl) {
         // user checked that wants to type an url
-        if (!this.typingUrl || !this.typedMediaIsValid) {
+        if (!this.typedMediaIsValid) {
           // user didnt fill url input or url didnt generate preview correctly
           this.warning.type = 'alert-error';
           this.warning.message = `Digite uma URL válida! Verifique também se o preview foi gerado corretamente.`;
@@ -554,9 +555,14 @@ export default {
             if (result.status === 200 && result.success === true) {
               this.replyMessage.imageURL = result.data.link;
               this.isUploading = '';
+              this.isPreviewing = 'video';
+              this.isPreviewingSrc = result.data.link;
+              this.uploadDeleteHash = result.data.deletehash;
             } else {
               console.log('handle video upload error');
-            }
+              this.warning.type = 'alert-error';
+              this.warning.message = 'Ocorreu um erro ao subir seu vídeo! Por favor, faça o upload diretamente em https://imgur.com/upload e poste usando o link.';
+              }
           });
       }
     },
