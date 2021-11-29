@@ -93,7 +93,7 @@
       <video v-if="isPreviewing === 'video'"
       id="videoToUpload"
       :src="isPreviewingSrc"
-      @load="validateTypedUrl()"
+      @play="validateTypedUrl()"
       @error="videoErrorCallback()"
       autoplay="true"
       loop="true"
@@ -242,7 +242,6 @@ export default {
         inputUrl.setCustomValidity('');
         if (inputUrl.checkValidity()) {
           this.visualizePreview();
-          //this.checkPreview = true;
           this.isPreviewing = 'image';
           this.isPreviewingSrc = this.typingUrl;
         }
