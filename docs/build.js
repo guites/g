@@ -179,320 +179,6 @@ module.exports = __webpack_require__.p + "sham.png?e93e9eaa0830ef43cfb378471a03c
 /* 2 */
 /***/ (function(module, exports) {
 
-/*
-	MIT License http://www.opensource.org/licenses/mit-license.php
-	Author Tobias Koppers @sokra
-*/
-// css base code, injected by the css-loader
-module.exports = function(useSourceMap) {
-	var list = [];
-
-	// return the list of modules as css string
-	list.toString = function toString() {
-		return this.map(function (item) {
-			var content = cssWithMappingToString(item, useSourceMap);
-			if(item[2]) {
-				return "@media " + item[2] + "{" + content + "}";
-			} else {
-				return content;
-			}
-		}).join("");
-	};
-
-	// import a list of modules into the list
-	list.i = function(modules, mediaQuery) {
-		if(typeof modules === "string")
-			modules = [[null, modules, ""]];
-		var alreadyImportedModules = {};
-		for(var i = 0; i < this.length; i++) {
-			var id = this[i][0];
-			if(typeof id === "number")
-				alreadyImportedModules[id] = true;
-		}
-		for(i = 0; i < modules.length; i++) {
-			var item = modules[i];
-			// skip already imported module
-			// this implementation is not 100% perfect for weird media query combinations
-			//  when a module is imported multiple times with different media queries.
-			//  I hope this will never occur (Hey this way we have smaller bundles)
-			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
-				if(mediaQuery && !item[2]) {
-					item[2] = mediaQuery;
-				} else if(mediaQuery) {
-					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
-				}
-				list.push(item);
-			}
-		}
-	};
-	return list;
-};
-
-function cssWithMappingToString(item, useSourceMap) {
-	var content = item[1] || '';
-	var cssMapping = item[3];
-	if (!cssMapping) {
-		return content;
-	}
-
-	if (useSourceMap && typeof btoa === 'function') {
-		var sourceMapping = toComment(cssMapping);
-		var sourceURLs = cssMapping.sources.map(function (source) {
-			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
-		});
-
-		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
-	}
-
-	return [content].join('\n');
-}
-
-// Adapted from convert-source-map (MIT)
-function toComment(sourceMap) {
-	// eslint-disable-next-line no-undef
-	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
-	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
-
-	return '/*# ' + data + ' */';
-}
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony export (immutable) */ __webpack_exports__["default"] = addStylesClient;
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__listToStyles__ = __webpack_require__(35);
-/*
-  MIT License http://www.opensource.org/licenses/mit-license.php
-  Author Tobias Koppers @sokra
-  Modified by Evan You @yyx990803
-*/
-
-
-
-var hasDocument = typeof document !== 'undefined'
-
-if (typeof DEBUG !== 'undefined' && DEBUG) {
-  if (!hasDocument) {
-    throw new Error(
-    'vue-style-loader cannot be used in a non-browser environment. ' +
-    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
-  ) }
-}
-
-/*
-type StyleObject = {
-  id: number;
-  parts: Array<StyleObjectPart>
-}
-
-type StyleObjectPart = {
-  css: string;
-  media: string;
-  sourceMap: ?string
-}
-*/
-
-var stylesInDom = {/*
-  [id: number]: {
-    id: number,
-    refs: number,
-    parts: Array<(obj?: StyleObjectPart) => void>
-  }
-*/}
-
-var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
-var singletonElement = null
-var singletonCounter = 0
-var isProduction = false
-var noop = function () {}
-var options = null
-var ssrIdKey = 'data-vue-ssr-id'
-
-// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
-// tags it will allow on a page
-var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
-
-function addStylesClient (parentId, list, _isProduction, _options) {
-  isProduction = _isProduction
-
-  options = _options || {}
-
-  var styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, list)
-  addStylesToDom(styles)
-
-  return function update (newList) {
-    var mayRemove = []
-    for (var i = 0; i < styles.length; i++) {
-      var item = styles[i]
-      var domStyle = stylesInDom[item.id]
-      domStyle.refs--
-      mayRemove.push(domStyle)
-    }
-    if (newList) {
-      styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, newList)
-      addStylesToDom(styles)
-    } else {
-      styles = []
-    }
-    for (var i = 0; i < mayRemove.length; i++) {
-      var domStyle = mayRemove[i]
-      if (domStyle.refs === 0) {
-        for (var j = 0; j < domStyle.parts.length; j++) {
-          domStyle.parts[j]()
-        }
-        delete stylesInDom[domStyle.id]
-      }
-    }
-  }
-}
-
-function addStylesToDom (styles /* Array<StyleObject> */) {
-  for (var i = 0; i < styles.length; i++) {
-    var item = styles[i]
-    var domStyle = stylesInDom[item.id]
-    if (domStyle) {
-      domStyle.refs++
-      for (var j = 0; j < domStyle.parts.length; j++) {
-        domStyle.parts[j](item.parts[j])
-      }
-      for (; j < item.parts.length; j++) {
-        domStyle.parts.push(addStyle(item.parts[j]))
-      }
-      if (domStyle.parts.length > item.parts.length) {
-        domStyle.parts.length = item.parts.length
-      }
-    } else {
-      var parts = []
-      for (var j = 0; j < item.parts.length; j++) {
-        parts.push(addStyle(item.parts[j]))
-      }
-      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
-    }
-  }
-}
-
-function createStyleElement () {
-  var styleElement = document.createElement('style')
-  styleElement.type = 'text/css'
-  head.appendChild(styleElement)
-  return styleElement
-}
-
-function addStyle (obj /* StyleObjectPart */) {
-  var update, remove
-  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
-
-  if (styleElement) {
-    if (isProduction) {
-      // has SSR styles and in production mode.
-      // simply do nothing.
-      return noop
-    } else {
-      // has SSR styles but in dev mode.
-      // for some reason Chrome can't handle source map in server-rendered
-      // style tags - source maps in <style> only works if the style tag is
-      // created and inserted dynamically. So we remove the server rendered
-      // styles and inject new ones.
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  if (isOldIE) {
-    // use singleton mode for IE9.
-    var styleIndex = singletonCounter++
-    styleElement = singletonElement || (singletonElement = createStyleElement())
-    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
-    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
-  } else {
-    // use multi-style-tag mode in all other cases
-    styleElement = createStyleElement()
-    update = applyToTag.bind(null, styleElement)
-    remove = function () {
-      styleElement.parentNode.removeChild(styleElement)
-    }
-  }
-
-  update(obj)
-
-  return function updateStyle (newObj /* StyleObjectPart */) {
-    if (newObj) {
-      if (newObj.css === obj.css &&
-          newObj.media === obj.media &&
-          newObj.sourceMap === obj.sourceMap) {
-        return
-      }
-      update(obj = newObj)
-    } else {
-      remove()
-    }
-  }
-}
-
-var replaceText = (function () {
-  var textStore = []
-
-  return function (index, replacement) {
-    textStore[index] = replacement
-    return textStore.filter(Boolean).join('\n')
-  }
-})()
-
-function applyToSingletonTag (styleElement, index, remove, obj) {
-  var css = remove ? '' : obj.css
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = replaceText(index, css)
-  } else {
-    var cssNode = document.createTextNode(css)
-    var childNodes = styleElement.childNodes
-    if (childNodes[index]) styleElement.removeChild(childNodes[index])
-    if (childNodes.length) {
-      styleElement.insertBefore(cssNode, childNodes[index])
-    } else {
-      styleElement.appendChild(cssNode)
-    }
-  }
-}
-
-function applyToTag (styleElement, obj) {
-  var css = obj.css
-  var media = obj.media
-  var sourceMap = obj.sourceMap
-
-  if (media) {
-    styleElement.setAttribute('media', media)
-  }
-  if (options.ssrId) {
-    styleElement.setAttribute(ssrIdKey, obj.id)
-  }
-
-  if (sourceMap) {
-    // https://developer.chrome.com/devtools/docs/javascript-debugging
-    // this makes source maps inside style tags work properly in Chrome
-    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
-    // http://stackoverflow.com/a/26603875
-    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
-  }
-
-  if (styleElement.styleSheet) {
-    styleElement.styleSheet.cssText = css
-  } else {
-    while (styleElement.firstChild) {
-      styleElement.removeChild(styleElement.firstChild)
-    }
-    styleElement.appendChild(document.createTextNode(css))
-  }
-}
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
 var g;
 
 // This works in non-strict mode
@@ -517,7 +203,7 @@ module.exports = g;
 
 
 /***/ }),
-/* 5 */
+/* 3 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -12537,88 +12223,25 @@ Vue.compile = compileToFunctions;
 
 /* harmony default export */ __webpack_exports__["a"] = (Vue);
 
-/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(4), __webpack_require__(27).setImmediate))
+/* WEBPACK VAR INJECTION */}.call(__webpack_exports__, __webpack_require__(2), __webpack_require__(27).setImmediate))
 
 /***/ }),
-/* 6 */
+/* 4 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_js___ = __webpack_require__(7);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_js___ = __webpack_require__(5);
 /* unused harmony namespace reexport */
  /* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0__node_modules_babel_loader_lib_index_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_script_lang_js___["a" /* default */]); 
 
 /***/ }),
-/* 7 */
+/* 5 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_styles_css__ = __webpack_require__(33);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__assets_css_styles_css___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__assets_css_styles_css__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_searchbar_vue__ = __webpack_require__(36);
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 //
 //
 //
@@ -12720,8 +12343,6 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
     SearchBar: __WEBPACK_IMPORTED_MODULE_1__components_searchbar_vue__["a" /* default */]
   },
   data: () => ({
-    searchText: '',
-    q: '',
     janitor: false,
     marquees: [],
     marquee: true,
@@ -12752,9 +12373,6 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
       const captchaScript = document.createElement('script');
       captchaScript.src = 'https://www.google.com/recaptcha/api.js?render=6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471';
       document.head.appendChild(captchaScript);
-    },
-    searchAction() {
-      this.q = this.searchText;
     },
     ajaxGtmRequest() {
       const gtmScript = document.createElement('script');
@@ -12913,6 +12531,320 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
 });
 
 /***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+/*
+	MIT License http://www.opensource.org/licenses/mit-license.php
+	Author Tobias Koppers @sokra
+*/
+// css base code, injected by the css-loader
+module.exports = function(useSourceMap) {
+	var list = [];
+
+	// return the list of modules as css string
+	list.toString = function toString() {
+		return this.map(function (item) {
+			var content = cssWithMappingToString(item, useSourceMap);
+			if(item[2]) {
+				return "@media " + item[2] + "{" + content + "}";
+			} else {
+				return content;
+			}
+		}).join("");
+	};
+
+	// import a list of modules into the list
+	list.i = function(modules, mediaQuery) {
+		if(typeof modules === "string")
+			modules = [[null, modules, ""]];
+		var alreadyImportedModules = {};
+		for(var i = 0; i < this.length; i++) {
+			var id = this[i][0];
+			if(typeof id === "number")
+				alreadyImportedModules[id] = true;
+		}
+		for(i = 0; i < modules.length; i++) {
+			var item = modules[i];
+			// skip already imported module
+			// this implementation is not 100% perfect for weird media query combinations
+			//  when a module is imported multiple times with different media queries.
+			//  I hope this will never occur (Hey this way we have smaller bundles)
+			if(typeof item[0] !== "number" || !alreadyImportedModules[item[0]]) {
+				if(mediaQuery && !item[2]) {
+					item[2] = mediaQuery;
+				} else if(mediaQuery) {
+					item[2] = "(" + item[2] + ") and (" + mediaQuery + ")";
+				}
+				list.push(item);
+			}
+		}
+	};
+	return list;
+};
+
+function cssWithMappingToString(item, useSourceMap) {
+	var content = item[1] || '';
+	var cssMapping = item[3];
+	if (!cssMapping) {
+		return content;
+	}
+
+	if (useSourceMap && typeof btoa === 'function') {
+		var sourceMapping = toComment(cssMapping);
+		var sourceURLs = cssMapping.sources.map(function (source) {
+			return '/*# sourceURL=' + cssMapping.sourceRoot + source + ' */'
+		});
+
+		return [content].concat(sourceURLs).concat([sourceMapping]).join('\n');
+	}
+
+	return [content].join('\n');
+}
+
+// Adapted from convert-source-map (MIT)
+function toComment(sourceMap) {
+	// eslint-disable-next-line no-undef
+	var base64 = btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap))));
+	var data = 'sourceMappingURL=data:application/json;charset=utf-8;base64,' + base64;
+
+	return '/*# ' + data + ' */';
+}
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony export (immutable) */ __webpack_exports__["default"] = addStylesClient;
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__listToStyles__ = __webpack_require__(35);
+/*
+  MIT License http://www.opensource.org/licenses/mit-license.php
+  Author Tobias Koppers @sokra
+  Modified by Evan You @yyx990803
+*/
+
+
+
+var hasDocument = typeof document !== 'undefined'
+
+if (typeof DEBUG !== 'undefined' && DEBUG) {
+  if (!hasDocument) {
+    throw new Error(
+    'vue-style-loader cannot be used in a non-browser environment. ' +
+    "Use { target: 'node' } in your Webpack config to indicate a server-rendering environment."
+  ) }
+}
+
+/*
+type StyleObject = {
+  id: number;
+  parts: Array<StyleObjectPart>
+}
+
+type StyleObjectPart = {
+  css: string;
+  media: string;
+  sourceMap: ?string
+}
+*/
+
+var stylesInDom = {/*
+  [id: number]: {
+    id: number,
+    refs: number,
+    parts: Array<(obj?: StyleObjectPart) => void>
+  }
+*/}
+
+var head = hasDocument && (document.head || document.getElementsByTagName('head')[0])
+var singletonElement = null
+var singletonCounter = 0
+var isProduction = false
+var noop = function () {}
+var options = null
+var ssrIdKey = 'data-vue-ssr-id'
+
+// Force single-tag solution on IE6-9, which has a hard limit on the # of <style>
+// tags it will allow on a page
+var isOldIE = typeof navigator !== 'undefined' && /msie [6-9]\b/.test(navigator.userAgent.toLowerCase())
+
+function addStylesClient (parentId, list, _isProduction, _options) {
+  isProduction = _isProduction
+
+  options = _options || {}
+
+  var styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, list)
+  addStylesToDom(styles)
+
+  return function update (newList) {
+    var mayRemove = []
+    for (var i = 0; i < styles.length; i++) {
+      var item = styles[i]
+      var domStyle = stylesInDom[item.id]
+      domStyle.refs--
+      mayRemove.push(domStyle)
+    }
+    if (newList) {
+      styles = Object(__WEBPACK_IMPORTED_MODULE_0__listToStyles__["a" /* default */])(parentId, newList)
+      addStylesToDom(styles)
+    } else {
+      styles = []
+    }
+    for (var i = 0; i < mayRemove.length; i++) {
+      var domStyle = mayRemove[i]
+      if (domStyle.refs === 0) {
+        for (var j = 0; j < domStyle.parts.length; j++) {
+          domStyle.parts[j]()
+        }
+        delete stylesInDom[domStyle.id]
+      }
+    }
+  }
+}
+
+function addStylesToDom (styles /* Array<StyleObject> */) {
+  for (var i = 0; i < styles.length; i++) {
+    var item = styles[i]
+    var domStyle = stylesInDom[item.id]
+    if (domStyle) {
+      domStyle.refs++
+      for (var j = 0; j < domStyle.parts.length; j++) {
+        domStyle.parts[j](item.parts[j])
+      }
+      for (; j < item.parts.length; j++) {
+        domStyle.parts.push(addStyle(item.parts[j]))
+      }
+      if (domStyle.parts.length > item.parts.length) {
+        domStyle.parts.length = item.parts.length
+      }
+    } else {
+      var parts = []
+      for (var j = 0; j < item.parts.length; j++) {
+        parts.push(addStyle(item.parts[j]))
+      }
+      stylesInDom[item.id] = { id: item.id, refs: 1, parts: parts }
+    }
+  }
+}
+
+function createStyleElement () {
+  var styleElement = document.createElement('style')
+  styleElement.type = 'text/css'
+  head.appendChild(styleElement)
+  return styleElement
+}
+
+function addStyle (obj /* StyleObjectPart */) {
+  var update, remove
+  var styleElement = document.querySelector('style[' + ssrIdKey + '~="' + obj.id + '"]')
+
+  if (styleElement) {
+    if (isProduction) {
+      // has SSR styles and in production mode.
+      // simply do nothing.
+      return noop
+    } else {
+      // has SSR styles but in dev mode.
+      // for some reason Chrome can't handle source map in server-rendered
+      // style tags - source maps in <style> only works if the style tag is
+      // created and inserted dynamically. So we remove the server rendered
+      // styles and inject new ones.
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  if (isOldIE) {
+    // use singleton mode for IE9.
+    var styleIndex = singletonCounter++
+    styleElement = singletonElement || (singletonElement = createStyleElement())
+    update = applyToSingletonTag.bind(null, styleElement, styleIndex, false)
+    remove = applyToSingletonTag.bind(null, styleElement, styleIndex, true)
+  } else {
+    // use multi-style-tag mode in all other cases
+    styleElement = createStyleElement()
+    update = applyToTag.bind(null, styleElement)
+    remove = function () {
+      styleElement.parentNode.removeChild(styleElement)
+    }
+  }
+
+  update(obj)
+
+  return function updateStyle (newObj /* StyleObjectPart */) {
+    if (newObj) {
+      if (newObj.css === obj.css &&
+          newObj.media === obj.media &&
+          newObj.sourceMap === obj.sourceMap) {
+        return
+      }
+      update(obj = newObj)
+    } else {
+      remove()
+    }
+  }
+}
+
+var replaceText = (function () {
+  var textStore = []
+
+  return function (index, replacement) {
+    textStore[index] = replacement
+    return textStore.filter(Boolean).join('\n')
+  }
+})()
+
+function applyToSingletonTag (styleElement, index, remove, obj) {
+  var css = remove ? '' : obj.css
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = replaceText(index, css)
+  } else {
+    var cssNode = document.createTextNode(css)
+    var childNodes = styleElement.childNodes
+    if (childNodes[index]) styleElement.removeChild(childNodes[index])
+    if (childNodes.length) {
+      styleElement.insertBefore(cssNode, childNodes[index])
+    } else {
+      styleElement.appendChild(cssNode)
+    }
+  }
+}
+
+function applyToTag (styleElement, obj) {
+  var css = obj.css
+  var media = obj.media
+  var sourceMap = obj.sourceMap
+
+  if (media) {
+    styleElement.setAttribute('media', media)
+  }
+  if (options.ssrId) {
+    styleElement.setAttribute(ssrIdKey, obj.id)
+  }
+
+  if (sourceMap) {
+    // https://developer.chrome.com/devtools/docs/javascript-debugging
+    // this makes source maps inside style tags work properly in Chrome
+    css += '\n/*# sourceURL=' + sourceMap.sources[0] + ' */'
+    // http://stackoverflow.com/a/26603875
+    css += '\n/*# sourceMappingURL=data:application/json;base64,' + btoa(unescape(encodeURIComponent(JSON.stringify(sourceMap)))) + ' */'
+  }
+
+  if (styleElement.styleSheet) {
+    styleElement.styleSheet.cssText = css
+  } else {
+    while (styleElement.firstChild) {
+      styleElement.removeChild(styleElement.firstChild)
+    }
+    styleElement.appendChild(document.createTextNode(css))
+  }
+}
+
+
+/***/ }),
 /* 8 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
@@ -12999,129 +12931,88 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
 //
 //
 //
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 
 /* harmony default export */ __webpack_exports__["a"] = ({
   name: 'SearchBar',
-  props: ['q'],
   data: () => ({
-    maxResults: 5,
-    posts: {
-      results_index: [],
-      results: [],
-      aviso: '',
-      aviso_class: '',
-      search_url: `search-posts?q=`,
-      name: 'post'
-    },
-    replies: {
-      results_index: [],
-      results: [],
-      aviso: '',
-      aviso_class: '',
-      search_url: `search-replies?q=`,
-      name: 'reply'
-    }
+    fetchingData: false,
+    searchText: '',
+    posts: [],
+    shownPosts: [],
+    replies: [],
+    shownReplies: [],
+    embeddedReplies: []
   }),
   methods: {
-    setPlaceholder(e) {
-      e.target.src = __webpack_require__(1);
-      e.target.classList.add('search_placeholder');
+    async showResults(e) {
+      const str = e.target.value.toLowerCase();
+      await this.cachePosts();
+      await this.cacheReplies();
+      this.shownPosts = this.posts.filter(post => post.message.toLowerCase().includes(str) || post.subject.toLowerCase().includes(str) || post.username.toLowerCase().includes(str));
+      this.shownReplies = this.replies.filter(reply => reply.content.toLowerCase().includes(str) || reply.username.toLowerCase().includes(str));
     },
-    search(collection, q) {
-      if (q == '') {
-        this[collection]['results_index'] = [];
-        this[collection]['results'] = [];
-        return;
-      }
-      fetch(`${this.$backendURL}${this[collection]['search_url']}${q}`).then(response => {
-        if (!response.ok) {
-          throw new Error(response.status);
-        }
-        return response.json();
-      }).then(result => {
-        if (result.error && result.code == 'no results') {
-          this[collection]['aviso'] = `0 ${this[collection]['name']}s`;
-          this[collection]['aviso_class'] = 'text-warning';
-          this[collection]['results_index'] = [];
-          this[collection]['results'] = [];
-          return;
-        }
-        const plural = result.results.length != 1 ? 's' : '';
-        this[collection]['aviso'] = `+${result.results.length} ${this[collection]['name']}${plural}`;
-        this[collection]['aviso_class'] = 'text-success';
-        result.results.forEach(r => {
-          if (this[collection]['results'].length >= this.maxResults) {
-            this[collection]['results'].pop();
-            this[collection]['results_index'].pop();
-          }
-          let filtered;
-          if (collection == 'posts') {
-            filtered = (({ created, id, imageurl, message, subject, username }) => ({ created, id, imageurl, message, subject, username }))(r);
-          } else if (collection == 'replies') {
-            filtered = (({ created, id, imageurl, content, message_id, username }) => ({ created, id, imageurl, content, message_id, username }))(r);
-          }
-          filtered.created = new Date(filtered.created).toLocaleDateString('pt-BR');
-          if (this[collection]['results_index'].includes(filtered.id)) {
-            const duplicated_pos = this[collection]['results_index'].indexOf(filtered.id);
-            this[collection]['results_index'].splice(duplicated_pos, 1);
-            this[collection]['results'].splice(duplicated_pos, 1);
-          }
-          this[collection]['results_index'].unshift(filtered.id);
-          this[collection]['results'].unshift(filtered);
+    async cachePosts() {
+      if (this.posts.length === 0) {
+        this.fetchingData = true;
+        const rawData = await fetch(`${this.$backendURL}messages`);
+        const postsObj = await rawData.json();
+        const filteredPosts = postsObj.results.map(post => {
+          return {
+            created: post.created,
+            id: post.id,
+            imageurl: post.imageurl,
+            message: post.message,
+            subject: post.subject,
+            username: post.username
+          };
         });
-      }).catch(err => {
-        if (err.message == '503') {
-          this[collection]['aviso'] = 'Busca indisponível!';
-        }
-      });
-    }
+        this.posts = filteredPosts;
+        this.fetchingData = false;
+      }
+    },
+    async cacheReplies() {
+      if (this.replies.length === 0) {
+        this.fetchingData = true;
+        const rawData = await fetch(`${this.$backendURL}replies`);
+        const repliesObj = await rawData.json();
+        const filteredReplies = repliesObj.results.map(reply => {
+          return {
+            created: reply.created,
+            id: reply.id,
+            imageurl: reply.imageurl,
+            content: reply.content,
+            username: reply.username,
+            message_id: reply.message_id
+          };
+        });
+        this.replies = filteredReplies;
+        this.fetchingData = false;
+      }
+    },
+    setPlaceholder(e) {
+      if (!e.target.src.includes('none')) {
+        console.log(e.target.src);
+        e.target.src = __webpack_require__(1);
+        e.target.classList.add('search_placeholder');
+      }
+    },
+    showImg(e) {
+      const btn = e.target;
+      const img = e.target.nextElementSibling;
+      img.src = btn.getAttribute('data-src');
+      img.className = 'fullsize';
+      btn.remove();
+    },
+    fullSize(e) {
+      if (!e.target.src.includes('none') && e.target.className !== 'search_placeholder') {
+        e.target.classList.toggle('fullsize');
+      }
+    },
+    search(collection, q) {}
   },
   watch: {
     q(val) {
-      this.search('posts', val);
-      this.search('replies', val);
+      // filtrar o próprio json por esse valor
     }
   }
 });
@@ -13142,7 +13033,7 @@ if (window.location.host === host && window.location.protocol !== 'https:') {
 "use strict";
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_replybox_vue__ = __webpack_require__(12);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_message_vue__ = __webpack_require__(15);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_gifbox_vue__ = __webpack_require__(58);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__components_gifbox_vue__ = __webpack_require__(52);
 //
 //
 //
@@ -14059,7 +13950,7 @@ if (!Function.prototype.bind) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_212b1522___ = __webpack_require__(50);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__replybox_vue_vue_type_template_id_212b1522___ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__replybox_vue_vue_type_script_lang_js___ = __webpack_require__(13);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -14649,7 +14540,7 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_e2ccb044___ = __webpack_require__(52);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__message_vue_vue_type_template_id_e2ccb044___ = __webpack_require__(46);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__message_vue_vue_type_script_lang_js___ = __webpack_require__(16);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -16095,9 +15986,9 @@ if (!Function.prototype.bind) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__(3);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__App_vue__ = __webpack_require__(30);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__router__ = __webpack_require__(45);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__router__ = __webpack_require__(39);
 
 
 
@@ -16182,7 +16073,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
                          (typeof global !== "undefined" && global.clearImmediate) ||
                          (this && this.clearImmediate);
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
 /* 28 */
@@ -16375,7 +16266,7 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
     attachTo.clearImmediate = clearImmediate;
 }(typeof self === "undefined" ? typeof global === "undefined" ? this : global : self));
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(4), __webpack_require__(29)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2), __webpack_require__(29)))
 
 /***/ }),
 /* 29 */
@@ -16572,12 +16463,10 @@ process.umask = function() { return 0; };
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__App_vue_vue_type_template_id_424ed2dc___ = __webpack_require__(31);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__App_vue_vue_type_script_lang_js___ = __webpack_require__(6);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__App_vue_vue_type_template_id_7f9c69f0___ = __webpack_require__(31);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__App_vue_vue_type_script_lang_js___ = __webpack_require__(4);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__App_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(42);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
-
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
 
 
 
@@ -16585,10 +16474,10 @@ process.umask = function() { return 0; };
 
 /* normalize component */
 
-var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
+var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_1__App_vue_vue_type_script_lang_js___["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_0__App_vue_vue_type_template_id_424ed2dc___["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_0__App_vue_vue_type_template_id_424ed2dc___["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_0__App_vue_vue_type_template_id_7f9c69f0___["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_0__App_vue_vue_type_template_id_7f9c69f0___["b" /* staticRenderFns */],
   false,
   null,
   null,
@@ -16603,9 +16492,9 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_424ed2dc___ = __webpack_require__(32);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_424ed2dc___["a"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_424ed2dc___["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_7f9c69f0___ = __webpack_require__(32);
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_7f9c69f0___["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_7f9c69f0___["b"]; });
 
 
 /***/ }),
@@ -16615,7 +16504,7 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"app"}},[_c('header',[_c('div',{staticClass:"inner-header"},[_c('nav',[_c('ul',[_vm._m(0),_vm._v(" "),(!_vm.isHome)?_c('li',[_c('a',{attrs:{"href":"/"}},[_vm._v("mensagens")])]):_vm._e(),_vm._v(" "),(!_vm.isInfo)?_c('li',[_c('a',{attrs:{"href":"/#/info"}},[_vm._v("informações")])]):_vm._e()])]),_vm._v(" "),[_c('form',{attrs:{"id":"search-form"},on:{"submit":function($event){$event.preventDefault();return _vm.searchAction()}}},[_c('div',[_c('label',{attrs:{"for":"search"}},[_vm._v("Pesquisar")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.searchText),expression:"searchText"}],attrs:{"id":"search","name":"search","type":"search","placeholder":"Pesquise no site","aria-label":"Pesquisar"},domProps:{"value":(_vm.searchText)},on:{"input":function($event){if($event.target.composing){ return; }_vm.searchText=$event.target.value}}})]),_vm._v(" "),_c('div',[(_vm.searchText)?_c('small',[_vm._v("aperte "),_c('span',[_vm._v("<enter>")]),_vm._v("!")]):_vm._e()])]),_vm._v(" "),_c('SearchBar',{attrs:{"q":_vm.q}})]],2),_vm._v(" "),(_vm.marquee)?_c('div',{staticClass:"marquee"},[_c('p',{on:{"click":function($event){_vm.marqueeInput=!_vm.marqueeInput}}},[_vm._v("⌨️")]),_vm._v(" "),_c('span',_vm._l((_vm.marquees),function(marquee){return _c('span',{key:marquee.id},[(marquee.has_url === 'true' || marquee.has_url === true)?_c('a',{attrs:{"href":marquee.href,"target":"_blank","rel":"noreferrer"}},[_vm._v("\n            "+_vm._s(marquee.content)+";\n            ")]):_c('span',[_vm._v("\n              "+_vm._s(marquee.content)+";\n            ")])])}),0),_vm._v(" "),_c('p',{on:{"click":function($event){_vm.marquee=!_vm.marquee}}},[_vm._v("✖")])]):_vm._e(),_vm._v(" "),_c('transition',{attrs:{"name":"fadeForm"}},[(_vm.marqueeInput)?_c('form',{attrs:{"id":"marqueeForm"},on:{"submit":function($event){$event.preventDefault();return _vm.addMarquee()}}},[_c('div',{staticClass:"marquee-form-top"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.marqueeMessage.content),expression:"marqueeMessage.content"}],attrs:{"type":"text","placeholder":"Proibido mais de 50 chars neste fórum cristão","name":"marqueeInput","required":"","maxlength":"50"},domProps:{"value":(_vm.marqueeMessage.content)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.marqueeMessage, "content", $event.target.value)}}}),_vm._v(" "),_c('input',{attrs:{"type":"submit","value":"Enviar"}})]),_vm._v(" "),_c('div',{staticClass:"marquee-form-bottom"},[_c('label',{attrs:{"for":"marqueeCheckUrl"}},[_vm._v("\n              tem link?\n              "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.marqueeMessage.has_url),expression:"marqueeMessage.has_url"}],attrs:{"type":"checkbox","id":"marqueeCheckUrl","name":"marqueeCheckUrl"},domProps:{"checked":Array.isArray(_vm.marqueeMessage.has_url)?_vm._i(_vm.marqueeMessage.has_url,null)>-1:(_vm.marqueeMessage.has_url)},on:{"change":function($event){var $$a=_vm.marqueeMessage.has_url,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.marqueeMessage, "has_url", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.marqueeMessage, "has_url", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.marqueeMessage, "has_url", $$c)}}}})]),_vm._v(" "),_c('transition',{attrs:{"name":"fade"}},[(_vm.marqueeMessage.has_url)?_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.marqueeMessage.href),expression:"marqueeMessage.href"}],attrs:{"type":"url","name":"marqueeUrl","placeholder":"https://www.htmhell.dev/","required":""},domProps:{"value":(_vm.marqueeMessage.href)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.marqueeMessage, "href", $event.target.value)}}}):_vm._e()])],1),_vm._v(" "),(_vm.error)?_c('div',{staticClass:"alert-error"},[_c('span',{on:{"click":function($event){_vm.error=''}}},[_vm._v("x")]),_vm._v(" "),_c('h4',[_vm._v("Erro!")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(_vm.error))])]):_vm._e()]):_vm._e()])],1),_vm._v(" "),_c('router-view',{staticClass:"container",attrs:{"auth":this.auth}})],1)}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{attrs:{"id":"app"}},[_c('header',[_c('div',{staticClass:"inner-header"},[_c('nav',[_c('ul',[_vm._m(0),_vm._v(" "),(!_vm.isHome)?_c('li',[_c('a',{attrs:{"href":"/"}},[_vm._v("mensagens")])]):_vm._e(),_vm._v(" "),(!_vm.isInfo)?_c('li',[_c('a',{attrs:{"href":"/#/info"}},[_vm._v("informações")])]):_vm._e()])]),_vm._v(" "),_c('SearchBar')],1),_vm._v(" "),(_vm.marquee)?_c('div',{staticClass:"marquee"},[_c('p',{on:{"click":function($event){_vm.marqueeInput=!_vm.marqueeInput}}},[_vm._v("⌨️")]),_vm._v(" "),_c('span',_vm._l((_vm.marquees),function(marquee){return _c('span',{key:marquee.id},[(marquee.has_url === 'true' || marquee.has_url === true)?_c('a',{attrs:{"href":marquee.href,"target":"_blank","rel":"noreferrer"}},[_vm._v("\n            "+_vm._s(marquee.content)+";\n            ")]):_c('span',[_vm._v("\n              "+_vm._s(marquee.content)+";\n            ")])])}),0),_vm._v(" "),_c('p',{on:{"click":function($event){_vm.marquee=!_vm.marquee}}},[_vm._v("✖")])]):_vm._e(),_vm._v(" "),_c('transition',{attrs:{"name":"fadeForm"}},[(_vm.marqueeInput)?_c('form',{attrs:{"id":"marqueeForm"},on:{"submit":function($event){$event.preventDefault();return _vm.addMarquee()}}},[_c('div',{staticClass:"marquee-form-top"},[_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.marqueeMessage.content),expression:"marqueeMessage.content"}],attrs:{"type":"text","placeholder":"Proibido mais de 50 chars neste fórum cristão","name":"marqueeInput","required":"","maxlength":"50"},domProps:{"value":(_vm.marqueeMessage.content)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.marqueeMessage, "content", $event.target.value)}}}),_vm._v(" "),_c('input',{attrs:{"type":"submit","value":"Enviar"}})]),_vm._v(" "),_c('div',{staticClass:"marquee-form-bottom"},[_c('label',{attrs:{"for":"marqueeCheckUrl"}},[_vm._v("\n              tem link?\n              "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.marqueeMessage.has_url),expression:"marqueeMessage.has_url"}],attrs:{"type":"checkbox","id":"marqueeCheckUrl","name":"marqueeCheckUrl"},domProps:{"checked":Array.isArray(_vm.marqueeMessage.has_url)?_vm._i(_vm.marqueeMessage.has_url,null)>-1:(_vm.marqueeMessage.has_url)},on:{"change":function($event){var $$a=_vm.marqueeMessage.has_url,$$el=$event.target,$$c=$$el.checked?(true):(false);if(Array.isArray($$a)){var $$v=null,$$i=_vm._i($$a,$$v);if($$el.checked){$$i<0&&(_vm.$set(_vm.marqueeMessage, "has_url", $$a.concat([$$v])))}else{$$i>-1&&(_vm.$set(_vm.marqueeMessage, "has_url", $$a.slice(0,$$i).concat($$a.slice($$i+1))))}}else{_vm.$set(_vm.marqueeMessage, "has_url", $$c)}}}})]),_vm._v(" "),_c('transition',{attrs:{"name":"fade"}},[(_vm.marqueeMessage.has_url)?_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.marqueeMessage.href),expression:"marqueeMessage.href"}],attrs:{"type":"url","name":"marqueeUrl","placeholder":"https://www.htmhell.dev/","required":""},domProps:{"value":(_vm.marqueeMessage.href)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.marqueeMessage, "href", $event.target.value)}}}):_vm._e()])],1),_vm._v(" "),(_vm.error)?_c('div',{staticClass:"alert-error"},[_c('span',{on:{"click":function($event){_vm.error=''}}},[_vm._v("x")]),_vm._v(" "),_c('h4',[_vm._v("Erro!")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(_vm.error))])]):_vm._e()]):_vm._e()])],1),_vm._v(" "),_c('router-view',{staticClass:"container",attrs:{"auth":this.auth}})],1)}
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('li',[_c('a',{attrs:{"href":"/"}},[_c('h1',[_vm._v("gchan")]),_c('img',{attrs:{"src":__webpack_require__(1),"alt":"gchan logo"}})])])}]
 
 
@@ -16632,19 +16521,19 @@ if(content.__esModule) content = content.default;
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var add = __webpack_require__(3).default
+var add = __webpack_require__(7).default
 var update = add("e90bed74", content, true, {});
 
 /***/ }),
 /* 34 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(2)(false);
+exports = module.exports = __webpack_require__(6)(false);
 // imports
 
 
 // module
-exports.push([module.i, "* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\nbody {\n  background-color: #222;\n  color: #b9b9b9;\n}\n\n.fadeForm-enter-active, .fadeForm-leave-active {\n  transition: all 0.25s;\n  max-height: 200px;\n  overflow: hidden;\n}\n\n.fadeForm-enter, .fadeForm-leave-to {\n  max-height: 0px;\n}\n\n.fade-leave-active {\n  transition: opacity 0.5s;\n}\n\n.fade-enter-active {\n  transition: opacity 0.5s;\n}\n\n.fade-enter, .fade-leave-to {\n  opacity: 0;\n}\n\n.grecaptcha-badge {\n  visibility: hidden;\n}\n\n.alert {\n  max-width: calc(100% - 40px);\n  top: 15px;\n  left: 50%;\n  transform: translateX(-50%);\n  position: absolute;\n  width: 100%;\n  color: #fff;\n  padding: 20px;\n  border-radius: 3px;\n}\n.alert.alert-info {\n  background-color: #842cb0;\n}\n.alert.alert-error {\n  background-color: #e74c3c;\n}\n.alert.alert-success {\n  background-color: #72ab00;\n}\n.alert h4 {\n  position: relative;\n  font-size: 22px;\n  margin-bottom: 15px;\n}\n.alert p {\n  font-size: 18px;\n  margin-bottom: 15px;\n}\n.alert span {\n  text-align: right;\n  width: 100%;\n  opacity: 0.6;\n  font-size: 22px;\n  padding: 0 5px 0;\n  transition: opacity 300ms ease;\n  cursor: pointer;\n  position: absolute;\n  padding: 3px 14px;\n  top: 0;\n  right: 0;\n  z-index: 1;\n}\n.alert span:hover {\n  opacity: 0.95;\n}\n\n.badge {\n  display: inline-block;\n  padding: 0.25em 0.4em;\n  font-size: 75%;\n  font-weight: 700;\n  line-height: 1;\n  text-align: center;\n  white-space: nowrap;\n  vertical-align: baseline;\n  border-radius: 0.25rem;\n}\n.badge.beta {\n  background-color: #6f42c1;\n  color: white;\n}\n\n.noselect {\n  -webkit-touch-callout: none;\n  /* iOS Safari */\n  -webkit-user-select: none;\n  /* Safari */\n  -khtml-user-select: none;\n  /* Konqueror HTML */\n  -moz-user-select: none;\n  /* Old versions of Firefox */\n  -ms-user-select: none;\n  /* Internet Explorer/Edge */\n  user-select: none;\n  /* Non-prefixed version, currently\n   supported by Chrome, Edge, Opera and Firefox */\n}\n\nbody.isdragging {\n  cursor: grabbing;\n}\nbody.isdragging #replybox #replybox-head span {\n  cursor: grabbing;\n}\n\nform#replyForm div {\n  padding: 10px 0;\n}\nform textarea, form input[type=email], form input[type=password], form input[type=text], form input[type=url] {\n  height: 36.5px;\n  border: 1px solid #222;\n  border-radius: 4px;\n  background-color: #fff;\n  font-size: 15px;\n  padding: 6px 12px;\n  line-height: 1.5;\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\n}\nform textarea:focus, form input[type=email]:focus, form input[type=password]:focus, form input[type=text]:focus, form input[type=url]:focus {\n  color: #444;\n  background-color: #fff;\n  border-color: #739ac2;\n  outline: 0;\n  box-shadow: 0 0 0 0.2rem rgba(55, 90, 127, 0.25);\n}\nform button[type=submit], form input[type=submit] {\n  height: 36.5px;\n  background-color: #375a7f;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 10px 15px;\n  font-size: 15px;\n  font-weight: bold;\n  margin: 15px 0;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  transition: all 300ms ease;\n}\nform button[type=submit]:hover, form input[type=submit]:hover {\n  color: #fff;\n  background-color: #2b4764;\n  border-color: #28415b;\n}\nform button[type=submit].create-post, form input[type=submit].create-post {\n  margin: 15px 0 25px;\n}\nform button[type=submit].disabled, form input[type=submit].disabled {\n  opacity: 0.5;\n  cursor: wait;\n}\nform .gif-search-toggle label {\n  cursor: pointer;\n}\nform textarea {\n  height: 100px;\n}\nform .alert {\n  position: absolute;\n  max-width: 500px;\n  width: 100%;\n  padding: 20px;\n  color: #fff;\n  border-radius: 3px;\n}\nform .alert.alert-info {\n  background-color: #842cb0;\n}\nform .alert.alert-error {\n  background-color: #e74c3c;\n}\nform .alert.alert-success {\n  background-color: #72ab00;\n}\nform .alert h4 {\n  position: relative;\n  font-size: 22px;\n  margin-bottom: 15px;\n}\nform .alert p {\n  font-size: 18px;\n  margin-bottom: 15px;\n}\nform .alert span {\n  text-align: right;\n  width: 100%;\n  opacity: 0.6;\n  font-size: 22px;\n  padding: 0 5px 0;\n  transition: opacity 300ms ease;\n  cursor: pointer;\n  position: absolute;\n  padding: 3px 14px;\n  top: 0;\n  right: 0;\n  z-index: 1;\n}\nform .alert span:hover {\n  opacity: 0.95;\n}\n\nheader {\n  width: 100vw;\n  background-color: #303030;\n}\nheader .inner-header {\n  display: flex;\n  justify-content: space-around;\n  max-width: 980px;\n  width: 95%;\n  margin: 0 auto;\n}\nheader .inner-header nav ul {\n  display: flex;\n  list-style-type: none;\n}\nheader .inner-header nav ul li {\n  padding: 10px 5px;\n}\nheader .inner-header nav ul li a {\n  display: flex;\n  padding: 10px 5px;\n  opacity: 0.6;\n  color: white;\n  text-decoration: none;\n  transition: all 300ms ease;\n}\nheader .inner-header nav ul li a:hover {\n  opacity: 0.75;\n}\nheader .inner-header nav ul li button {\n  height: 36.5px;\n  background-color: #2b4764;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 5px;\n}\nheader .inner-header nav ul li:not(:nth-child(1)) {\n  margin-top: 3px;\n}\nheader .inner-header nav ul li:nth-child(1) {\n  display: flex;\n  align-items: center;\n}\nheader .inner-header nav ul li:nth-child(1) img {\n  width: 32px;\n  height: 34px;\n  margin: 0 0 0 5px;\n}\nheader .inner-header form {\n  display: flex;\n  align-items: center;\n}\nheader .inner-header form button {\n  height: 36.5px;\n  background-color: #2b4764;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n}\nheader .inner-header form input {\n  height: 36.5px;\n  border-color: #2b4764;\n  border-radius: 5px;\n  padding: 5px;\n  margin: 0 5px;\n}\nheader .janitor-login form {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  max-width: 320px;\n  margin: 0 auto;\n}\nheader .janitor-login form div {\n  width: 100%;\n  padding: 10px 5px 5px;\n}\nheader .janitor-login form div.fields input {\n  width: calc(100% - 62px);\n}\nheader .janitor-login form div.btns {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: relative;\n}\nheader .janitor-login form div.btns input, header .janitor-login form div.btns button {\n  margin: 10px 5px;\n  width: 150px;\n}\nheader .janitor-login form div.btns a, header .janitor-login form div.btns button.goto-form {\n  text-decoration: underline;\n  cursor: pointer;\n  background-color: transparent;\n  border: none;\n  padding: 10px 5px;\n  opacity: 0.6;\n  color: white;\n  transition: all 300ms ease;\n}\nheader .janitor-login form div.btns a:hover, header .janitor-login form div.btns button.goto-form:hover {\n  opacity: 0.75;\n}\nheader .janitor-login form div.btns input {\n  width: 75px;\n  height: 30px;\n}\nheader .janitor-login form div.btns .img-wrapper {\n  position: absolute;\n  right: 0;\n  height: 36.5px;\n  width: 48px;\n  padding: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  background-color: #375a7f;\n  border-color: #2b476482;\n  border-radius: 5px;\n}\nheader .janitor-login form div.btns .img-wrapper img {\n  width: 16px;\n}\nheader .janitor-login form div div {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\nheader .janitor-login form div div label {\n  padding: 10px;\n  width: 62px;\n  display: block;\n}\nheader .marquee {\n  margin: 0 auto;\n  width: 100%;\n  overflow: hidden;\n  white-space: nowrap;\n  padding: 2px;\n  position: relative;\n  background-color: #222;\n  font-size: 16px;\n  line-height: 135%;\n  font-family: \"cxled\", monospace;\n}\nheader .marquee:hover > span, header .marquee:focus-within > span {\n  -webkit-animation-play-state: paused;\n  animation-play-state: paused;\n}\nheader .marquee:hover p, header .marquee:focus-within p {\n  opacity: 1;\n}\nheader .marquee > span {\n  color: #edcd6c;\n  display: inline-block;\n  padding-left: 100%;\n  -webkit-animation: movement-steps20 10s linear infinite forwards;\n  animation: movement-steps20 10s linear infinite forwards;\n  font-size: 16px;\n  line-height: 135%;\n  letter-spacing: 2px;\n  opacity: 0.8;\n}\nheader .marquee > span span {\n  display: inline-block;\n  margin: 0 5px;\n}\nheader .marquee > span span a {\n  color: #edcd6c;\n}\nheader .marquee > span span a:visited {\n  color: #edcd6c;\n}\nheader .marquee p {\n  color: white;\n  position: absolute;\n  top: -7px;\n  right: 0px;\n  opacity: 0;\n  transition: all 300ms ease;\n  cursor: pointer;\n  padding: 10px;\n  z-index: 2;\n  background-color: #222;\n  width: 50px;\n  text-align: center;\n  font-size: 27px;\n}\nheader .marquee p:nth-child(1) {\n  left: 0;\n  font-size: 30px;\n}\nheader .marquee p:hover {\n  color: red;\n  opacity: 1;\n}\nheader #marqueeForm {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  max-width: 500px;\n  width: 100%;\n  margin: 0 auto;\n  height: 105px;\n}\nheader #marqueeForm input[type=text] {\n  width: calc(100% - 80px);\n}\nheader #marqueeForm .marquee-form-top, header #marqueeForm .marquee-form-bottom {\n  width: 100%;\n  display: flex;\n  align-items: center;\n}\nheader #marqueeForm .marquee-form-bottom label {\n  width: 105px;\n  height: 36.5px;\n  display: flex;\n  align-items: center;\n}\nheader #marqueeForm .marquee-form-bottom label input {\n  margin-left: 5px;\n  width: initial;\n  height: initial;\n}\nheader #marqueeForm .marquee-form-bottom .fade-enter-active, header #marqueeForm .marquee-form-bottom .fade-leave-active {\n  transition: opacity 0.25s;\n}\nheader #marqueeForm .marquee-form-bottom .fade-enter, header #marqueeForm .marquee-form-bottom .fade-leave-to {\n  opacity: 0;\n}\nheader #marqueeForm .marquee-form-bottom input {\n  width: calc(100% - 105px);\n}\n@keyframes marquee {\n  0% {\n    transform: translate(0, 0);\n    padding-right: 0;\n  }\n  100% {\n    transform: translate(-100%, 0);\n    padding-right: 100%;\n  }\n}\n@keyframes movement-steps20 {\n  0% {\n    transform: translateX(0%);\n    left: 100%;\n  }\n  5%, 9.99% {\n    transform: translateX(-5%);\n    left: 95%;\n  }\n  10%, 14.99% {\n    transform: translateX(-10%);\n    left: 90%;\n  }\n  15%, 19.99% {\n    transform: translateX(-15%);\n    left: 85%;\n  }\n  20%, 24.99% {\n    transform: translateX(-20%);\n    left: 80%;\n  }\n  25%, 29.99% {\n    transform: translateX(-25%);\n    left: 75%;\n  }\n  30%, 34.99% {\n    transform: translateX(-30%);\n    left: 70%;\n  }\n  35%, 39.99% {\n    transform: translateX(-35%);\n    left: 65%;\n  }\n  40%, 44.99% {\n    transform: translateX(-40%);\n    left: 60%;\n  }\n  45%, 49.99% {\n    transform: translateX(-45%);\n    left: 55%;\n  }\n  50%, 54.99% {\n    transform: translateX(-50%);\n    left: 50%;\n  }\n  55%, 59.99% {\n    transform: translateX(-55%);\n    left: 45%;\n  }\n  60%, 64.99% {\n    transform: translateX(-60%);\n    left: 40%;\n  }\n  65%, 69.99% {\n    transform: translateX(-65%);\n    left: 35%;\n  }\n  70%, 74.99% {\n    transform: translateX(-70%);\n    left: 30%;\n  }\n  75%, 79.99% {\n    transform: translateX(-75%);\n    left: 25%;\n  }\n  80%, 84.99% {\n    transform: translateX(-80%);\n    left: 20%;\n  }\n  85%, 89.99% {\n    transform: translateX(-85%);\n    left: 15%;\n  }\n  90%, 94.99% {\n    transform: translateX(-90%);\n    left: 10%;\n  }\n  95%, 99.99% {\n    transform: translateX(-95%);\n    left: 5%;\n  }\n  100% {\n    transform: translateX(-100%);\n    left: 0%;\n  }\n}\n\nsection.create-thread {\n  display: flex;\n  justify-content: space-around;\n  margin-top: 20px;\n  max-width: 1200px;\n  width: 100%;\n  margin: 0 auto;\n}\nsection.create-thread h2 {\n  text-decoration: underline;\n  margin: 15px 0;\n  cursor: pointer;\n}\nsection.create-thread form {\n  max-width: 500px;\n  width: 100%;\n  border-bottom: 5px dotted #b9b9b9;\n  margin-bottom: 25px;\n}\nsection.create-thread form .form-group, section.create-thread form .searchgifstuffs {\n  display: flex;\n  flex-direction: column;\n  max-width: 500px;\n}\nsection.create-thread form .form-group.media-type-radios, section.create-thread form .searchgifstuffs.media-type-radios {\n  flex-direction: row;\n  margin: 10px 0;\n}\nsection.create-thread form .form-group .form-subject, section.create-thread form .searchgifstuffs .form-subject {\n  display: flex;\n  align-items: center;\n}\nsection.create-thread form .form-group .form-subject input[type=checkbox], section.create-thread form .searchgifstuffs .form-subject input[type=checkbox] {\n  min-height: 0;\n  width: initial;\n  height: initial;\n}\nsection.create-thread form .form-group label, section.create-thread form .searchgifstuffs label {\n  margin: 5px 15px 5px 0;\n}\nsection.create-thread form .form-group label.upload-concluido, section.create-thread form .searchgifstuffs label.upload-concluido {\n  color: #00bc8c;\n  font-weight: 600;\n}\nsection.create-thread form .form-group input:not([type=file]), section.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs input:not([type=file]), section.create-thread form .searchgifstuffs textarea {\n  background-color: #e6e6e6;\n  min-height: 26px;\n}\nsection.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs textarea {\n  max-width: 100%;\n}\nsection.create-thread form .form-group input[type=radio]:not(.gif-type), section.create-thread form .searchgifstuffs input[type=radio]:not(.gif-type) {\n  min-height: initial;\n}\nsection.create-thread form .form-group input[type=radio].gif-type, section.create-thread form .searchgifstuffs input[type=radio].gif-type {\n  opacity: 0;\n  position: absolute;\n}\nsection.create-thread form .form-group input[type=radio].gif-type:checked + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:checked + label {\n  background-color: #313131;\n  border-color: #ffff00ad;\n  color: #ff0;\n}\nsection.create-thread form .form-group input[type=radio].gif-type:focus + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:focus + label {\n  outline: 1px solid #ffa500cc;\n  outline-offset: 1px;\n  outline-style: auto;\n}\nsection.create-thread form .form-group input[type=file], section.create-thread form .searchgifstuffs input[type=file] {\n  display: block;\n  width: 100%;\n  padding: 0 0 1rem 0;\n  font-size: 1rem;\n  font-weight: 400;\n  line-height: 1.5;\n  background-clip: padding-box;\n  border: 0 solid #fff;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border-radius: 0.25rem;\n  overflow: hidden;\n  cursor: pointer;\n}\nsection.create-thread form .form-group .gif-search-toggle .btn, section.create-thread form .searchgifstuffs .gif-search-toggle .btn {\n  display: inline-block;\n  font-weight: 400;\n  text-align: center;\n  user-select: none;\n  border: 1px solid transparent;\n  padding: 0.375rem 0.75rem;\n  font-size: 0.9375rem;\n  line-height: 1.5;\n  border-radius: 0.25rem;\n  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;\n}\nsection.create-thread form .form-group .gif-search-toggle .btn-primary, section.create-thread form .searchgifstuffs .gif-search-toggle .btn-primary {\n  color: #fff;\n  border-color: #444;\n}\nsection.create-thread .gifBoxWrapper {\n  min-height: 590px;\n}\nsection.create-thread .gifBoxWrapper, section.create-thread .imagePreview {\n  width: calc(100% - 500px);\n  max-width: 480px;\n}\nsection.create-thread .gifBoxWrapper .gif-info, section.create-thread .imagePreview .gif-info {\n  color: #842cb0;\n  margin: 15px 0;\n}\nsection.create-thread .gifBoxWrapper .gif-success, section.create-thread .imagePreview .gif-success {\n  color: #72ab00;\n  margin: 15px 0;\n  display: flex;\n  justify-content: space-between;\n}\nsection.create-thread .gifBoxWrapper .gif-success a, section.create-thread .imagePreview .gif-success a {\n  color: #e74c3c;\n}\nsection.create-thread .gifBoxWrapper div.error-wrap a, section.create-thread .imagePreview div.error-wrap a {\n  padding: 10px;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul, section.create-thread .imagePreview .paginate-arrows ul {\n  display: flex;\n  list-style: none;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul div, section.create-thread .imagePreview .paginate-arrows ul div {\n  display: flex;\n  margin: 0 auto;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:nth-child(1) a, section.create-thread .imagePreview .paginate-arrows ul li.page-item:nth-child(1) a {\n  border-radius: 4px;\n  border-top-right-radius: 0;\n  border-bottom-right-radius: 0;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:last-child a, section.create-thread .imagePreview .paginate-arrows ul li.page-item:last-child a {\n  border-radius: 4px;\n  border-top-left-radius: 0;\n  border-bottom-left-radius: 0;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item p.page-link {\n  color: #fff;\n  cursor: pointer;\n  background-color: #444;\n  font-size: 0.85rem;\n  padding: 0.85rem 1.15rem;\n  line-height: 1.5;\n  display: block;\n  text-decoration: none;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.disabled p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item.disabled p.page-link {\n  background-color: #007053;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.active p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item.active p.page-link {\n  background-color: #313131;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:hover p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item:hover p.page-link {\n  background-color: #313131;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows .paginate-next, section.create-thread .gifBoxWrapper .paginate-arrows .paginate-prev, section.create-thread .imagePreview .paginate-arrows .paginate-next, section.create-thread .imagePreview .paginate-arrows .paginate-prev {\n  width: 40px;\n  height: 40px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border: 1px solid #217dbb;\n  border-radius: 80%;\n  background-color: #2384c6;\n  color: #fff;\n  cursor: pointer;\n}\nsection.create-thread .gifBoxWrapper .emptyGifResults, section.create-thread .imagePreview .emptyGifResults {\n  border: 2px solid gray;\n  border-radius: 4px;\n  width: 100%;\n  height: 100%;\n}\nsection.create-thread .gifBoxWrapper .emptyGifResults img, section.create-thread .imagePreview .emptyGifResults img {\n  width: 100%;\n  height: 100%;\n}\nsection.create-thread .gifBoxWrapper .gifBox, section.create-thread .imagePreview .gifBox {\n  width: 100%;\n  height: 480px;\n  min-height: 250px;\n  display: flex;\n  flex-wrap: wrap;\n  border: 2px solid gray;\n  border-radius: 4px;\n  position: relative;\n}\nsection.create-thread .gifBoxWrapper .gifBox .expandedGif, section.create-thread .imagePreview .gifBox .expandedGif {\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\nsection.create-thread .gifBoxWrapper .gifBox .expandedGif img, section.create-thread .imagePreview .gifBox .expandedGif img {\n  width: 100%;\n  height: auto;\n  object-fit: contain;\n  max-height: 480px;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif, section.create-thread .imagePreview .gifBox .gifBoxGif {\n  border: 3px solid gray;\n  width: 50%;\n  height: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: all 300ms ease;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif:hover, section.create-thread .imagePreview .gifBox .gifBoxGif:hover {\n  border-color: #842cb0;\n  cursor: pointer;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif.clicked, section.create-thread .imagePreview .gifBox .gifBoxGif.clicked {\n  border-color: #842cb0;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif img, section.create-thread .imagePreview .gifBox .gifBoxGif img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gif-attribute, section.create-thread .imagePreview .gifBox .gif-attribute {\n  position: absolute;\n  bottom: -40px;\n  left: 50%;\n  transform: translateX(-50%);\n  padding-top: 5px;\n}\nsection.create-thread .imagePreview {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-direction: column;\n}\nsection.create-thread .imagePreview p.info {\n  color: #842cb0;\n}\nsection.create-thread .imagePreview p.success {\n  color: #00bc8c;\n}\nsection.create-thread .imagePreview p.error {\n  color: #e74c3c;\n}\nsection.create-thread .imagePreview button:not(.volume) {\n  margin: 0 0 10px auto;\n  background-color: #e74c3c;\n  border-color: #e74c3c;\n  border: 1px solid transparent;\n  color: #fff;\n  padding: 5px;\n  border-radius: 4px;\n  font-size: 12px;\n  line-height: 1.5;\n  z-index: 1;\n  cursor: pointer;\n  font-weight: bold;\n}\nsection.create-thread .imagePreview button:not(.volume):hover {\n  background-color: #e12e1c;\n  border-color: #d62c1a;\n}\nsection.create-thread .imagePreview button:not(.volume):disabled {\n  opacity: 0.5;\n  cursor: wait;\n}\nsection.create-thread .imagePreview p {\n  padding: 10px;\n  font-weight: bold;\n}\nsection.create-thread .imagePreview p ul {\n  font-weight: initial;\n  margin: 5px;\n}\nsection.create-thread .imagePreview video, section.create-thread .imagePreview img {\n  border: 2px solid gray;\n  border-radius: 4px;\n  width: 100%;\n  height: auto;\n  max-height: 100%;\n  object-fit: contain;\n}\nsection.create-thread .imagePreview video.uploading, section.create-thread .imagePreview img.uploading {\n  filter: blur(5px);\n}\nsection.create-thread .imagePreview .video-wrap {\n  position: relative;\n}\nsection.create-thread .imagePreview .video-wrap video {\n  width: 100%;\n  height: auto;\n  max-height: 100%;\n  object-fit: contain;\n}\nsection.create-thread .imagePreview .video-wrap video.uploading {\n  filter: blur(5px);\n}\nsection.create-thread .imagePreview .video-wrap button.volume {\n  width: 100%;\n  height: 30px;\n  position: absolute;\n  left: 5px;\n  bottom: 5px;\n  background: transparent;\n  border: none;\n  color: transparent;\n  opacity: 0;\n  text-decoration: line-through;\n  transition: all 200ms ease;\n}\nsection.create-thread .imagePreview .video-wrap button.volume.no-audio {\n  display: none;\n}\nsection.create-thread .imagePreview .video-wrap button.volume img {\n  width: 36px;\n  height: 36px;\n  border: 2px solid transparent;\n}\nsection.create-thread .imagePreview .video-wrap:hover button.volume {\n  opacity: 1;\n}\nsection.create-thread .imagePreview .video-wrap:focus-within button.volume, section.create-thread .imagePreview .video-wrap :focus-visible button.volume {\n  opacity: 1;\n}\nsection.create-thread .imagePreview .video-wrap:focus-within button.volume:focus-within img, section.create-thread .imagePreview .video-wrap:focus-within button.volume :focus-visible img, section.create-thread .imagePreview .video-wrap :focus-visible button.volume:focus-within img, section.create-thread .imagePreview .video-wrap :focus-visible button.volume :focus-visible img {\n  filter: none;\n}\n\ndiv li {\n  display: flex;\n  margin: 0 auto 10px;\n  max-width: 980px;\n  justify-content: flex-start;\n  align-items: start;\n}\ndiv li .video-wrap {\n  width: 300px;\n  position: relative;\n  margin-right: 15px;\n}\ndiv li .video-wrap button.volume {\n  width: 100%;\n  height: 30px;\n  position: absolute;\n  left: 5px;\n  bottom: 5px;\n  background: transparent;\n  border: none;\n  color: transparent;\n  opacity: 0;\n  text-decoration: line-through;\n  transition: all 200ms ease;\n}\ndiv li .video-wrap button.volume.no-audio {\n  display: none;\n}\ndiv li .video-wrap button.volume img {\n  width: 36px;\n  height: 36px;\n}\ndiv li .video-wrap:hover button.volume {\n  opacity: 1;\n}\ndiv li .video-wrap:focus-within button.volume, div li .video-wrap :focus-visible button.volume {\n  opacity: 1;\n}\ndiv li .video-wrap:focus-within button.volume:focus-within img, div li .video-wrap:focus-within button.volume :focus-visible img, div li .video-wrap :focus-visible button.volume:focus-within img, div li .video-wrap :focus-visible button.volume :focus-visible img {\n  filter: none;\n}\ndiv li .video-wrap.fullsize {\n  width: 100%;\n}\ndiv li img, div li video {\n  filter: brightness(75%);\n  width: 300px;\n  border: 2px solid #a4a4a4;\n  border-radius: 3px;\n  margin-right: 15px;\n  cursor: pointer;\n}\ndiv li img.img-thumbnail, div li video.img-thumbnail {\n  min-height: 200px;\n  object-fit: contain;\n}\ndiv li img.placeholder, div li video.placeholder {\n  width: 150px;\n  max-width: 150px;\n  height: auto;\n  min-height: 0;\n  cursor: initial;\n}\ndiv li img:hover, div li video:hover {\n  filter: none;\n}\ndiv li img.fullsize, div li video.fullsize {\n  width: 100%;\n}\ndiv li div {\n  width: calc(100% - 300px);\n}\ndiv li div .reply-warning {\n  width: 100%;\n  cursor: pointer;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\ndiv li div .reply-warning em {\n  font-size: 12px;\n  pointer-events: none;\n}\ndiv li div .reply-warning button.button-link {\n  pointer-events: none;\n  float: right;\n  padding: 3px;\n  background-color: #444;\n  border: 1px solid #444;\n  color: #b9b9b9;\n  width: 65px;\n}\ndiv li div p {\n  white-space: pre-line;\n  overflow-wrap: break-word;\n  width: 95%;\n}\ndiv li div p.text-content {\n  max-height: 114px;\n  height: 100%;\n  overflow: hidden;\n  margin-bottom: 10px;\n  transition: max-height ease 300ms;\n}\ndiv li div p.text-content.show-all {\n  max-height: 330px;\n  overflow: scroll;\n}\ndiv li div p.text-content + .reply-warning em {\n  opacity: 0;\n}\ndiv li div p.text-content .quote-hidden {\n  position: absolute;\n  border: 2px dashed #888;\n  background-color: #101010;\n  width: 100%;\n  display: none;\n  z-index: 3;\n  margin: 0 auto 10px;\n  max-width: 980px;\n  justify-content: flex-start;\n  align-items: start;\n  padding: 10px;\n  overflow-wrap: initial;\n  white-space: initial;\n}\ndiv li div p.text-content .quote-hidden.show {\n  display: flex;\n}\ndiv li div p.text-content .quote-hidden > div {\n  width: 100%;\n}\ndiv li div p a {\n  position: relative;\n  display: inline-block;\n  color: #3498db;\n}\ndiv li div p a:hover {\n  color: #e12e1c;\n}\ndiv li div p span.yt-warning {\n  position: absolute;\n  pointer-events: none;\n  z-index: 1;\n  width: 200px;\n  background-color: #111;\n  font-size: 13px;\n  padding: 10px;\n  border-radius: 5px;\n  border: 1px solid #333;\n}\ndiv li div p img.yt-thumb {\n  width: 250px;\n  position: absolute;\n  pointer-events: none;\n  z-index: 1;\n}\ndiv li div img {\n  width: 50px;\n  border: none;\n}\ndiv li div div.iframe-wrapper {\n  display: flex;\n  width: 100%;\n}\ndiv li div div.iframe-wrapper div {\n  width: 100%;\n  display: block;\n}\ndiv li div div.iframe-wrapper div.open {\n  display: block;\n}\ndiv li div div.iframe-wrapper div iframe {\n  max-width: 100%;\n  width: 640px;\n  height: 360px;\n}\ndiv li div small {\n  display: block;\n  margin: 0;\n  font-size: 11px;\n}\ndiv li div.edit_tab {\n  width: 100%;\n  display: flex;\n}\ndiv li div.edit_tab p {\n  width: initial;\n}\ndiv li div.edit_tab p.name {\n  font-weight: 700;\n  font-size: 14px;\n}\ndiv li div.edit_tab button {\n  margin-left: 15px;\n  cursor: pointer;\n  background-color: transparent;\n  height: 36.5px;\n  border-radius: 5px;\n  padding: 5px;\n  transition: all 300ms ease;\n  border-width: 0;\n}\ndiv li div.edit_tab button.delete {\n  color: #e74c3c;\n  border-color: #e74c3c;\n}\ndiv li div.edit_tab button.delete:hover {\n  background-color: #e74c3c;\n}\ndiv li div.edit_tab button.edit {\n  color: #f39c12;\n  border-color: #f39c12;\n}\ndiv li div.edit_tab button.edit:hover {\n  background-color: #f39c12;\n}\ndiv li div.edit_tab button.react {\n  color: #3498db;\n  border-color: #3498db;\n}\ndiv li div.edit_tab button.react:hover {\n  background-color: #3498db;\n}\ndiv li div.edit_tab button.reply {\n  color: #999;\n  border-color: #444;\n}\ndiv li div.edit_tab button.reply img {\n  margin: 0;\n  pointer-events: none;\n}\ndiv li div.edit_tab button.reply img:nth-child(1) {\n  display: none;\n}\ndiv li div.edit_tab button.reply img:nth-child(2) {\n  display: initial;\n}\ndiv li div.edit_tab button.reply:hover {\n  background-color: #444;\n}\ndiv li div.edit_tab button.reply:hover img:nth-child(1) {\n  display: initial;\n}\ndiv li div.edit_tab button.reply:hover img:nth-child(2) {\n  display: none;\n}\ndiv li div.edit_tab button.link-reply {\n  color: #00bc8c;\n  border-width: 1px;\n  border-color: transparent;\n  min-width: 50px;\n}\ndiv li div.edit_tab button.link-reply img {\n  margin: 0;\n  pointer-events: none;\n}\ndiv li div.edit_tab button.link-reply:hover {\n  color: #00bc8c;\n  background-color: #444;\n  border-color: #00bc8c;\n}\ndiv li div.edit_tab button.link {\n  padding: 0 5px;\n}\ndiv li div.edit_tab button.link a {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: #00bc8c;\n  text-decoration: none;\n}\ndiv li div.edit_tab button.link:hover a {\n  text-decoration: underline;\n}\ndiv li div.edit_tab button:hover {\n  color: #fff;\n}\ndiv li div.reply_count small {\n  color: #f39c12;\n}\ndiv li div p.subject {\n  font-size: 16px;\n  font-weight: 700;\n  width: initial;\n}\ndiv li div p.subject span.id {\n  font-size: 13px;\n  font-weight: 500;\n}\ndiv li.reply-item img, div li.reply-item video {\n  width: 150px;\n  min-height: initial;\n}\ndiv li.reply-item img.fullsize, div li.reply-item video.fullsize {\n  width: 100%;\n}\ndiv li.reply-item .video-wrap {\n  position: relative;\n}\ndiv li.reply-item .video-wrap video {\n  width: 100%;\n  height: auto;\n  max-height: 100%;\n  object-fit: contain;\n}\ndiv li.reply-item .video-wrap video.uploading {\n  filter: blur(5px);\n}\ndiv li.reply-item .video-wrap button {\n  position: absolute;\n}\ndiv li.reply-item > div, div li.reply-item .quote-hidden {\n  border: 2px solid #444;\n  background-color: #333;\n  padding: 10px 10px 0;\n}\ndiv li.reply-item > div.target, div li.reply-item .quote-hidden.target {\n  border: 2px dashed #888;\n  background-color: #101010;\n}\ndiv hr {\n  opacity: 1;\n  max-width: 980px;\n  margin: 15px auto;\n}\n\n#replybox {\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  position: fixed;\n  top: 0%;\n  left: 50%;\n  border: 2px solid #444;\n  background-color: #222;\n  padding: 15px;\n  max-width: 650px;\n  max-height: 100vh;\n}\n#replybox .form-group {\n  display: flex;\n  padding: 0;\n}\n#replybox .form-group.row {\n  flex-direction: row;\n  justify-content: space-around;\n}\n#replybox .form-group.justify-center {\n  justify-content: center;\n}\n#replybox .form-group div {\n  padding: 0;\n}\n#replybox .previewImg {\n  display: flex;\n  flex-direction: column;\n}\n#replybox .previewImg img, #replybox .previewImg video {\n  max-height: calc(100vh - 37.5px - 66px - 30px);\n  object-fit: contain;\n}\n#replybox p {\n  text-align: center;\n  margin-top: 5px;\n}\n#replybox p.info {\n  color: #842cb0;\n}\n#replybox p.success {\n  color: #00bc8c;\n}\n#replybox p.error {\n  color: #e74c3c;\n}\n#replybox button.mobile-only {\n  height: 36.5px;\n  background-color: #444;\n  border-color: #444;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 10px 15px;\n  font-size: 15px;\n  font-weight: bold;\n  margin: 15px 0;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  transition: all 300ms ease;\n}\n#replybox button.mobile-only.ml-15 {\n  margin-left: 15px;\n}\n#replybox button.mobile-only:hover {\n  color: #fff;\n  background-color: #2b4764;\n  border-color: #28415b;\n}\n#replybox button.mobile-only.create-post {\n  margin: 15px 0 25px;\n}\n#replybox button.mobile-only.disabled {\n  opacity: 0.5;\n  cursor: wait;\n}\n#replybox button.mobile-only input[type=file] {\n  display: none;\n}\n#replybox #replybox-head {\n  width: 100%;\n  border-bottom: 2px solid #444;\n  padding-bottom: 10px;\n  margin-bottom: 10px;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n#replybox #replybox-head span {\n  width: calc(100% - 50px);\n  cursor: grab;\n}\n#replybox #replybox-head span.grabbing {\n  cursor: grabbing;\n}\n#replybox #replybox-head .close {\n  width: 50px;\n  height: 25px;\n  border: 2px solid #444;\n  border-radius: 0;\n  font-weight: bold;\n  transition: all 100ms ease;\n  cursor: pointer;\n}\n#replybox #replybox-head .close:hover {\n  color: #ccc;\n  border-color: #ccc;\n}\n#replybox form .form-group {\n  display: flex;\n  flex-direction: column;\n}\n#replybox form .form-group textarea {\n  max-width: 100%;\n  max-height: calc(100vh - 305px);\n}\n\n.about {\n  max-width: 980px;\n  margin: 0 auto;\n}\n.about h1 {\n  text-align: center;\n  margin: 20px;\n}\n.about img {\n  width: 100%;\n}\n\nsection#cookie_consent {\n  min-height: 70px;\n  position: fixed;\n  bottom: 5px;\n  z-index: 99;\n  background-color: rgba(255, 255, 255, 0.8);\n  border: 2px solid #212121;\n  border-radius: 4px;\n  width: 525px;\n  left: 50%;\n  transform: translateX(-50%);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\nsection#cookie_consent .cookie_consent_wrapper {\n  border-radius: 4px;\n  width: 500px;\n  height: 90%;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  align-items: center;\n  background-color: #212121;\n  padding: 5px;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie_message {\n  margin-bottom: 5px;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie-btns {\n  width: 100%;\n  display: flex;\n  justify-content: space-around;\n  align-items: center;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie-btns a {\n  color: #ce7b45;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie-btns .cookie_btn_wrapper button {\n  padding: 5px;\n}\n\nsection#cookies {\n  text-align: left;\n}\nsection#cookies h2 {\n  font-size: 28px;\n  margin: 15px;\n}\nsection#cookies p {\n  line-height: 1.5;\n}\nsection#cookies p a {\n  color: #999;\n}\nsection#cookies p a:visited {\n  color: #888;\n}\nsection#cookies form {\n  margin: 20px;\n}\nsection#cookies form #cookie-consent {\n  border: 1px solid #444;\n  padding: 10px;\n  font-size: 16px;\n  border-radius: 5px;\n}\n\nsection#register h3 {\n  text-align: center;\n  font-size: 28px;\n  margin: 15px;\n}\nsection#register form {\n  display: flex;\n  flex-direction: column;\n  align-items: flex-start;\n  justify-content: center;\n  max-width: 320px;\n  margin: 0 auto;\n  padding: 15px;\n  border-radius: 5px;\n  border: 1px solid transparent;\n  transition: border-color 0.1s;\n}\nsection#register form:focus-within {\n  border-color: #555;\n}\nsection#register form .checkbox-wrapper {\n  display: flex;\n  align-items: center;\n}\nsection#register form .checkbox-wrapper label {\n  margin-left: 5px;\n}\nsection#register form > div input {\n  margin: 0;\n  height: 30px;\n}\nsection#register form input[type=submit] {\n  height: 36.5px;\n  background-color: #2b4764;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 5px;\n  width: 100px;\n}\nsection#register form input {\n  margin: 10px 0 10px 0;\n}\n\nsection, .janitor-login, .media-body {\n  position: relative;\n}\nsection .flash, .janitor-login .flash, .media-body .flash {\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  border: none;\n  color: #fff;\n  position: absolute;\n  width: 290px;\n  padding: 30px 25px;\n  border-radius: 4px;\n  z-index: 2;\n  display: flex;\n  flex-direction: column;\n}\nsection .flash.error, .janitor-login .flash.error, .media-body .flash.error {\n  background-color: #e74c3c;\n}\nsection .flash.success, .janitor-login .flash.success, .media-body .flash.success {\n  background-color: #00bc8c;\n}\nsection .flash button, .janitor-login .flash button, .media-body .flash button {\n  padding: 12px 20px;\n  color: inherit;\n  cursor: pointer;\n  background-color: transparent;\n  font-weight: 700;\n  line-height: 1;\n}\nsection .flash button.flash-btn, .janitor-login .flash button.flash-btn, .media-body .flash button.flash-btn {\n  border: none;\n  position: absolute;\n  top: 0;\n  right: 0;\n  z-index: 2;\n  margin: 0;\n  border-radius: 0;\n}\nsection .flash .opt-btns, .janitor-login .flash .opt-btns, .media-body .flash .opt-btns {\n  margin-top: 10px;\n}\nsection .flash .opt-btns button, .janitor-login .flash .opt-btns button, .media-body .flash .opt-btns button {\n  padding: 12px 12px;\n  opacity: 0.6;\n  color: #fff;\n  border-radius: 5px;\n  border: 2px solid #fff;\n  background-color: #e74c3c;\n  transition: all 300ms ease;\n  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);\n}\nsection .flash .opt-btns button:hover, .janitor-login .flash .opt-btns button:hover, .media-body .flash .opt-btns button:hover {\n  opacity: 1;\n}\nsection .flash strong, .janitor-login .flash strong, .media-body .flash strong {\n  font-weight: bolder;\n  margin: 5px 0;\n}\nsection .flash a, .janitor-login .flash a, .media-body .flash a {\n  text-decoration: underline;\n  font-weight: 700;\n  color: #fff;\n  margin: 5px 0;\n}\n\n@media screen and (max-width: 979px) {\n  section.create-thread {\n    justify-content: initial;\n    flex-direction: column;\n    height: auto;\n    align-items: center;\n    margin-bottom: 50px;\n  }\n  section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {\n    width: 100%;\n  }\n\n  #replybox {\n    left: 0;\n    top: 0;\n  }\n\n  .list-unstyled {\n    width: 95%;\n    margin: 0 auto;\n  }\n}\n@media screen and (max-width: 767px) {\n  header .marquee > span {\n    font-size: 18px;\n    animation-duration: 15s;\n    animation: movement-steps20 15s linear infinte;\n  }\n  header .inner-header {\n    flex-direction: column;\n  }\n  header .inner-header nav ul {\n    flex-direction: column;\n    font-size: 30px;\n  }\n  header .inner-header nav ul li:nth-child(1) {\n    flex-direction: row;\n  }\n  header .inner-header nav ul li:not(:first-child) {\n    font-size: 18px;\n  }\n  header .inner-header nav ul li:not(:first-child) a {\n    opacity: 0.75;\n  }\n  header .inner-header nav ul li img {\n    width: 32px;\n    margin: 0;\n  }\n  header .inner-header form {\n    flex-direction: column;\n  }\n  header .inner-header form button {\n    display: none;\n  }\n  header .inner-header form input {\n    text-align: center;\n  }\n  header .inner-header form label {\n    margin-bottom: 5px;\n  }\n\n  #replybox {\n    max-width: calc(100vw - 25px);\n  }\n\n  div li {\n    flex-direction: column;\n    align-items: start;\n  }\n  div li div {\n    width: 100%;\n  }\n  div li .video-wrap {\n    width: 75%;\n  }\n  div li .video-wrap video {\n    width: 100%;\n  }\n  div li img {\n    width: 75%;\n  }\n  div li.reply-item img, div li.reply-item video {\n    width: 250px;\n  }\n\n  section#cookie_consent {\n    width: 100vw;\n    height: 120px;\n  }\n  section#cookie_consent .cookie_consent_wrapper .cookie-btns {\n    flex-direction: column;\n  }\n  section#cookie_consent .cookie_consent_wrapper .cookie-btns a {\n    margin-bottom: 5px;\n  }\n}\n@media screen and (max-width: 525px) {\n  section.create-thread form {\n    width: 95%;\n  }\n}\n@media screen and (max-width: 479px) {\n  div li img {\n    width: 100%;\n  }\n\n  section.create-thread form .form-group.media-type-radios {\n    flex-direction: column;\n  }\n  section.create-thread form .form-group.media-type-radios > div {\n    padding: 10px 0;\n  }\n}\n/* mobile keyboard adaptation test */\n@media screen and (max-height: 540px), screen and (max-width: 479px) {\n  #replybox {\n    max-width: 100%;\n    width: 100%;\n  }\n}\n@media screen and (max-width: 400px) {\n  #replybox button.mobile-only {\n    font-size: 13px;\n  }\n}\n#input_url {\n  margin: 15px 0;\n}", ""]);
+exports.push([module.i, "* {\n  margin: 0;\n  padding: 0;\n  box-sizing: border-box;\n}\n\nbody {\n  background-color: #222;\n  color: #b9b9b9;\n}\n\n.fadeForm-enter-active, .fadeForm-leave-active {\n  transition: all 0.25s;\n  max-height: 200px;\n  overflow: hidden;\n}\n\n.fadeForm-enter, .fadeForm-leave-to {\n  max-height: 0px;\n}\n\n.fade-leave-active {\n  transition: opacity 0.5s;\n}\n\n.fade-enter-active {\n  transition: opacity 0.5s;\n}\n\n.fade-enter, .fade-leave-to {\n  opacity: 0;\n}\n\n.grecaptcha-badge {\n  visibility: hidden;\n}\n\n.alert {\n  max-width: calc(100% - 40px);\n  top: 15px;\n  left: 50%;\n  transform: translateX(-50%);\n  position: absolute;\n  width: 100%;\n  color: #fff;\n  padding: 20px;\n  border-radius: 3px;\n}\n.alert.alert-info {\n  background-color: #842cb0;\n}\n.alert.alert-error {\n  background-color: #e74c3c;\n}\n.alert.alert-success {\n  background-color: #72ab00;\n}\n.alert h4 {\n  position: relative;\n  font-size: 22px;\n  margin-bottom: 15px;\n}\n.alert p {\n  font-size: 18px;\n  margin-bottom: 15px;\n}\n.alert span {\n  text-align: right;\n  width: 100%;\n  opacity: 0.6;\n  font-size: 22px;\n  padding: 0 5px 0;\n  transition: opacity 300ms ease;\n  cursor: pointer;\n  position: absolute;\n  padding: 3px 14px;\n  top: 0;\n  right: 0;\n  z-index: 1;\n}\n.alert span:hover {\n  opacity: 0.95;\n}\n\n.badge {\n  display: inline-block;\n  padding: 0.25em 0.4em;\n  font-size: 75%;\n  font-weight: 700;\n  line-height: 1;\n  text-align: center;\n  white-space: nowrap;\n  vertical-align: baseline;\n  border-radius: 0.25rem;\n}\n.badge.beta {\n  background-color: #6f42c1;\n  color: white;\n}\n\n.noselect {\n  -webkit-touch-callout: none;\n  /* iOS Safari */\n  -webkit-user-select: none;\n  /* Safari */\n  -khtml-user-select: none;\n  /* Konqueror HTML */\n  -moz-user-select: none;\n  /* Old versions of Firefox */\n  -ms-user-select: none;\n  /* Internet Explorer/Edge */\n  user-select: none;\n  /* Non-prefixed version, currently\n   supported by Chrome, Edge, Opera and Firefox */\n}\n\na.nostyle:link {\n  text-decoration: inherit;\n  color: inherit;\n  display: contents;\n}\n\na.nostyle:visited {\n  text-decoration: inherit;\n  color: inherit;\n  display: contents;\n}\n\nbody.isdragging {\n  cursor: grabbing;\n}\nbody.isdragging #replybox #replybox-head span {\n  cursor: grabbing;\n}\n\nform#replyForm div {\n  padding: 10px 0;\n}\nform textarea, form input[type=email], form input[type=password], form input[type=text], form input[type=url] {\n  height: 36.5px;\n  border: 1px solid #222;\n  border-radius: 4px;\n  background-color: #fff;\n  font-size: 15px;\n  padding: 6px 12px;\n  line-height: 1.5;\n  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;\n}\nform textarea:focus, form input[type=email]:focus, form input[type=password]:focus, form input[type=text]:focus, form input[type=url]:focus {\n  color: #444;\n  background-color: #fff;\n  border-color: #739ac2;\n  outline: 0;\n  box-shadow: 0 0 0 0.2rem rgba(55, 90, 127, 0.25);\n}\nform button[type=submit], form input[type=submit] {\n  height: 36.5px;\n  background-color: #375a7f;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 10px 15px;\n  font-size: 15px;\n  font-weight: bold;\n  margin: 15px 0;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  transition: all 300ms ease;\n}\nform button[type=submit]:hover, form input[type=submit]:hover {\n  color: #fff;\n  background-color: #2b4764;\n  border-color: #28415b;\n}\nform button[type=submit].create-post, form input[type=submit].create-post {\n  margin: 15px 0 25px;\n}\nform button[type=submit].disabled, form input[type=submit].disabled {\n  opacity: 0.5;\n  cursor: wait;\n}\nform .gif-search-toggle label {\n  cursor: pointer;\n}\nform textarea {\n  height: 100px;\n}\nform .alert {\n  position: absolute;\n  max-width: 500px;\n  width: 100%;\n  padding: 20px;\n  color: #fff;\n  border-radius: 3px;\n}\nform .alert.alert-info {\n  background-color: #842cb0;\n}\nform .alert.alert-error {\n  background-color: #e74c3c;\n}\nform .alert.alert-success {\n  background-color: #72ab00;\n}\nform .alert h4 {\n  position: relative;\n  font-size: 22px;\n  margin-bottom: 15px;\n}\nform .alert p {\n  font-size: 18px;\n  margin-bottom: 15px;\n}\nform .alert span {\n  text-align: right;\n  width: 100%;\n  opacity: 0.6;\n  font-size: 22px;\n  padding: 0 5px 0;\n  transition: opacity 300ms ease;\n  cursor: pointer;\n  position: absolute;\n  padding: 3px 14px;\n  top: 0;\n  right: 0;\n  z-index: 1;\n}\nform .alert span:hover {\n  opacity: 0.95;\n}\n\nheader {\n  width: 100vw;\n  background-color: #303030;\n}\nheader .inner-header {\n  display: flex;\n  justify-content: space-around;\n  max-width: 980px;\n  width: 95%;\n  margin: 0 auto;\n}\nheader .inner-header nav ul {\n  display: flex;\n  list-style-type: none;\n}\nheader .inner-header nav ul li {\n  padding: 10px 5px;\n}\nheader .inner-header nav ul li a {\n  display: flex;\n  padding: 10px 5px;\n  opacity: 0.6;\n  color: white;\n  text-decoration: none;\n  transition: all 300ms ease;\n}\nheader .inner-header nav ul li a:hover {\n  opacity: 0.75;\n}\nheader .inner-header nav ul li button {\n  height: 36.5px;\n  background-color: #2b4764;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 5px;\n}\nheader .inner-header nav ul li:not(:nth-child(1)) {\n  margin-top: 3px;\n}\nheader .inner-header nav ul li:nth-child(1) {\n  display: flex;\n  align-items: center;\n}\nheader .inner-header nav ul li:nth-child(1) img {\n  width: 32px;\n  height: 34px;\n  margin: 0 0 0 5px;\n}\nheader .inner-header form {\n  display: flex;\n  align-items: center;\n}\nheader .inner-header form button {\n  height: 36.5px;\n  background-color: #2b4764;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n}\nheader .inner-header form input {\n  height: 36.5px;\n  border-color: #2b4764;\n  border-radius: 5px;\n  padding: 5px;\n  margin: 0 5px;\n}\nheader .janitor-login form {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  max-width: 320px;\n  margin: 0 auto;\n}\nheader .janitor-login form div {\n  width: 100%;\n  padding: 10px 5px 5px;\n}\nheader .janitor-login form div.fields input {\n  width: calc(100% - 62px);\n}\nheader .janitor-login form div.btns {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  position: relative;\n}\nheader .janitor-login form div.btns input, header .janitor-login form div.btns button {\n  margin: 10px 5px;\n  width: 150px;\n}\nheader .janitor-login form div.btns a, header .janitor-login form div.btns button.goto-form {\n  text-decoration: underline;\n  cursor: pointer;\n  background-color: transparent;\n  border: none;\n  padding: 10px 5px;\n  opacity: 0.6;\n  color: white;\n  transition: all 300ms ease;\n}\nheader .janitor-login form div.btns a:hover, header .janitor-login form div.btns button.goto-form:hover {\n  opacity: 0.75;\n}\nheader .janitor-login form div.btns input {\n  width: 75px;\n  height: 30px;\n}\nheader .janitor-login form div.btns .img-wrapper {\n  position: absolute;\n  right: 0;\n  height: 36.5px;\n  width: 48px;\n  padding: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  cursor: pointer;\n  background-color: #375a7f;\n  border-color: #2b476482;\n  border-radius: 5px;\n}\nheader .janitor-login form div.btns .img-wrapper img {\n  width: 16px;\n}\nheader .janitor-login form div div {\n  display: flex;\n  align-items: center;\n  justify-content: space-between;\n}\nheader .janitor-login form div div label {\n  padding: 10px;\n  width: 62px;\n  display: block;\n}\nheader .marquee {\n  margin: 0 auto;\n  width: 100%;\n  overflow: hidden;\n  white-space: nowrap;\n  padding: 2px;\n  position: relative;\n  background-color: #222;\n  font-size: 16px;\n  line-height: 135%;\n  font-family: \"cxled\", monospace;\n}\nheader .marquee:hover > span, header .marquee:focus-within > span {\n  -webkit-animation-play-state: paused;\n  animation-play-state: paused;\n}\nheader .marquee:hover p, header .marquee:focus-within p {\n  opacity: 1;\n}\nheader .marquee > span {\n  color: #edcd6c;\n  display: inline-block;\n  padding-left: 100%;\n  -webkit-animation: movement-steps20 10s linear infinite forwards;\n  animation: movement-steps20 10s linear infinite forwards;\n  font-size: 16px;\n  line-height: 135%;\n  letter-spacing: 2px;\n  opacity: 0.8;\n}\nheader .marquee > span span {\n  display: inline-block;\n  margin: 0 5px;\n}\nheader .marquee > span span a {\n  color: #edcd6c;\n}\nheader .marquee > span span a:visited {\n  color: #edcd6c;\n}\nheader .marquee p {\n  color: white;\n  position: absolute;\n  top: -7px;\n  right: 0px;\n  opacity: 0;\n  transition: all 300ms ease;\n  cursor: pointer;\n  padding: 10px;\n  z-index: 2;\n  background-color: #222;\n  width: 50px;\n  text-align: center;\n  font-size: 27px;\n}\nheader .marquee p:nth-child(1) {\n  left: 0;\n  font-size: 30px;\n}\nheader .marquee p:hover {\n  color: red;\n  opacity: 1;\n}\nheader #marqueeForm {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  max-width: 500px;\n  width: 100%;\n  margin: 0 auto;\n  height: 105px;\n}\nheader #marqueeForm input[type=text] {\n  width: calc(100% - 80px);\n}\nheader #marqueeForm .marquee-form-top, header #marqueeForm .marquee-form-bottom {\n  width: 100%;\n  display: flex;\n  align-items: center;\n}\nheader #marqueeForm .marquee-form-bottom label {\n  width: 105px;\n  height: 36.5px;\n  display: flex;\n  align-items: center;\n}\nheader #marqueeForm .marquee-form-bottom label input {\n  margin-left: 5px;\n  width: initial;\n  height: initial;\n}\nheader #marqueeForm .marquee-form-bottom .fade-enter-active, header #marqueeForm .marquee-form-bottom .fade-leave-active {\n  transition: opacity 0.25s;\n}\nheader #marqueeForm .marquee-form-bottom .fade-enter, header #marqueeForm .marquee-form-bottom .fade-leave-to {\n  opacity: 0;\n}\nheader #marqueeForm .marquee-form-bottom input {\n  width: calc(100% - 105px);\n}\n@keyframes marquee {\n  0% {\n    transform: translate(0, 0);\n    padding-right: 0;\n  }\n  100% {\n    transform: translate(-100%, 0);\n    padding-right: 100%;\n  }\n}\n@keyframes movement-steps20 {\n  0% {\n    transform: translateX(0%);\n    left: 100%;\n  }\n  5%, 9.99% {\n    transform: translateX(-5%);\n    left: 95%;\n  }\n  10%, 14.99% {\n    transform: translateX(-10%);\n    left: 90%;\n  }\n  15%, 19.99% {\n    transform: translateX(-15%);\n    left: 85%;\n  }\n  20%, 24.99% {\n    transform: translateX(-20%);\n    left: 80%;\n  }\n  25%, 29.99% {\n    transform: translateX(-25%);\n    left: 75%;\n  }\n  30%, 34.99% {\n    transform: translateX(-30%);\n    left: 70%;\n  }\n  35%, 39.99% {\n    transform: translateX(-35%);\n    left: 65%;\n  }\n  40%, 44.99% {\n    transform: translateX(-40%);\n    left: 60%;\n  }\n  45%, 49.99% {\n    transform: translateX(-45%);\n    left: 55%;\n  }\n  50%, 54.99% {\n    transform: translateX(-50%);\n    left: 50%;\n  }\n  55%, 59.99% {\n    transform: translateX(-55%);\n    left: 45%;\n  }\n  60%, 64.99% {\n    transform: translateX(-60%);\n    left: 40%;\n  }\n  65%, 69.99% {\n    transform: translateX(-65%);\n    left: 35%;\n  }\n  70%, 74.99% {\n    transform: translateX(-70%);\n    left: 30%;\n  }\n  75%, 79.99% {\n    transform: translateX(-75%);\n    left: 25%;\n  }\n  80%, 84.99% {\n    transform: translateX(-80%);\n    left: 20%;\n  }\n  85%, 89.99% {\n    transform: translateX(-85%);\n    left: 15%;\n  }\n  90%, 94.99% {\n    transform: translateX(-90%);\n    left: 10%;\n  }\n  95%, 99.99% {\n    transform: translateX(-95%);\n    left: 5%;\n  }\n  100% {\n    transform: translateX(-100%);\n    left: 0%;\n  }\n}\n\nsection.create-thread {\n  display: flex;\n  justify-content: space-around;\n  margin-top: 20px;\n  max-width: 1200px;\n  width: 100%;\n  margin: 0 auto;\n}\nsection.create-thread h2 {\n  text-decoration: underline;\n  margin: 15px 0;\n  cursor: pointer;\n}\nsection.create-thread form {\n  max-width: 500px;\n  width: 100%;\n  border-bottom: 5px dotted #b9b9b9;\n  margin-bottom: 25px;\n}\nsection.create-thread form .form-group, section.create-thread form .searchgifstuffs {\n  display: flex;\n  flex-direction: column;\n  max-width: 500px;\n}\nsection.create-thread form .form-group.media-type-radios, section.create-thread form .searchgifstuffs.media-type-radios {\n  flex-direction: row;\n  margin: 10px 0;\n}\nsection.create-thread form .form-group .form-subject, section.create-thread form .searchgifstuffs .form-subject {\n  display: flex;\n  align-items: center;\n}\nsection.create-thread form .form-group .form-subject input[type=checkbox], section.create-thread form .searchgifstuffs .form-subject input[type=checkbox] {\n  min-height: 0;\n  width: initial;\n  height: initial;\n}\nsection.create-thread form .form-group label, section.create-thread form .searchgifstuffs label {\n  margin: 5px 15px 5px 0;\n}\nsection.create-thread form .form-group label.upload-concluido, section.create-thread form .searchgifstuffs label.upload-concluido {\n  color: #00bc8c;\n  font-weight: 600;\n}\nsection.create-thread form .form-group input:not([type=file]), section.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs input:not([type=file]), section.create-thread form .searchgifstuffs textarea {\n  background-color: #e6e6e6;\n  min-height: 26px;\n}\nsection.create-thread form .form-group textarea, section.create-thread form .searchgifstuffs textarea {\n  max-width: 100%;\n}\nsection.create-thread form .form-group input[type=radio]:not(.gif-type), section.create-thread form .searchgifstuffs input[type=radio]:not(.gif-type) {\n  min-height: initial;\n}\nsection.create-thread form .form-group input[type=radio].gif-type, section.create-thread form .searchgifstuffs input[type=radio].gif-type {\n  opacity: 0;\n  position: absolute;\n}\nsection.create-thread form .form-group input[type=radio].gif-type:checked + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:checked + label {\n  background-color: #313131;\n  border-color: #ffff00ad;\n  color: #ff0;\n}\nsection.create-thread form .form-group input[type=radio].gif-type:focus + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:focus + label {\n  outline: 1px solid #ffa500cc;\n  outline-offset: 1px;\n  outline-style: auto;\n}\nsection.create-thread form .form-group input[type=file], section.create-thread form .searchgifstuffs input[type=file] {\n  display: block;\n  width: 100%;\n  padding: 0 0 1rem 0;\n  font-size: 1rem;\n  font-weight: 400;\n  line-height: 1.5;\n  background-clip: padding-box;\n  border: 0 solid #fff;\n  -webkit-appearance: none;\n  -moz-appearance: none;\n  appearance: none;\n  border-radius: 0.25rem;\n  overflow: hidden;\n  cursor: pointer;\n}\nsection.create-thread form .form-group .gif-search-toggle .btn, section.create-thread form .searchgifstuffs .gif-search-toggle .btn {\n  display: inline-block;\n  font-weight: 400;\n  text-align: center;\n  user-select: none;\n  border: 1px solid transparent;\n  padding: 0.375rem 0.75rem;\n  font-size: 0.9375rem;\n  line-height: 1.5;\n  border-radius: 0.25rem;\n  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out, border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out, -webkit-box-shadow 0.15s ease-in-out;\n}\nsection.create-thread form .form-group .gif-search-toggle .btn-primary, section.create-thread form .searchgifstuffs .gif-search-toggle .btn-primary {\n  color: #fff;\n  border-color: #444;\n}\nsection.create-thread .gifBoxWrapper {\n  min-height: 590px;\n}\nsection.create-thread .gifBoxWrapper, section.create-thread .imagePreview {\n  width: calc(100% - 500px);\n  max-width: 480px;\n}\nsection.create-thread .gifBoxWrapper .gif-info, section.create-thread .imagePreview .gif-info {\n  color: #842cb0;\n  margin: 15px 0;\n}\nsection.create-thread .gifBoxWrapper .gif-success, section.create-thread .imagePreview .gif-success {\n  color: #72ab00;\n  margin: 15px 0;\n  display: flex;\n  justify-content: space-between;\n}\nsection.create-thread .gifBoxWrapper .gif-success a, section.create-thread .imagePreview .gif-success a {\n  color: #e74c3c;\n}\nsection.create-thread .gifBoxWrapper div.error-wrap a, section.create-thread .imagePreview div.error-wrap a {\n  padding: 10px;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul, section.create-thread .imagePreview .paginate-arrows ul {\n  display: flex;\n  list-style: none;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul div, section.create-thread .imagePreview .paginate-arrows ul div {\n  display: flex;\n  margin: 0 auto;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:nth-child(1) a, section.create-thread .imagePreview .paginate-arrows ul li.page-item:nth-child(1) a {\n  border-radius: 4px;\n  border-top-right-radius: 0;\n  border-bottom-right-radius: 0;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:last-child a, section.create-thread .imagePreview .paginate-arrows ul li.page-item:last-child a {\n  border-radius: 4px;\n  border-top-left-radius: 0;\n  border-bottom-left-radius: 0;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item p.page-link {\n  color: #fff;\n  cursor: pointer;\n  background-color: #444;\n  font-size: 0.85rem;\n  padding: 0.85rem 1.15rem;\n  line-height: 1.5;\n  display: block;\n  text-decoration: none;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.disabled p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item.disabled p.page-link {\n  background-color: #007053;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item.active p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item.active p.page-link {\n  background-color: #313131;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows ul li.page-item:hover p.page-link, section.create-thread .imagePreview .paginate-arrows ul li.page-item:hover p.page-link {\n  background-color: #313131;\n}\nsection.create-thread .gifBoxWrapper .paginate-arrows .paginate-next, section.create-thread .gifBoxWrapper .paginate-arrows .paginate-prev, section.create-thread .imagePreview .paginate-arrows .paginate-next, section.create-thread .imagePreview .paginate-arrows .paginate-prev {\n  width: 40px;\n  height: 40px;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  border: 1px solid #217dbb;\n  border-radius: 80%;\n  background-color: #2384c6;\n  color: #fff;\n  cursor: pointer;\n}\nsection.create-thread .gifBoxWrapper .emptyGifResults, section.create-thread .imagePreview .emptyGifResults {\n  border: 2px solid gray;\n  border-radius: 4px;\n  width: 100%;\n  height: 100%;\n}\nsection.create-thread .gifBoxWrapper .emptyGifResults img, section.create-thread .imagePreview .emptyGifResults img {\n  width: 100%;\n  height: 100%;\n}\nsection.create-thread .gifBoxWrapper .gifBox, section.create-thread .imagePreview .gifBox {\n  width: 100%;\n  height: 480px;\n  min-height: 250px;\n  display: flex;\n  flex-wrap: wrap;\n  border: 2px solid gray;\n  border-radius: 4px;\n  position: relative;\n}\nsection.create-thread .gifBoxWrapper .gifBox .expandedGif, section.create-thread .imagePreview .gifBox .expandedGif {\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\nsection.create-thread .gifBoxWrapper .gifBox .expandedGif img, section.create-thread .imagePreview .gifBox .expandedGif img {\n  width: 100%;\n  height: auto;\n  object-fit: contain;\n  max-height: 480px;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif, section.create-thread .imagePreview .gifBox .gifBoxGif {\n  border: 3px solid gray;\n  width: 50%;\n  height: 50%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  transition: all 300ms ease;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif:hover, section.create-thread .imagePreview .gifBox .gifBoxGif:hover {\n  border-color: #842cb0;\n  cursor: pointer;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif.clicked, section.create-thread .imagePreview .gifBox .gifBoxGif.clicked {\n  border-color: #842cb0;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gifBoxGif img, section.create-thread .imagePreview .gifBox .gifBoxGif img {\n  width: 100%;\n  height: 100%;\n  object-fit: cover;\n}\nsection.create-thread .gifBoxWrapper .gifBox .gif-attribute, section.create-thread .imagePreview .gifBox .gif-attribute {\n  position: absolute;\n  bottom: -40px;\n  left: 50%;\n  transform: translateX(-50%);\n  padding-top: 5px;\n}\nsection.create-thread .imagePreview {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-direction: column;\n}\nsection.create-thread .imagePreview p.info {\n  color: #842cb0;\n}\nsection.create-thread .imagePreview p.success {\n  color: #00bc8c;\n}\nsection.create-thread .imagePreview p.error {\n  color: #e74c3c;\n}\nsection.create-thread .imagePreview button:not(.volume) {\n  margin: 0 0 10px auto;\n  background-color: #e74c3c;\n  border-color: #e74c3c;\n  border: 1px solid transparent;\n  color: #fff;\n  padding: 5px;\n  border-radius: 4px;\n  font-size: 12px;\n  line-height: 1.5;\n  z-index: 1;\n  cursor: pointer;\n  font-weight: bold;\n}\nsection.create-thread .imagePreview button:not(.volume):hover {\n  background-color: #e12e1c;\n  border-color: #d62c1a;\n}\nsection.create-thread .imagePreview button:not(.volume):disabled {\n  opacity: 0.5;\n  cursor: wait;\n}\nsection.create-thread .imagePreview p {\n  padding: 10px;\n  font-weight: bold;\n}\nsection.create-thread .imagePreview p ul {\n  font-weight: initial;\n  margin: 5px;\n}\nsection.create-thread .imagePreview video, section.create-thread .imagePreview img {\n  border: 2px solid gray;\n  border-radius: 4px;\n  width: 100%;\n  height: auto;\n  max-height: 100%;\n  object-fit: contain;\n}\nsection.create-thread .imagePreview video.uploading, section.create-thread .imagePreview img.uploading {\n  filter: blur(5px);\n}\nsection.create-thread .imagePreview .video-wrap {\n  position: relative;\n}\nsection.create-thread .imagePreview .video-wrap video {\n  width: 100%;\n  height: auto;\n  max-height: 100%;\n  object-fit: contain;\n}\nsection.create-thread .imagePreview .video-wrap video.uploading {\n  filter: blur(5px);\n}\nsection.create-thread .imagePreview .video-wrap button.volume {\n  width: 100%;\n  height: 30px;\n  position: absolute;\n  left: 5px;\n  bottom: 5px;\n  background: transparent;\n  border: none;\n  color: transparent;\n  opacity: 0;\n  text-decoration: line-through;\n  transition: all 200ms ease;\n}\nsection.create-thread .imagePreview .video-wrap button.volume.no-audio {\n  display: none;\n}\nsection.create-thread .imagePreview .video-wrap button.volume img {\n  width: 36px;\n  height: 36px;\n  border: 2px solid transparent;\n}\nsection.create-thread .imagePreview .video-wrap:hover button.volume {\n  opacity: 1;\n}\nsection.create-thread .imagePreview .video-wrap:focus-within button.volume, section.create-thread .imagePreview .video-wrap :focus-visible button.volume {\n  opacity: 1;\n}\nsection.create-thread .imagePreview .video-wrap:focus-within button.volume:focus-within img, section.create-thread .imagePreview .video-wrap:focus-within button.volume :focus-visible img, section.create-thread .imagePreview .video-wrap :focus-visible button.volume:focus-within img, section.create-thread .imagePreview .video-wrap :focus-visible button.volume :focus-visible img {\n  filter: none;\n}\n\ndiv li {\n  display: flex;\n  margin: 0 auto 10px;\n  max-width: 980px;\n  justify-content: flex-start;\n  align-items: start;\n}\ndiv li .video-wrap {\n  width: 300px;\n  position: relative;\n  margin-right: 15px;\n}\ndiv li .video-wrap button.volume {\n  width: 100%;\n  height: 30px;\n  position: absolute;\n  left: 5px;\n  bottom: 5px;\n  background: transparent;\n  border: none;\n  color: transparent;\n  opacity: 0;\n  text-decoration: line-through;\n  transition: all 200ms ease;\n}\ndiv li .video-wrap button.volume.no-audio {\n  display: none;\n}\ndiv li .video-wrap button.volume img {\n  width: 36px;\n  height: 36px;\n}\ndiv li .video-wrap:hover button.volume {\n  opacity: 1;\n}\ndiv li .video-wrap:focus-within button.volume, div li .video-wrap :focus-visible button.volume {\n  opacity: 1;\n}\ndiv li .video-wrap:focus-within button.volume:focus-within img, div li .video-wrap:focus-within button.volume :focus-visible img, div li .video-wrap :focus-visible button.volume:focus-within img, div li .video-wrap :focus-visible button.volume :focus-visible img {\n  filter: none;\n}\ndiv li .video-wrap.fullsize {\n  width: 100%;\n}\ndiv li img, div li video {\n  filter: brightness(75%);\n  width: 300px;\n  border: 2px solid #a4a4a4;\n  border-radius: 3px;\n  margin-right: 15px;\n  cursor: pointer;\n}\ndiv li img.img-thumbnail, div li video.img-thumbnail {\n  min-height: 200px;\n  object-fit: contain;\n}\ndiv li img.placeholder, div li video.placeholder {\n  width: 150px;\n  max-width: 150px;\n  height: auto;\n  min-height: 0;\n  cursor: initial;\n}\ndiv li img:hover, div li video:hover {\n  filter: none;\n}\ndiv li img.fullsize, div li video.fullsize {\n  width: 100% !important;\n  height: auto !important;\n}\ndiv li div {\n  width: calc(100% - 300px);\n}\ndiv li div .reply-warning {\n  width: 100%;\n  cursor: pointer;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\ndiv li div .reply-warning em {\n  font-size: 12px;\n  pointer-events: none;\n}\ndiv li div .reply-warning button.button-link {\n  pointer-events: none;\n  float: right;\n  padding: 3px;\n  background-color: #444;\n  border: 1px solid #444;\n  color: #b9b9b9;\n  width: 65px;\n}\ndiv li div p {\n  white-space: pre-line;\n  overflow-wrap: break-word;\n  width: 95%;\n}\ndiv li div p.text-content {\n  max-height: 114px;\n  height: 100%;\n  overflow: hidden;\n  margin-bottom: 10px;\n  transition: max-height ease 300ms;\n}\ndiv li div p.text-content.show-all {\n  max-height: 330px;\n  overflow: scroll;\n}\ndiv li div p.text-content + .reply-warning em {\n  opacity: 0;\n}\ndiv li div p.text-content .quote-hidden {\n  position: absolute;\n  border: 2px dashed #888;\n  background-color: #101010;\n  width: 100%;\n  display: none;\n  z-index: 3;\n  margin: 0 auto 10px;\n  max-width: 980px;\n  justify-content: flex-start;\n  align-items: start;\n  padding: 10px;\n  overflow-wrap: initial;\n  white-space: initial;\n}\ndiv li div p.text-content .quote-hidden.show {\n  display: flex;\n}\ndiv li div p.text-content .quote-hidden > div {\n  width: 100%;\n}\ndiv li div p a {\n  position: relative;\n  display: inline-block;\n  color: #3498db;\n}\ndiv li div p a:hover {\n  color: #e12e1c;\n}\ndiv li div p span.yt-warning {\n  position: absolute;\n  pointer-events: none;\n  z-index: 1;\n  width: 200px;\n  background-color: #111;\n  font-size: 13px;\n  padding: 10px;\n  border-radius: 5px;\n  border: 1px solid #333;\n}\ndiv li div p img.yt-thumb {\n  width: 250px;\n  position: absolute;\n  pointer-events: none;\n  z-index: 1;\n}\ndiv li div img {\n  width: 50px;\n  border: none;\n}\ndiv li div div.iframe-wrapper {\n  display: flex;\n  width: 100%;\n}\ndiv li div div.iframe-wrapper div {\n  width: 100%;\n  display: block;\n}\ndiv li div div.iframe-wrapper div.open {\n  display: block;\n}\ndiv li div div.iframe-wrapper div iframe {\n  max-width: 100%;\n  width: 640px;\n  height: 360px;\n}\ndiv li div small {\n  display: block;\n  margin: 0;\n  font-size: 11px;\n}\ndiv li div.edit_tab {\n  width: 100%;\n  display: flex;\n}\ndiv li div.edit_tab p {\n  width: initial;\n}\ndiv li div.edit_tab p.name {\n  font-weight: 700;\n  font-size: 14px;\n}\ndiv li div.edit_tab button {\n  margin-left: 15px;\n  cursor: pointer;\n  background-color: transparent;\n  height: 36.5px;\n  border-radius: 5px;\n  padding: 5px;\n  transition: all 300ms ease;\n  border-width: 0;\n}\ndiv li div.edit_tab button.delete {\n  color: #e74c3c;\n  border-color: #e74c3c;\n}\ndiv li div.edit_tab button.delete:hover {\n  background-color: #e74c3c;\n}\ndiv li div.edit_tab button.edit {\n  color: #f39c12;\n  border-color: #f39c12;\n}\ndiv li div.edit_tab button.edit:hover {\n  background-color: #f39c12;\n}\ndiv li div.edit_tab button.react {\n  color: #3498db;\n  border-color: #3498db;\n}\ndiv li div.edit_tab button.react:hover {\n  background-color: #3498db;\n}\ndiv li div.edit_tab button.reply {\n  color: #999;\n  border-color: #444;\n}\ndiv li div.edit_tab button.reply img {\n  margin: 0;\n  pointer-events: none;\n}\ndiv li div.edit_tab button.reply img:nth-child(1) {\n  display: none;\n}\ndiv li div.edit_tab button.reply img:nth-child(2) {\n  display: initial;\n}\ndiv li div.edit_tab button.reply:hover {\n  background-color: #444;\n}\ndiv li div.edit_tab button.reply:hover img:nth-child(1) {\n  display: initial;\n}\ndiv li div.edit_tab button.reply:hover img:nth-child(2) {\n  display: none;\n}\ndiv li div.edit_tab button.link-reply {\n  color: #00bc8c;\n  border-width: 1px;\n  border-color: transparent;\n  min-width: 50px;\n}\ndiv li div.edit_tab button.link-reply img {\n  margin: 0;\n  pointer-events: none;\n}\ndiv li div.edit_tab button.link-reply:hover {\n  color: #00bc8c;\n  background-color: #444;\n  border-color: #00bc8c;\n}\ndiv li div.edit_tab button.link {\n  padding: 0 5px;\n}\ndiv li div.edit_tab button.link a {\n  width: 100%;\n  height: 100%;\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  color: #00bc8c;\n  text-decoration: none;\n}\ndiv li div.edit_tab button.link:hover a {\n  text-decoration: underline;\n}\ndiv li div.edit_tab button:hover {\n  color: #fff;\n}\ndiv li div.reply_count small {\n  color: #f39c12;\n}\ndiv li div p.subject {\n  font-size: 16px;\n  font-weight: 700;\n  width: initial;\n}\ndiv li div p.subject span.id {\n  font-size: 13px;\n  font-weight: 500;\n}\ndiv li.reply-item img, div li.reply-item video {\n  width: 150px;\n  min-height: initial;\n}\ndiv li.reply-item img.fullsize, div li.reply-item video.fullsize {\n  width: 100%;\n}\ndiv li.reply-item .video-wrap {\n  position: relative;\n}\ndiv li.reply-item .video-wrap video {\n  width: 100%;\n  height: auto;\n  max-height: 100%;\n  object-fit: contain;\n}\ndiv li.reply-item .video-wrap video.uploading {\n  filter: blur(5px);\n}\ndiv li.reply-item .video-wrap button {\n  position: absolute;\n}\ndiv li.reply-item > div, div li.reply-item .quote-hidden {\n  border: 2px solid #444;\n  background-color: #333;\n  padding: 10px 10px 0;\n}\ndiv li.reply-item > div.target, div li.reply-item .quote-hidden.target {\n  border: 2px dashed #888;\n  background-color: #101010;\n}\ndiv hr {\n  opacity: 1;\n  max-width: 980px;\n  margin: 15px auto;\n}\n\n#replybox {\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  position: fixed;\n  top: 0%;\n  left: 50%;\n  border: 2px solid #444;\n  background-color: #222;\n  padding: 15px;\n  max-width: 650px;\n  max-height: 100vh;\n}\n#replybox .form-group {\n  display: flex;\n  padding: 0;\n}\n#replybox .form-group.row {\n  flex-direction: row;\n  justify-content: space-around;\n}\n#replybox .form-group.justify-center {\n  justify-content: center;\n}\n#replybox .form-group div {\n  padding: 0;\n}\n#replybox .previewImg {\n  display: flex;\n  flex-direction: column;\n}\n#replybox .previewImg img, #replybox .previewImg video {\n  max-height: calc(100vh - 37.5px - 66px - 30px);\n  object-fit: contain;\n}\n#replybox p {\n  text-align: center;\n  margin-top: 5px;\n}\n#replybox p.info {\n  color: #842cb0;\n}\n#replybox p.success {\n  color: #00bc8c;\n}\n#replybox p.error {\n  color: #e74c3c;\n}\n#replybox button.mobile-only {\n  height: 36.5px;\n  background-color: #444;\n  border-color: #444;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 10px 15px;\n  font-size: 15px;\n  font-weight: bold;\n  margin: 15px 0;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  transition: all 300ms ease;\n}\n#replybox button.mobile-only.ml-15 {\n  margin-left: 15px;\n}\n#replybox button.mobile-only:hover {\n  color: #fff;\n  background-color: #2b4764;\n  border-color: #28415b;\n}\n#replybox button.mobile-only.create-post {\n  margin: 15px 0 25px;\n}\n#replybox button.mobile-only.disabled {\n  opacity: 0.5;\n  cursor: wait;\n}\n#replybox button.mobile-only input[type=file] {\n  display: none;\n}\n#replybox #replybox-head {\n  width: 100%;\n  border-bottom: 2px solid #444;\n  padding-bottom: 10px;\n  margin-bottom: 10px;\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n}\n#replybox #replybox-head span {\n  width: calc(100% - 50px);\n  cursor: grab;\n}\n#replybox #replybox-head span.grabbing {\n  cursor: grabbing;\n}\n#replybox #replybox-head .close {\n  width: 50px;\n  height: 25px;\n  border: 2px solid #444;\n  border-radius: 0;\n  font-weight: bold;\n  transition: all 100ms ease;\n  cursor: pointer;\n}\n#replybox #replybox-head .close:hover {\n  color: #ccc;\n  border-color: #ccc;\n}\n#replybox form .form-group {\n  display: flex;\n  flex-direction: column;\n}\n#replybox form .form-group textarea {\n  max-width: 100%;\n  max-height: calc(100vh - 305px);\n}\n\n.about {\n  max-width: 980px;\n  margin: 0 auto;\n}\n.about h1 {\n  text-align: center;\n  margin: 20px;\n}\n.about img {\n  width: 100%;\n}\n\nsection#cookie_consent {\n  min-height: 70px;\n  position: fixed;\n  bottom: 5px;\n  z-index: 99;\n  background-color: rgba(255, 255, 255, 0.8);\n  border: 2px solid #212121;\n  border-radius: 4px;\n  width: 525px;\n  left: 50%;\n  transform: translateX(-50%);\n  display: flex;\n  align-items: center;\n  justify-content: center;\n}\nsection#cookie_consent .cookie_consent_wrapper {\n  border-radius: 4px;\n  width: 500px;\n  height: 90%;\n  display: flex;\n  flex-direction: column;\n  justify-content: space-between;\n  align-items: center;\n  background-color: #212121;\n  padding: 5px;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie_message {\n  margin-bottom: 5px;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie-btns {\n  width: 100%;\n  display: flex;\n  justify-content: space-around;\n  align-items: center;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie-btns a {\n  color: #ce7b45;\n}\nsection#cookie_consent .cookie_consent_wrapper .cookie-btns .cookie_btn_wrapper button {\n  padding: 5px;\n}\n\nsection#cookies {\n  text-align: left;\n}\nsection#cookies h2 {\n  font-size: 28px;\n  margin: 15px;\n}\nsection#cookies p {\n  line-height: 1.5;\n}\nsection#cookies p a {\n  color: #999;\n}\nsection#cookies p a:visited {\n  color: #888;\n}\nsection#cookies form {\n  margin: 20px;\n}\nsection#cookies form #cookie-consent {\n  border: 1px solid #444;\n  padding: 10px;\n  font-size: 16px;\n  border-radius: 5px;\n}\n\nsection#register h3 {\n  text-align: center;\n  font-size: 28px;\n  margin: 15px;\n}\nsection#register form {\n  display: flex;\n  flex-direction: column;\n  align-items: flex-start;\n  justify-content: center;\n  max-width: 320px;\n  margin: 0 auto;\n  padding: 15px;\n  border-radius: 5px;\n  border: 1px solid transparent;\n  transition: border-color 0.1s;\n}\nsection#register form:focus-within {\n  border-color: #555;\n}\nsection#register form .checkbox-wrapper {\n  display: flex;\n  align-items: center;\n}\nsection#register form .checkbox-wrapper label {\n  margin-left: 5px;\n}\nsection#register form > div input {\n  margin: 0;\n  height: 30px;\n}\nsection#register form input[type=submit] {\n  height: 36.5px;\n  background-color: #2b4764;\n  border-color: #2b476482;\n  border-radius: 5px;\n  color: #fff;\n  cursor: pointer;\n  padding: 5px;\n  width: 100px;\n}\nsection#register form input {\n  margin: 10px 0 10px 0;\n}\n\nsection, .janitor-login, .media-body {\n  position: relative;\n}\nsection .flash, .janitor-login .flash, .media-body .flash {\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  border: none;\n  color: #fff;\n  position: absolute;\n  width: 290px;\n  padding: 30px 25px;\n  border-radius: 4px;\n  z-index: 2;\n  display: flex;\n  flex-direction: column;\n}\nsection .flash.error, .janitor-login .flash.error, .media-body .flash.error {\n  background-color: #e74c3c;\n}\nsection .flash.success, .janitor-login .flash.success, .media-body .flash.success {\n  background-color: #00bc8c;\n}\nsection .flash button, .janitor-login .flash button, .media-body .flash button {\n  padding: 12px 20px;\n  color: inherit;\n  cursor: pointer;\n  background-color: transparent;\n  font-weight: 700;\n  line-height: 1;\n}\nsection .flash button.flash-btn, .janitor-login .flash button.flash-btn, .media-body .flash button.flash-btn {\n  border: none;\n  position: absolute;\n  top: 0;\n  right: 0;\n  z-index: 2;\n  margin: 0;\n  border-radius: 0;\n}\nsection .flash .opt-btns, .janitor-login .flash .opt-btns, .media-body .flash .opt-btns {\n  margin-top: 10px;\n}\nsection .flash .opt-btns button, .janitor-login .flash .opt-btns button, .media-body .flash .opt-btns button {\n  padding: 12px 12px;\n  opacity: 0.6;\n  color: #fff;\n  border-radius: 5px;\n  border: 2px solid #fff;\n  background-color: #e74c3c;\n  transition: all 300ms ease;\n  background-image: linear-gradient(45deg, rgba(255, 255, 255, 0.15) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.15) 75%, transparent 75%, transparent);\n}\nsection .flash .opt-btns button:hover, .janitor-login .flash .opt-btns button:hover, .media-body .flash .opt-btns button:hover {\n  opacity: 1;\n}\nsection .flash strong, .janitor-login .flash strong, .media-body .flash strong {\n  font-weight: bolder;\n  margin: 5px 0;\n}\nsection .flash a, .janitor-login .flash a, .media-body .flash a {\n  text-decoration: underline;\n  font-weight: 700;\n  color: #fff;\n  margin: 5px 0;\n}\n\n#search-form {\n  flex-direction: column;\n  justify-content: center;\n}\n#search-form div:nth-child(2):not(.loader) {\n  margin-top: 5px;\n  min-height: 20px;\n  min-width: 100px;\n  align-items: center;\n  display: flex;\n}\n#search-form div small {\n  margin-right: 5px;\n}\n\n#searchbar {\n  width: 100%;\n  display: flex;\n  flex-direction: column;\n  border: 1px solid #444;\n  padding: 25px;\n  border-radius: 4px;\n  background-color: #222;\n  margin-bottom: 5px;\n}\n#searchbar #searchbar-header {\n  width: 100%;\n}\n#searchbar #searchbar-header p {\n  border-bottom: 2px solid #444;\n  padding: 5px;\n  margin: 5px 5px 15px;\n}\n#searchbar #searchbar-lists {\n  display: flex;\n}\n#searchbar #searchbar-lists ul {\n  max-width: 460px;\n  width: 100%;\n}\n#searchbar #searchbar-lists ul .search-list-title {\n  border-bottom: 2px solid #444;\n  padding-bottom: 10px;\n  margin-bottom: 10px;\n  display: block;\n  width: 100%;\n  max-width: 200px;\n}\n#searchbar #searchbar-lists ul li {\n  display: block;\n  min-height: 60px;\n  border: 2px solid transparent;\n  background-color: transparent;\n  transition: all 100ms;\n  padding: 5px 15px;\n  margin: 0 auto 5px;\n}\n#searchbar #searchbar-lists ul li:hover {\n  border-color: #222;\n  border-radius: 4px;\n  background-color: #b9b9b9;\n  color: #222;\n}\n#searchbar #searchbar-lists ul li button {\n  height: 36.5px;\n  border-radius: 5px;\n  cursor: pointer;\n  padding: 5px 7.5px;\n  font-size: 13px;\n  font-weight: bold;\n  display: flex;\n  justify-content: center;\n  align-items: center;\n  transition: all 300ms ease;\n  color: #fff;\n  background-color: #2b4764;\n  border-color: #28415b;\n  margin: 0 0 25px;\n}\n#searchbar #searchbar-lists ul li img {\n  width: 120px;\n  height: 60px;\n  object-fit: cover;\n  object-position: top;\n  float: left;\n}\n#searchbar #searchbar-lists ul li img.search_placeholder {\n  object-fit: cover;\n  width: 32px;\n  height: 32px;\n  cursor: default;\n}\n#searchbar #searchbar-lists ul li img.none {\n  display: none;\n}\n#searchbar #searchbar-lists ul li div {\n  width: initial;\n  min-height: 60px;\n}\n#searchbar #searchbar-lists ul li div a {\n  display: block;\n}\n#searchbar #searchbar-lists ul li div a small {\n  display: initial;\n  font-size: small;\n}\n\n.inner-header {\n  flex-wrap: wrap;\n}\n\n@media screen and (max-width: 979px) {\n  section.create-thread {\n    justify-content: initial;\n    flex-direction: column;\n    height: auto;\n    align-items: center;\n    margin-bottom: 50px;\n  }\n  section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {\n    width: 100%;\n  }\n\n  #replybox {\n    left: 0;\n    top: 0;\n  }\n\n  .list-unstyled {\n    width: 95%;\n    margin: 0 auto;\n  }\n}\n@media screen and (max-width: 767px) {\n  header .marquee > span {\n    font-size: 18px;\n    animation-duration: 15s;\n    animation: movement-steps20 15s linear infinte;\n  }\n  header .inner-header {\n    flex-direction: column;\n  }\n  header .inner-header nav ul {\n    flex-direction: column;\n    font-size: 30px;\n  }\n  header .inner-header nav ul li:nth-child(1) {\n    flex-direction: row;\n  }\n  header .inner-header nav ul li:not(:first-child) {\n    font-size: 18px;\n  }\n  header .inner-header nav ul li:not(:first-child) a {\n    opacity: 0.75;\n  }\n  header .inner-header nav ul li img {\n    width: 32px;\n    margin: 0;\n  }\n  header .inner-header form {\n    flex-direction: column;\n  }\n  header .inner-header form button {\n    display: none;\n  }\n  header .inner-header form input {\n    text-align: center;\n  }\n  header .inner-header form label {\n    margin-bottom: 5px;\n  }\n\n  #replybox {\n    max-width: calc(100vw - 25px);\n  }\n\n  div li {\n    flex-direction: column;\n    align-items: start;\n  }\n  div li div {\n    width: 100%;\n  }\n  div li .video-wrap {\n    width: 75%;\n  }\n  div li .video-wrap video {\n    width: 100%;\n  }\n  div li img {\n    width: 75%;\n  }\n  div li.reply-item img, div li.reply-item video {\n    width: 250px;\n  }\n\n  section#cookie_consent {\n    width: 100vw;\n    height: 120px;\n  }\n  section#cookie_consent .cookie_consent_wrapper .cookie-btns {\n    flex-direction: column;\n  }\n  section#cookie_consent .cookie_consent_wrapper .cookie-btns a {\n    margin-bottom: 5px;\n  }\n\n  #searchbar #searchbar-lists {\n    flex-direction: column;\n  }\n  #searchbar #searchbar-lists ul:nth-child(1) {\n    margin-bottom: 25px;\n  }\n}\n@media screen and (max-width: 525px) {\n  section.create-thread form {\n    width: 95%;\n  }\n}\n@media screen and (max-width: 479px) {\n  div li img {\n    width: 100%;\n  }\n\n  section.create-thread form .form-group.media-type-radios {\n    flex-direction: column;\n  }\n  section.create-thread form .form-group.media-type-radios > div {\n    padding: 10px 0;\n  }\n}\n/* mobile keyboard adaptation test */\n@media screen and (max-height: 540px), screen and (max-width: 479px) {\n  #replybox {\n    max-width: 100%;\n    width: 100%;\n  }\n}\n@media screen and (max-width: 400px) {\n  #replybox button.mobile-only {\n    font-size: 13px;\n  }\n}\n#input_url {\n  margin: 15px 0;\n}\n\n.loader {\n  margin: 5px auto;\n  font-size: 2px;\n  width: 1em;\n  height: 1em;\n  border-radius: 50%;\n  position: relative;\n  text-indent: -9999em;\n  -webkit-animation: load5 1.1s infinite ease;\n  animation: load5 1.1s infinite ease;\n  -webkit-transform: translateZ(0);\n  -ms-transform: translateZ(0);\n  transform: translateZ(0);\n}\n\n@-webkit-keyframes load5 {\n  0%, 100% {\n    box-shadow: 0em -2.6em 0em 0em #ffffff, 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.5), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.7);\n  }\n  12.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.7), 1.8em -1.8em 0 0em #ffffff, 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.5);\n  }\n  25% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.5), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.7), 2.5em 0em 0 0em #ffffff, 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  37.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.5), 2.5em 0em 0 0em rgba(255, 255, 255, 0.7), 1.75em 1.75em 0 0em #ffffff, 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  50% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.5), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.7), 0em 2.5em 0 0em #ffffff, -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  62.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.5), 0em 2.5em 0 0em rgba(255, 255, 255, 0.7), -1.8em 1.8em 0 0em #ffffff, -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  75% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.5), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.7), -2.6em 0em 0 0em #ffffff, -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  87.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.5), -2.6em 0em 0 0em rgba(255, 255, 255, 0.7), -1.8em -1.8em 0 0em #ffffff;\n  }\n}\n@keyframes load5 {\n  0%, 100% {\n    box-shadow: 0em -2.6em 0em 0em #ffffff, 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.5), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.7);\n  }\n  12.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.7), 1.8em -1.8em 0 0em #ffffff, 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.5);\n  }\n  25% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.5), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.7), 2.5em 0em 0 0em #ffffff, 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  37.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.5), 2.5em 0em 0 0em rgba(255, 255, 255, 0.7), 1.75em 1.75em 0 0em #ffffff, 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  50% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.5), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.7), 0em 2.5em 0 0em #ffffff, -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.2), -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  62.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.5), 0em 2.5em 0 0em rgba(255, 255, 255, 0.7), -1.8em 1.8em 0 0em #ffffff, -2.6em 0em 0 0em rgba(255, 255, 255, 0.2), -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  75% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.5), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.7), -2.6em 0em 0 0em #ffffff, -1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2);\n  }\n  87.5% {\n    box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.5), -2.6em 0em 0 0em rgba(255, 255, 255, 0.7), -1.8em -1.8em 0 0em #ffffff;\n  }\n}", ""]);
 
 // exports
 
@@ -16689,12 +16578,10 @@ function listToStyles (parentId, list) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__searchbar_vue_vue_type_template_id_625b962a___ = __webpack_require__(37);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__searchbar_vue_vue_type_template_id_cfdd5776___ = __webpack_require__(37);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__searchbar_vue_vue_type_script_lang_js___ = __webpack_require__(8);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__searchbar_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(39);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
-
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
 
 
 
@@ -16702,10 +16589,10 @@ function listToStyles (parentId, list) {
 
 /* normalize component */
 
-var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
+var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__["a" /* default */])(
   __WEBPACK_IMPORTED_MODULE_1__searchbar_vue_vue_type_script_lang_js___["a" /* default */],
-  __WEBPACK_IMPORTED_MODULE_0__searchbar_vue_vue_type_template_id_625b962a___["a" /* render */],
-  __WEBPACK_IMPORTED_MODULE_0__searchbar_vue_vue_type_template_id_625b962a___["b" /* staticRenderFns */],
+  __WEBPACK_IMPORTED_MODULE_0__searchbar_vue_vue_type_template_id_cfdd5776___["a" /* render */],
+  __WEBPACK_IMPORTED_MODULE_0__searchbar_vue_vue_type_template_id_cfdd5776___["b" /* staticRenderFns */],
   false,
   null,
   null,
@@ -16720,9 +16607,9 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_template_id_625b962a___ = __webpack_require__(38);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_template_id_625b962a___["a"]; });
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_template_id_625b962a___["b"]; });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_template_id_cfdd5776___ = __webpack_require__(38);
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_template_id_cfdd5776___["a"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_template_id_cfdd5776___["b"]; });
 
 
 /***/ }),
@@ -16732,7 +16619,7 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return (_vm.q != '')?_c('div',{attrs:{"id":"searchbar"}},[_c('div',{attrs:{"id":"searchbar-header"}},[_c('p',[_c('span',{class:_vm.posts.aviso_class,attrs:{"id":"searchbar-aviso-posts"}},[_vm._v(_vm._s(_vm.posts.aviso))]),_vm._v(" ⥎ "),_c('span',{class:_vm.replies.aviso_class,attrs:{"id":"searchbar-aviso-replies"}},[_vm._v(_vm._s(_vm.replies.aviso))])])]),_vm._v(" "),_c('div',{attrs:{"id":"searchbar-lists"}},[_c('ul',[_c('strong',{staticClass:"search-list-title"},[_vm._v("POSTS")]),_vm._v(" "),_vm._l((_vm.posts.results),function(post){return _c('a',{key:post.id,staticClass:"nostyle",attrs:{"href":'/#/post/' + post.id}},[_c('li',[(post.imageurl)?_c('img',{attrs:{"src":post.imageurl},on:{"error":function($event){return _vm.setPlaceholder($event)}}}):_c('img',{staticClass:"search_placeholder",attrs:{"src":__webpack_require__(1)}}),_vm._v(" "),_c('div',[(post.subject)?_c('strong',[_vm._v(_vm._s(post.subject))]):_c('strong',[_vm._v("gchan post #"+_vm._s(post.id))]),_vm._v(" "),_c('small',[_vm._v(" em "+_vm._s(post.created))]),_vm._v(" "),_c('p',{staticClass:"text-content"},[_vm._v(_vm._s(post.message))])])])])}),_vm._v(" "),((_vm.posts.results.length <= 0))?_c('p',[_vm._v("0 posts! :(")]):_vm._e()],2),_vm._v(" "),_c('ul',[_c('strong',{staticClass:"search-list-title"},[_vm._v("RESPOSTAS")]),_vm._v(" "),_vm._l((_vm.replies.results),function(reply){return _c('a',{key:reply.id,staticClass:"nostyle",attrs:{"href":'/#/post/' + reply.message_id}},[_c('li',[(reply.imageurl)?_c('img',{attrs:{"src":reply.imageurl},on:{"error":function($event){return _vm.setPlaceholder($event)}}}):_c('img',{staticClass:"search_placeholder",attrs:{"src":__webpack_require__(1)}}),_vm._v(" "),_c('div',[(reply.username)?_c('strong',[_vm._v("por "+_vm._s(reply.username))]):_vm._e(),_vm._v(" "),_c('small',[_vm._v(" em "+_vm._s(reply.created))]),_vm._v(" "),_c('p',{staticClass:"text-content"},[_vm._v(_vm._s(reply.content))])])])])}),_vm._v(" "),(_vm.replies.results.length <= 0)?_c('p',[_vm._v("0 replies! :(")]):_vm._e()],2)])]):_vm._e()}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticStyle:{"width":"100%"}},[_c('form',{attrs:{"id":"search-form"}},[_c('div',[_c('label',{attrs:{"for":"search"}},[_vm._v("Pesquisar")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.searchText),expression:"searchText"}],attrs:{"id":"search","name":"search","type":"search","placeholder":"Pesquise no site","aria-label":"Pesquisar"},domProps:{"value":(_vm.searchText)},on:{"input":[function($event){if($event.target.composing){ return; }_vm.searchText=$event.target.value},function($event){return _vm.showResults($event)}]}})]),_vm._v(" "),_c('div',[(_vm.fetchingData)?_c('small',[_vm._v("aguarde...")]):_vm._e(),_vm._v(" "),(_vm.fetchingData)?_c('div',{staticClass:"loader"},[_vm._v("carregando...")]):_vm._e()])]),_vm._v(" "),(_vm.searchText)?_c('div',{attrs:{"id":"searchbar"}},[_c('div',{attrs:{"id":"searchbar-header"}}),_vm._v(" "),_c('div',{attrs:{"id":"searchbar-lists"}},[_c('ul',[_c('strong',{staticClass:"search-list-title"},[_vm._v(_vm._s(_vm.shownPosts.length)+" posts "),(_vm.shownReplies.length > 0)?_c('small',[_vm._v("("+_vm._s(_vm.shownReplies.length)+") respostas")]):_vm._e()]),_vm._v(" "),_vm._l((_vm.shownPosts),function(post,i){return _c('li',{key:("post-" + (post.id))},[(i <= 5)?[(post.imageurl)?_c('img',{attrs:{"loading":"lazy","src":post.imageurl},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.setPlaceholder($event)}}}):_c('img',{staticClass:"search_placeholder",attrs:{"loading":"lazy","src":__webpack_require__(1)}})]:[(post.imageurl)?[_c('button',{attrs:{"data-src":post.imageurl},on:{"click":function($event){return _vm.showImg($event)}}},[_vm._v("\n                  imagem\n                ")]),_vm._v(" "),_c('img',{staticClass:"none",attrs:{"src":"/none"},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.setPlaceholder($event)}}})]:_vm._e()],_vm._v(" "),_c('div',[_c('a',{staticClass:"nostyle",attrs:{"href":("/post/" + (post.id))}},[(post.subject)?_c('strong',[_vm._v(_vm._s(post.subject))]):_c('strong',[_vm._v("gchan post #"+_vm._s(post.id))]),_vm._v(" "),_c('small',[_vm._v(" em "+_vm._s(post.created))]),_vm._v(" "),_c('p',{staticClass:"text-content"},[_vm._v(_vm._s(post.message))])])])],2)}),_vm._v(" "),_vm._l((_vm.shownReplies),function(reply,i){return _c('li',{key:("reply-" + (reply.id))},[(i <= 5)?[(reply.imageurl)?_c('img',{attrs:{"loading":"lazy","src":reply.imageurl},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.setPlaceholder($event)}}}):_c('img',{staticClass:"search_placeholder",attrs:{"loading":"lazy","src":__webpack_require__(1)}})]:[(reply.imageurl)?[_c('button',{attrs:{"data-src":reply.imageurl},on:{"click":function($event){return _vm.showImg($event)}}},[_vm._v("\n                  imagem\n                ")]),_vm._v(" "),_c('img',{staticClass:"none",attrs:{"src":"/none"},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.setPlaceholder($event)}}})]:_vm._e()],_vm._v(" "),_c('div',[_c('a',{staticClass:"nostyle",attrs:{"href":("/post/" + (reply.message_id))}},[_c('strong',[_vm._v("resposta ao post #"+_vm._s(reply.message_id))]),_vm._v(" "),_c('small',[_vm._v(" "+_vm._s(reply.created))]),_vm._v(" "),_c('p',{staticClass:"text-content"},[_vm._v(_vm._s(reply.content))])])])],2)}),_vm._v(" "),((_vm.posts.length <= 0))?_c('p',[_vm._v("0 posts! :(")]):_vm._e()],2)])]):_vm._e()])}
 var staticRenderFns = []
 
 
@@ -16742,91 +16629,13 @@ var staticRenderFns = []
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(40);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_style_index_0_lang_css____default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_searchbar_vue_vue_type_style_index_0_lang_css___);
-/* unused harmony reexport namespace */
-
-
-/***/ }),
-/* 40 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(41);
-if(content.__esModule) content = content.default;
-if(typeof content === 'string') content = [[module.i, content, '']];
-if(content.locals) module.exports = content.locals;
-// add the styles to the DOM
-var add = __webpack_require__(3).default
-var update = add("610d85cc", content, true, {});
-
-/***/ }),
-/* 41 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(2)(false);
-// imports
-
-
-// module
-exports.push([module.i, "\n.text-warning { color: #f39c12;\n}\n.text-success { color: #00bc8c;\n}\n.inner-header { flex-wrap: wrap;\n}\n#searchbar {\n  width: 100%;\n  display:flex;\n  flex-direction: column;\n  border: 1px solid #444;\n  padding: 25px;\n  border-radius: 4px;\n  background-color: #222;\n  margin-bottom:5px;\n}\n#searchbar #searchbar-header { width: 100%;\n}\n#searchbar #searchbar-header p { border-bottom: 2px solid #444; padding:5px; margin: 5px 5px 15px;\n}\n#searchbar #searchbar-lists { display: flex;\n}\n#searchbar #searchbar-lists ul {max-width:460px;width:100%;}\n#searchbar #searchbar-lists ul li {\n  display:block;\n  min-height:60px;\n  border: 2px solid transparent;\n  background-color: transparent;\n  transition: all 100ms;\n}\n#searchbar #searchbar-lists ul li div {\n  width:initial;\n  min-height:60px;\n}\n#searchbar #searchbar-lists ul li div small { display: initial; font-size:small;\n}\n#searchbar #searchbar-lists ul .search-list-title {\n  border-bottom: 2px solid #444;\n  padding-bottom: 10px;\n  margin-bottom: 10px;\n  display: block;\n  width: 100%;\n  max-width: 200px;\n}\n#searchbar #searchbar-lists ul li img {\n  width: 120px; height: 60px;\n  object-fit: cover; object-position: top;\n  float:left;\n}\n#searchbar #searchbar-lists ul li img.search_placeholder{\n  object-fit: cover;\n  width:32px;\n  height:32px;\n}\n#searchbar #searchbar-lists ul li:hover {\n    border-color: #222;\n    cursor: pointer;\n    border-radius: 4px;\n    background-color: #b9b9b9;\n    color: #222;\n}\na.nostyle:link {\n    text-decoration: inherit;\n    color: inherit;\n    display: contents;\n}\na.nostyle:visited {\n    text-decoration: inherit;\n    color: inherit;\n    display: contents;\n}\n@media only screen and (max-width: 767px) {\n#searchbar #searchbar-lists {\n    flex-direction:column;\n}\n#searchbar #searchbar-lists ul:nth-child(1) {\n    margin-bottom:25px;\n}\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-/* 42 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(43);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css____default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_style_index_0_lang_css___);
-/* unused harmony reexport namespace */
-
-
-/***/ }),
-/* 43 */
-/***/ (function(module, exports, __webpack_require__) {
-
-// style-loader: Adds some css to the DOM by adding a <style> tag
-
-// load the styles
-var content = __webpack_require__(44);
-if(content.__esModule) content = content.default;
-if(typeof content === 'string') content = [[module.i, content, '']];
-if(content.locals) module.exports = content.locals;
-// add the styles to the DOM
-var add = __webpack_require__(3).default
-var update = add("8aa5af94", content, true, {});
-
-/***/ }),
-/* 44 */
-/***/ (function(module, exports, __webpack_require__) {
-
-exports = module.exports = __webpack_require__(2)(false);
-// imports
-
-
-// module
-exports.push([module.i, "\n#search-form { flex-direction:column; justify-content:center;}\n#search-form div:nth-child(2) { margin-top: 5px; min-height: 20px;}\n#search-form div small span { color: #2c81ba;\n}\n", ""]);
-
-// exports
-
-
-/***/ }),
-/* 45 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_router__ = __webpack_require__(46);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__views_Home_vue__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__views_Info_vue__ = __webpack_require__(61);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__views_Post_vue__ = __webpack_require__(66);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__views_New_vue__ = __webpack_require__(72);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__views_About_vue__ = __webpack_require__(76);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_vue__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_vue_router__ = __webpack_require__(40);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__views_Home_vue__ = __webpack_require__(41);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__views_Info_vue__ = __webpack_require__(55);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__views_Post_vue__ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__views_New_vue__ = __webpack_require__(66);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__views_About_vue__ = __webpack_require__(70);
 
 
 
@@ -16881,12 +16690,12 @@ router.beforeEach((to, from, next) => {
 /* harmony default export */ __webpack_exports__["a"] = (router);
 
 /***/ }),
-/* 46 */
+/* 40 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /*!
-  * vue-router v3.5.2
+  * vue-router v3.5.3
   * (c) 2021 Evan You
   * @license MIT
   */
@@ -16899,7 +16708,7 @@ function assert (condition, message) {
 }
 
 function warn (condition, message) {
-  if (false) {
+  if (!condition) {
     typeof console !== 'undefined' && console.warn(("[vue-router] " + message));
   }
 }
@@ -17405,7 +17214,7 @@ function parsePath (path) {
 }
 
 function cleanPath (path) {
-  return path.replace(/\/\//g, '/')
+  return path.replace(/\/+/g, '/')
 }
 
 var isarray = Array.isArray || function (arr) {
@@ -19197,7 +19006,9 @@ History.prototype.confirmTransition = function confirmTransition (route, onCompl
           cb(err);
         });
       } else {
-        warn(false, 'uncaught error during route navigation:');
+        if (false) {
+          warn(false, 'uncaught error during route navigation:');
+        }
         console.error(err);
       }
     }
@@ -19212,6 +19023,9 @@ History.prototype.confirmTransition = function confirmTransition (route, onCompl
     route.matched[lastRouteIndex] === current.matched[lastCurrentIndex]
   ) {
     this.ensureURL();
+    if (route.hash) {
+      handleScroll(this.router, current, route, false);
+    }
     return abort(createNavigationDuplicatedError(current, route))
   }
 
@@ -19775,6 +19589,9 @@ var AbstractHistory = /*@__PURE__*/(function (History) {
 var VueRouter = function VueRouter (options) {
   if ( options === void 0 ) options = {};
 
+  if (false) {
+    warn(this instanceof VueRouter, "Router must be called with the new operator.");
+  }
   this.app = null;
   this.apps = [];
   this.options = options;
@@ -20019,7 +19836,7 @@ function createHref (base, fullPath, mode) {
 }
 
 VueRouter.install = install;
-VueRouter.version = '3.5.2';
+VueRouter.version = '3.5.3';
 VueRouter.isNavigationFailure = isNavigationFailure;
 VueRouter.NavigationFailureType = NavigationFailureType;
 VueRouter.START_LOCATION = START;
@@ -20032,11 +19849,11 @@ if (inBrowser && window.Vue) {
 
 
 /***/ }),
-/* 47 */
+/* 41 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_1cddbc02___ = __webpack_require__(48);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Home_vue_vue_type_template_id_1cddbc02___ = __webpack_require__(42);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Home_vue_vue_type_script_lang_js___ = __webpack_require__(10);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -20061,17 +19878,17 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 /* harmony default export */ __webpack_exports__["a"] = (component.exports);
 
 /***/ }),
-/* 48 */
+/* 42 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_1cddbc02___ = __webpack_require__(49);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_1cddbc02___ = __webpack_require__(43);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_1cddbc02___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Home_vue_vue_type_template_id_1cddbc02___["b"]; });
 
 
 /***/ }),
-/* 49 */
+/* 43 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20083,17 +19900,17 @@ var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _
 
 
 /***/ }),
-/* 50 */
+/* 44 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_212b1522___ = __webpack_require__(51);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_212b1522___ = __webpack_require__(45);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_212b1522___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_replybox_vue_vue_type_template_id_212b1522___["b"]; });
 
 
 /***/ }),
-/* 51 */
+/* 45 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20105,57 +19922,57 @@ var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _
 
 
 /***/ }),
-/* 52 */
+/* 46 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_e2ccb044___ = __webpack_require__(53);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_e2ccb044___ = __webpack_require__(47);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_e2ccb044___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_message_vue_vue_type_template_id_e2ccb044___["b"]; });
 
 
 /***/ }),
-/* 53 */
+/* 47 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled d-flex flex-column align-items-center"},[_c('li',{staticClass:"media",attrs:{"id":'li_' + _vm.message.id}},[(_vm.message.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":_vm.message.imageurl,"alt":_vm.message.subject,"src":_vm.message.imageurl},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, _vm.message.id)},"load":function($event){return _vm.preventVideo($event)}}}):_c('img',{staticClass:"img-thumbnail placeholder",attrs:{"loading":"lazy","src":_vm.$backendURL+'placeholders',"alt":"post sem imagem"}}),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body"},[(_vm.messageFlash.header && _vm.messageFlash.messageID === _vm.message.id)?_c('div',{staticClass:"flash",class:_vm.messageFlash.type},[_c('button',{staticClass:"flash-btn",attrs:{"type":"button"},on:{"click":function($event){_vm.messageFlash.header = ''}}},[_vm._v("x")]),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.messageFlash.header))]),_vm._v("\n        "+_vm._s(_vm.messageFlash.text)+"\n        "),_c('a',{attrs:{"href":_vm.messageFlash.link}},[_vm._v(_vm._s(_vm.messageFlash.message))]),_vm._v(" "),_c('div',{staticClass:"opt-btns"},[_c('button',{attrs:{"type":"button"},on:{"click":function($event){return _vm.handleMessage(_vm.message.id,'delete',$event)}}},[_vm._v("\n            Deletar\n          ")])])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"edit_tab",attrs:{"data-message-id":_vm.message.id}},[_c('p',{staticClass:"message-username mt-0 mb-1 name"},[_vm._v("por: "+_vm._s(_vm.message.username))]),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"delete",attrs:{"type":"button"},on:{"click":function($event){return _vm.deleteMessage($event)}}},[_vm._v("deletar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"edit",attrs:{"type":"button"},on:{"click":function($event){return _vm.editMessage($event)}}},[_vm._v("editar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id !== _vm.auth.id && false)?_c('button',{staticClass:"react",attrs:{"type":"button"},on:{"click":function($event){return _vm.reactMessage($event)}}},[_vm._v("reagir")]):_vm._e(),_vm._v(" "),_c('button',{staticClass:"reply",attrs:{"type":"button","data-replyTo":_vm.message.id},on:{"click":function($event){return _vm.replyMessage($event)}}},[_vm._v("responder "),_c('img',{staticStyle:{"width":"16px"},attrs:{"src":__webpack_require__(54),"loading":"lazy"}}),_c('img',{staticStyle:{"width":"16px"},attrs:{"src":__webpack_require__(55),"loading":"lazy"}})]),_vm._v(" "),(_vm.replyCount && _vm.replyCount > 2 && _vm.isHome)?_c('button',{staticClass:"link",attrs:{"type":"button"}},[_c('a',{attrs:{"href":'/#/post/' + _vm.message.id}},[_vm._v("\n            ver respostas\n          ")])]):_vm._e()]),_vm._v(" "),(_vm.isHome && _vm.replyCount && _vm.replyCount > 2)?_c('div',{staticClass:"reply_count"},[_c('small',[_vm._v("Este post possui "+_vm._s(_vm.replyCount)+" respostas!")])]):_vm._e(),_vm._v(" "),_c('p',{staticClass:"mt-0 mb-1 subject"},[_c('span',{staticClass:"id message-id"},[_vm._v("#"+_vm._s(_vm.message.id)+" / ")]),_vm._v(" "),(_vm.message.subject)?_c('span',{staticClass:"message-subject"},[_vm._v(_vm._s(_vm.message.subject))]):_c('span',{staticClass:"id message-subject"},[_vm._v("gchan post")])]),_vm._v(" "),_c('p',{staticClass:"message-content",domProps:{"innerHTML":_vm._s(_vm.message.message)}}),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.message.yt_iframes)?_c('div',{ref:"yt_iframes",staticClass:"iframe-wrapper"},[_c('div')]):_vm._e(),_vm._v(" "),(_vm.message.created)?_c('small',{attrs:{"id":"message-created"}},[_vm._v(_vm._s(_vm.convertTZ(_vm.message.created)))]):_vm._e(),_c('br'),_vm._v(" "),(_vm.message.gif_origin == 'giphy')?_c('img',{staticClass:"gif_origin",attrs:{"alt":"powered by GIPHY","src":__webpack_require__(56)}}):_vm._e()])]),_vm._v(" "),_vm._l((_vm.replies),function(reply){return _c('li',{key:reply.id,staticClass:"media reply-item"},[(reply.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":reply.imageurl,"src":reply.imageurl,"alt":""},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, false)},"load":function($event){return _vm.preventVideo($event)}}}):_vm._e(),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body",attrs:{"id":'quoted_' + reply.id}},[_c('div',{staticClass:"edit_tab"},[_c('p',{staticClass:"mt-0 mb-1"},[_vm._v(_vm._s(reply.username))]),_vm._v(" "),_c('button',{staticClass:"link link-reply",attrs:{"type":"button","data-quoteid":reply.id,"title":"citar esta resposta"},on:{"click":function($event){return _vm.adcQuote($event)}}},[_vm._v("\n          #"+_vm._s(reply.id)+" "),_c('img',{staticStyle:{"width":"16px"},attrs:{"src":__webpack_require__(57),"loading":"lazy"}})])]),_vm._v(" "),_c('p',{staticClass:"text-content",domProps:{"innerHTML":_vm._s(reply.content)}}),_vm._v(" "),(_vm.checkContentLength(reply.content))?_c('div',{staticClass:"reply-warning",on:{"click":function($event){return _vm.expandContent($event)}}},[_c('em',[_vm._v("resposta truncada devido ao tamanho. clique para visualizar na íntegra.")]),_c('button',{staticClass:"button-link",attrs:{"type":"button"}},[_vm._v("expandir")])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"iframe-wrapper"}),_vm._v(" "),_c('small',[_vm._v(_vm._s(_vm.convertTZ(reply.created)))]),_c('br')])])}),_vm._v(" "),_c('hr')],2)}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('ul',{staticClass:"list-unstyled d-flex flex-column align-items-center"},[_c('li',{staticClass:"media",attrs:{"id":'li_' + _vm.message.id}},[(_vm.message.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":_vm.message.imageurl,"alt":_vm.message.subject,"src":_vm.message.imageurl},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, _vm.message.id)},"load":function($event){return _vm.preventVideo($event)}}}):_c('img',{staticClass:"img-thumbnail placeholder",attrs:{"loading":"lazy","src":_vm.$backendURL+'placeholders',"alt":"post sem imagem"}}),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body"},[(_vm.messageFlash.header && _vm.messageFlash.messageID === _vm.message.id)?_c('div',{staticClass:"flash",class:_vm.messageFlash.type},[_c('button',{staticClass:"flash-btn",attrs:{"type":"button"},on:{"click":function($event){_vm.messageFlash.header = ''}}},[_vm._v("x")]),_vm._v(" "),_c('strong',[_vm._v(_vm._s(_vm.messageFlash.header))]),_vm._v("\n        "+_vm._s(_vm.messageFlash.text)+"\n        "),_c('a',{attrs:{"href":_vm.messageFlash.link}},[_vm._v(_vm._s(_vm.messageFlash.message))]),_vm._v(" "),_c('div',{staticClass:"opt-btns"},[_c('button',{attrs:{"type":"button"},on:{"click":function($event){return _vm.handleMessage(_vm.message.id,'delete',$event)}}},[_vm._v("\n            Deletar\n          ")])])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"edit_tab",attrs:{"data-message-id":_vm.message.id}},[_c('p',{staticClass:"message-username mt-0 mb-1 name"},[_vm._v("por: "+_vm._s(_vm.message.username))]),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"delete",attrs:{"type":"button"},on:{"click":function($event){return _vm.deleteMessage($event)}}},[_vm._v("deletar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id === _vm.auth.id)?_c('button',{staticClass:"edit",attrs:{"type":"button"},on:{"click":function($event){return _vm.editMessage($event)}}},[_vm._v("editar")]):_vm._e(),_vm._v(" "),(_vm.message.user_id !== _vm.auth.id && false)?_c('button',{staticClass:"react",attrs:{"type":"button"},on:{"click":function($event){return _vm.reactMessage($event)}}},[_vm._v("reagir")]):_vm._e(),_vm._v(" "),_c('button',{staticClass:"reply",attrs:{"type":"button","data-replyTo":_vm.message.id},on:{"click":function($event){return _vm.replyMessage($event)}}},[_vm._v("responder "),_c('img',{staticStyle:{"width":"16px"},attrs:{"src":__webpack_require__(48),"loading":"lazy"}}),_c('img',{staticStyle:{"width":"16px"},attrs:{"src":__webpack_require__(49),"loading":"lazy"}})]),_vm._v(" "),(_vm.replyCount && _vm.replyCount > 2 && _vm.isHome)?_c('button',{staticClass:"link",attrs:{"type":"button"}},[_c('a',{attrs:{"href":'/#/post/' + _vm.message.id}},[_vm._v("\n            ver respostas\n          ")])]):_vm._e()]),_vm._v(" "),(_vm.isHome && _vm.replyCount && _vm.replyCount > 2)?_c('div',{staticClass:"reply_count"},[_c('small',[_vm._v("Este post possui "+_vm._s(_vm.replyCount)+" respostas!")])]):_vm._e(),_vm._v(" "),_c('p',{staticClass:"mt-0 mb-1 subject"},[_c('span',{staticClass:"id message-id"},[_vm._v("#"+_vm._s(_vm.message.id)+" / ")]),_vm._v(" "),(_vm.message.subject)?_c('span',{staticClass:"message-subject"},[_vm._v(_vm._s(_vm.message.subject))]):_c('span',{staticClass:"id message-subject"},[_vm._v("gchan post")])]),_vm._v(" "),_c('p',{staticClass:"message-content",domProps:{"innerHTML":_vm._s(_vm.message.message)}}),_vm._v(" "),_c('br'),_vm._v(" "),(_vm.message.yt_iframes)?_c('div',{ref:"yt_iframes",staticClass:"iframe-wrapper"},[_c('div')]):_vm._e(),_vm._v(" "),(_vm.message.created)?_c('small',{attrs:{"id":"message-created"}},[_vm._v(_vm._s(_vm.convertTZ(_vm.message.created)))]):_vm._e(),_c('br'),_vm._v(" "),(_vm.message.gif_origin == 'giphy')?_c('img',{staticClass:"gif_origin",attrs:{"alt":"powered by GIPHY","src":__webpack_require__(50)}}):_vm._e()])]),_vm._v(" "),_vm._l((_vm.replies),function(reply){return _c('li',{key:reply.id,staticClass:"media reply-item"},[(reply.imageurl)?_c('img',{staticClass:"img-thumbnail",attrs:{"loading":"lazy","data-src":reply.imageurl,"src":reply.imageurl,"alt":""},on:{"click":function($event){return _vm.fullSize($event)},"error":function($event){return _vm.createVideo($event, false)},"load":function($event){return _vm.preventVideo($event)}}}):_vm._e(),_vm._v(" "),_c('div',{staticClass:"align-self-center media-body",attrs:{"id":'quoted_' + reply.id}},[_c('div',{staticClass:"edit_tab"},[_c('p',{staticClass:"mt-0 mb-1"},[_vm._v(_vm._s(reply.username))]),_vm._v(" "),_c('button',{staticClass:"link link-reply",attrs:{"type":"button","data-quoteid":reply.id,"title":"citar esta resposta"},on:{"click":function($event){return _vm.adcQuote($event)}}},[_vm._v("\n          #"+_vm._s(reply.id)+" "),_c('img',{staticStyle:{"width":"16px"},attrs:{"src":__webpack_require__(51),"loading":"lazy"}})])]),_vm._v(" "),_c('p',{staticClass:"text-content",domProps:{"innerHTML":_vm._s(reply.content)}}),_vm._v(" "),(_vm.checkContentLength(reply.content))?_c('div',{staticClass:"reply-warning",on:{"click":function($event){return _vm.expandContent($event)}}},[_c('em',[_vm._v("resposta truncada devido ao tamanho. clique para visualizar na íntegra.")]),_c('button',{staticClass:"button-link",attrs:{"type":"button"}},[_vm._v("expandir")])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"iframe-wrapper"}),_vm._v(" "),_c('small',[_vm._v(_vm._s(_vm.convertTZ(reply.created)))]),_c('br')])])}),_vm._v(" "),_c('hr')],2)}
 var staticRenderFns = []
 
 
 
 /***/ }),
-/* 54 */
+/* 48 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "reply.white.png?02351b6ea77508b016941481d8367f3a";
 
 /***/ }),
-/* 55 */
+/* 49 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "reply.grey.png?c7336cd004de7beba86cc36bd4cd1ada";
 
 /***/ }),
-/* 56 */
+/* 50 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "giphy-attr1.png?fee6b77413ad368581807659f5551bb7";
 
 /***/ }),
-/* 57 */
+/* 51 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "reply.png?cbf6223818ecd82a5174dae0d99e3fed";
 
 /***/ }),
-/* 58 */
+/* 52 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gifbox_vue_vue_type_template_id_2ac58afd___ = __webpack_require__(59);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__gifbox_vue_vue_type_template_id_2ac58afd___ = __webpack_require__(53);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__gifbox_vue_vue_type_script_lang_js___ = __webpack_require__(18);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -20180,17 +19997,17 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 /* harmony default export */ __webpack_exports__["a"] = (component.exports);
 
 /***/ }),
-/* 59 */
+/* 53 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_gifbox_vue_vue_type_template_id_2ac58afd___ = __webpack_require__(60);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_gifbox_vue_vue_type_template_id_2ac58afd___ = __webpack_require__(54);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_gifbox_vue_vue_type_template_id_2ac58afd___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_gifbox_vue_vue_type_template_id_2ac58afd___["b"]; });
 
 
 /***/ }),
-/* 60 */
+/* 54 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20202,11 +20019,11 @@ var staticRenderFns = []
 
 
 /***/ }),
-/* 61 */
+/* 55 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Info_vue_vue_type_template_id_90ff2bba___ = __webpack_require__(62);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Info_vue_vue_type_template_id_90ff2bba___ = __webpack_require__(56);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Info_vue_vue_type_script_lang_js___ = __webpack_require__(20);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -20231,48 +20048,48 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 /* harmony default export */ __webpack_exports__["a"] = (component.exports);
 
 /***/ }),
-/* 62 */
+/* 56 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Info_vue_vue_type_template_id_90ff2bba___ = __webpack_require__(63);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Info_vue_vue_type_template_id_90ff2bba___ = __webpack_require__(57);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Info_vue_vue_type_template_id_90ff2bba___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Info_vue_vue_type_template_id_90ff2bba___["b"]; });
 
 
 /***/ }),
-/* 63 */
+/* 57 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"about"},[_c('h1',[_vm._v("Bem-vindo ao gchan!")]),_vm._v(" "),_c('img',{attrs:{"src":__webpack_require__(64),"alt":"poste no gchan"}}),_vm._v(" "),_c('img',{staticStyle:{"display":"none"},attrs:{"src":__webpack_require__(65),"alt":"Volume"}}),_vm._v(" "),_c('section',{attrs:{"id":"cookies"}},[_c('div',{attrs:{"id":"cookies-text"}},[_vm._m(0),_vm._v(" "),_c('p',[_vm._v("você pode alterar suas preferências abaixo.")]),_vm._v(" "),_c('form',[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.cookie_consent_computed),expression:"cookie_consent_computed"}],attrs:{"name":"cookie-consent","id":"cookie-consent"},on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.cookie_consent_computed=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},function($event){return _vm.selectCookieConsent($event)}]}},[_c('option',{attrs:{"value":"true"}},[_vm._v("aceito a coleta de dados")]),_vm._v(" "),_c('option',{attrs:{"value":"false"}},[_vm._v("recuso a coleta de dados")])])])])])])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',{staticClass:"about"},[_c('h1',[_vm._v("Bem-vindo ao gchan!")]),_vm._v(" "),_c('img',{attrs:{"src":__webpack_require__(58),"alt":"poste no gchan"}}),_vm._v(" "),_c('img',{staticStyle:{"display":"none"},attrs:{"src":__webpack_require__(59),"alt":"Volume"}}),_vm._v(" "),_c('section',{attrs:{"id":"cookies"}},[_c('div',{attrs:{"id":"cookies-text"}},[_vm._m(0),_vm._v(" "),_c('p',[_vm._v("você pode alterar suas preferências abaixo.")]),_vm._v(" "),_c('form',[_c('select',{directives:[{name:"model",rawName:"v-model",value:(_vm.cookie_consent_computed),expression:"cookie_consent_computed"}],attrs:{"name":"cookie-consent","id":"cookie-consent"},on:{"change":[function($event){var $$selectedVal = Array.prototype.filter.call($event.target.options,function(o){return o.selected}).map(function(o){var val = "_value" in o ? o._value : o.value;return val}); _vm.cookie_consent_computed=$event.target.multiple ? $$selectedVal : $$selectedVal[0]},function($event){return _vm.selectCookieConsent($event)}]}},[_c('option',{attrs:{"value":"true"}},[_vm._v("aceito a coleta de dados")]),_vm._v(" "),_c('option',{attrs:{"value":"false"}},[_vm._v("recuso a coleta de dados")])])])])])])}
 var staticRenderFns = [function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('p',[_vm._v("o "),_c('b',[_vm._v("gchan")]),_vm._v(" usa o\n      "),_c('a',{attrs:{"href":"https://twitter.com/googleanalytics","target":"_blank","rel":"noreferrer"}},[_vm._v("google analytics")]),_vm._v("\n      para contabilizar os acessos e as ações mais frequentes realizadas no site."),_c('br'),_vm._v("\n      Fique à vontade para bloquear a coleta dos dados.\n      ")])}]
 
 
 
 /***/ }),
-/* 64 */
+/* 58 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "gchan_hero.jpg?fbf14c4eac68c2d71e9aaebda2fdf3a8";
 
 /***/ }),
-/* 65 */
+/* 59 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "volume-high.png?79ae6bdb759b3b6b1fa89aedcf5ee363";
 
 /***/ }),
-/* 66 */
+/* 60 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_5a8da10f___ = __webpack_require__(67);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__Post_vue_vue_type_template_id_5a8da10f___ = __webpack_require__(61);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__Post_vue_vue_type_script_lang_js___ = __webpack_require__(22);
 /* unused harmony namespace reexport */
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Post_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(69);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Post_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(63);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
 
 
@@ -20296,17 +20113,17 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_3__node_modules_vue_loader_lib_
 /* harmony default export */ __webpack_exports__["a"] = (component.exports);
 
 /***/ }),
-/* 67 */
+/* 61 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_5a8da10f___ = __webpack_require__(68);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_5a8da10f___ = __webpack_require__(62);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_5a8da10f___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_template_id_5a8da10f___["b"]; });
 
 
 /***/ }),
-/* 68 */
+/* 62 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -20318,35 +20135,35 @@ var staticRenderFns = []
 
 
 /***/ }),
-/* 69 */
+/* 63 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(70);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_style_index_0_lang_css___ = __webpack_require__(64);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_style_index_0_lang_css____default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0__node_modules_vue_style_loader_index_js_node_modules_css_loader_index_js_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_vue_loader_lib_index_js_vue_loader_options_Post_vue_vue_type_style_index_0_lang_css___);
 /* unused harmony reexport namespace */
 
 
 /***/ }),
-/* 70 */
+/* 64 */
 /***/ (function(module, exports, __webpack_require__) {
 
 // style-loader: Adds some css to the DOM by adding a <style> tag
 
 // load the styles
-var content = __webpack_require__(71);
+var content = __webpack_require__(65);
 if(content.__esModule) content = content.default;
 if(typeof content === 'string') content = [[module.i, content, '']];
 if(content.locals) module.exports = content.locals;
 // add the styles to the DOM
-var add = __webpack_require__(3).default
+var add = __webpack_require__(7).default
 var update = add("1003fe9c", content, true, {});
 
 /***/ }),
-/* 71 */
+/* 65 */
 /***/ (function(module, exports, __webpack_require__) {
 
-exports = module.exports = __webpack_require__(2)(false);
+exports = module.exports = __webpack_require__(6)(false);
 // imports
 
 
@@ -20357,11 +20174,11 @@ exports.push([module.i, "\n.container h1 {\n  max-width:980px;\n  width:100%;\n 
 
 
 /***/ }),
-/* 72 */
+/* 66 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__New_vue_vue_type_template_id_f80070a8___ = __webpack_require__(73);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__New_vue_vue_type_template_id_f80070a8___ = __webpack_require__(67);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__New_vue_vue_type_script_lang_js___ = __webpack_require__(24);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
@@ -20386,39 +20203,39 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_2__node_modules_vue_loader_lib_
 /* harmony default export */ __webpack_exports__["a"] = (component.exports);
 
 /***/ }),
-/* 73 */
+/* 67 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_New_vue_vue_type_template_id_f80070a8___ = __webpack_require__(74);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_New_vue_vue_type_template_id_f80070a8___ = __webpack_require__(68);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_New_vue_vue_type_template_id_f80070a8___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_New_vue_vue_type_template_id_f80070a8___["b"]; });
 
 
 /***/ }),
-/* 74 */
+/* 68 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return render; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return staticRenderFns; });
-var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('section',{staticClass:"create-thread"},[_c('form',{on:{"submit":function($event){$event.preventDefault();return _vm.addMessage()}}},[(_vm.error)?_c('div',{staticClass:"alert-error"},[_c('span',{on:{"click":function($event){_vm.error=''}}},[_vm._v("x")]),_vm._v(" "),_c('h4',[_vm._v("Erro!")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(_vm.error))])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"form-group"},[_c('label',{attrs:{"for":"username"}},[_vm._v("Usuário")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.username),expression:"message.username"}],staticClass:"form-control",attrs:{"type":"text","id":"username","aria-describedby":"usernameHelp","placeholder":"anônimo","maxlength":"30","required":""},domProps:{"value":(_vm.message.username)},on:{"focus":function($event){return _vm.clearName($event)},"focusout":function($event){return _vm.checkForName($event)},"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "username", $event.target.value)}}}),_vm._v(" "),(_vm.auth.id)?_c('small',{staticClass:"form-text text-muted",attrs:{"id":"usernameHelp"}},[_vm._v("\n          anonimato é para os fracos\n        ")]):_c('small',{staticClass:"form-text text-muted",attrs:{"id":"usernameHelp"}},[_vm._v("\n          "+_vm._s(_vm.smallUsernamePhrase)+"\n        ")])]),_vm._v(" "),_c('div',{staticClass:"form-group"},[_c('div',{staticClass:"form-subject"},[_c('label',{attrs:{"for":"tem-assunto"}},[_vm._v("colocar assunto?")]),_vm._v(" "),_c('input',{attrs:{"type":"checkbox","name":"tem-assunto","id":"tem-assunto"},on:{"change":_vm.toggleSubject}})]),_vm._v(" "),(this.hasSubject === true)?_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.subject),expression:"message.subject"}],staticClass:"form-control",attrs:{"type":"text","id":"subject","placeholder":"assunto","maxlength":"50","required":""},domProps:{"value":(_vm.message.subject)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "subject", $event.target.value)}}}):_vm._e()]),_vm._v(" "),_c('div',{staticClass:"form-group"},[_c('label',{attrs:{"for":"message"}},[_vm._v("Mensagem")]),_vm._v(" "),_c('textarea',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.message),expression:"message.message"}],staticClass:"form-control",attrs:{"id":"message","rows":"5","placeholder":"mensagem","required":"","maxlength":"250"},domProps:{"value":(_vm.message.message)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "message", $event.target.value)}}})]),_vm._v(" "),_c('div',{staticClass:"form-group"},[(!this.optUpload)?_c('label',{attrs:{"for":"imageURL"}},[_vm._v("\n          URL da imagem/gif/vídeo")]):_vm._e(),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.imageURL),expression:"message.imageURL"}],staticClass:"form-control",attrs:{"type":"url","id":"imageURL","placeholder":"https://~","readonly":this.optUpload === true,"disabled":this.$route.query.mediaUrl},domProps:{"value":(_vm.message.imageURL)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "imageURL", $event.target.value)}}})]),_vm._v(" "),_c('button',{staticClass:"btn btn-primary",attrs:{"type":"submit"}},[_vm._v("Enviar")])]),_vm._v(" "),(this.$route.query.mediaUrl)?_c('div',{staticClass:"imagePreview"},[(this.$route.query.type === 'image')?_c('img',{attrs:{"src":this.$route.query.mediaUrl,"id":"imageToUpload","alt":"pré-visualização de imagem para upload"}}):(this.$route.query.type === 'video')?_c('div',{staticClass:"video-wrap"},[_c('video',{staticClass:"videoPreview",attrs:{"id":"videoToUpload","src":this.$route.query.mediaUrl,"autoplay":"true","loop":"true","muted":"true","playsinline":"true"},domProps:{"muted":true}}),_vm._v(" "),_c('button',{staticClass:"volume",attrs:{"type":"button"},on:{"click":_vm.toggleAudioOnClick}},[_c('img',{attrs:{"src":__webpack_require__(75),"alt":"Volume"}})])]):_c('p',[_vm._v("Formato não suportado! ::(")])]):_vm._e()])])}
+var render = function () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('section',{staticClass:"create-thread"},[_c('form',{on:{"submit":function($event){$event.preventDefault();return _vm.addMessage()}}},[(_vm.error)?_c('div',{staticClass:"alert-error"},[_c('span',{on:{"click":function($event){_vm.error=''}}},[_vm._v("x")]),_vm._v(" "),_c('h4',[_vm._v("Erro!")]),_vm._v(" "),_c('p',[_vm._v(_vm._s(_vm.error))])]):_vm._e(),_vm._v(" "),_c('div',{staticClass:"form-group"},[_c('label',{attrs:{"for":"username"}},[_vm._v("Usuário")]),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.username),expression:"message.username"}],staticClass:"form-control",attrs:{"type":"text","id":"username","aria-describedby":"usernameHelp","placeholder":"anônimo","maxlength":"30","required":""},domProps:{"value":(_vm.message.username)},on:{"focus":function($event){return _vm.clearName($event)},"focusout":function($event){return _vm.checkForName($event)},"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "username", $event.target.value)}}}),_vm._v(" "),(_vm.auth.id)?_c('small',{staticClass:"form-text text-muted",attrs:{"id":"usernameHelp"}},[_vm._v("\n          anonimato é para os fracos\n        ")]):_c('small',{staticClass:"form-text text-muted",attrs:{"id":"usernameHelp"}},[_vm._v("\n          "+_vm._s(_vm.smallUsernamePhrase)+"\n        ")])]),_vm._v(" "),_c('div',{staticClass:"form-group"},[_c('div',{staticClass:"form-subject"},[_c('label',{attrs:{"for":"tem-assunto"}},[_vm._v("colocar assunto?")]),_vm._v(" "),_c('input',{attrs:{"type":"checkbox","name":"tem-assunto","id":"tem-assunto"},on:{"change":_vm.toggleSubject}})]),_vm._v(" "),(this.hasSubject === true)?_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.subject),expression:"message.subject"}],staticClass:"form-control",attrs:{"type":"text","id":"subject","placeholder":"assunto","maxlength":"50","required":""},domProps:{"value":(_vm.message.subject)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "subject", $event.target.value)}}}):_vm._e()]),_vm._v(" "),_c('div',{staticClass:"form-group"},[_c('label',{attrs:{"for":"message"}},[_vm._v("Mensagem")]),_vm._v(" "),_c('textarea',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.message),expression:"message.message"}],staticClass:"form-control",attrs:{"id":"message","rows":"5","placeholder":"mensagem","required":"","maxlength":"250"},domProps:{"value":(_vm.message.message)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "message", $event.target.value)}}})]),_vm._v(" "),_c('div',{staticClass:"form-group"},[(!this.optUpload)?_c('label',{attrs:{"for":"imageURL"}},[_vm._v("\n          URL da imagem/gif/vídeo")]):_vm._e(),_vm._v(" "),_c('input',{directives:[{name:"model",rawName:"v-model",value:(_vm.message.imageURL),expression:"message.imageURL"}],staticClass:"form-control",attrs:{"type":"url","id":"imageURL","placeholder":"https://~","readonly":this.optUpload === true,"disabled":this.$route.query.mediaUrl},domProps:{"value":(_vm.message.imageURL)},on:{"input":function($event){if($event.target.composing){ return; }_vm.$set(_vm.message, "imageURL", $event.target.value)}}})]),_vm._v(" "),_c('button',{staticClass:"btn btn-primary",attrs:{"type":"submit"}},[_vm._v("Enviar")])]),_vm._v(" "),(this.$route.query.mediaUrl)?_c('div',{staticClass:"imagePreview"},[(this.$route.query.type === 'image')?_c('img',{attrs:{"src":this.$route.query.mediaUrl,"id":"imageToUpload","alt":"pré-visualização de imagem para upload"}}):(this.$route.query.type === 'video')?_c('div',{staticClass:"video-wrap"},[_c('video',{staticClass:"videoPreview",attrs:{"id":"videoToUpload","src":this.$route.query.mediaUrl,"autoplay":"true","loop":"true","muted":"true","playsinline":"true"},domProps:{"muted":true}}),_vm._v(" "),_c('button',{staticClass:"volume",attrs:{"type":"button"},on:{"click":_vm.toggleAudioOnClick}},[_c('img',{attrs:{"src":__webpack_require__(69),"alt":"Volume"}})])]):_c('p',[_vm._v("Formato não suportado! ::(")])]):_vm._e()])])}
 var staticRenderFns = []
 
 
 
 /***/ }),
-/* 75 */
+/* 69 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__.p + "volume-off.png?5f26aefdcad090aa02d2f81ba5c797a6";
 
 /***/ }),
-/* 76 */
+/* 70 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__About_vue_vue_type_template_id_2092bab8___ = __webpack_require__(77);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__About_vue_vue_type_template_id_2092bab8___ = __webpack_require__(71);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_runtime_componentNormalizer_js__ = __webpack_require__(0);
 
 var script = {}
@@ -20440,17 +20257,17 @@ var component = Object(__WEBPACK_IMPORTED_MODULE_1__node_modules_vue_loader_lib_
 /* harmony default export */ __webpack_exports__["a"] = (component.exports);
 
 /***/ }),
-/* 77 */
+/* 71 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_About_vue_vue_type_template_id_2092bab8___ = __webpack_require__(78);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_About_vue_vue_type_template_id_2092bab8___ = __webpack_require__(72);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_About_vue_vue_type_template_id_2092bab8___["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_0__node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_About_vue_vue_type_template_id_2092bab8___["b"]; });
 
 
 /***/ }),
-/* 78 */
+/* 72 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
