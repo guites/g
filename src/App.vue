@@ -1,7 +1,4 @@
 <style>
-  #search-form { flex-direction:column; justify-content:center;} 
-  #search-form div:nth-child(2) { margin-top: 5px; min-height: 20px;}
-  #search-form div small span { color: #2c81ba; }
 </style>
 <template>
   <div id="app">
@@ -18,66 +15,8 @@
                     </li> -->
                 </ul>
             </nav>
-            <template>
-                <form id="search-form" @submit.prevent="searchAction()">
-                    <div>
-                      <label for="search">Pesquisar</label>
-                      <input v-model="searchText"
-                      id="search"
-                      name="search" type="search"
-                      placeholder="Pesquise no site"
-                      aria-label="Pesquisar">
-                    </div>
-                    <div>
-                      <small v-if="searchText">aperte <span>&lt;enter&gt;</span>!</small>
-                    </div>
-                </form>
-                <SearchBar :q="q">
-                </SearchBar>
-            </template>
+            <SearchBar></SearchBar>
         </div>
-        <!-- <transition name="fadeForm">
-          <div class="janitor-login" v-if="janitor">
-            <form v-if="!auth.loggedIn" v-on:submit.prevent="login($event)">
-              <div class="fields">
-                <div class="login-wrapper">
-                  <label for="janitor-login">email:</label>
-                  <input type="email" name="janitor-login"
-                  id="janitor-login" v-model="username" required>
-                </div>
-                <div class="pwd-wrapper">
-                  <label for="janitor-pass">pass:</label>
-                  <input type="password" name="janitor-pass"
-                  id="janitor-pass" v-model="password" required>
-                </div>
-              </div>
-              <div class="btns">
-                <button type="submit">entrar</button>
-                <button type="button" v-if="showOptions">recuperar senha</button>
-                <button type="button" class='img-wrapper' title="Informações"
-                v-on:click="showOptions=!showOptions">
-                  <img src="@/assets/information.png" alt="Registro/Alterar senha">
-                </button>
-                <a href='/#/info' v-if="isHome && showOptions && !this.auth.loggedIn">
-                  criar conta
-                </a>
-                <button v-if="isInfo && showOptions && !this.auth.loggedIn"
-                type="button"
-                class="goto-form"
-                title="ir para o formulário"
-                @click="focusForm()">
-                  criar conta
-                </button>
-              </div>
-            </form>
-            <div class="flash" :class="loginFlash.type" v-if="loginFlash.header">
-              <button class='flash-btn' type="button" v-on:click="loginFlash.header = ''">x</button>
-              <strong>{{loginFlash.header}}</strong>
-              {{loginFlash.text}}
-              <a :href="loginFlash.link">{{loginFlash.message}}</a>
-            </div>
-          </div>
-        </transition> -->
         <div v-if="marquee"
         class="marquee">
           <p v-on:click="marqueeInput=!marqueeInput">⌨️</p>
@@ -141,9 +80,7 @@
             </div>
           </form>
         </transition>
-
     </header>
-    <!-- <Home :auth="this.auth"/> -->
     <router-view :auth="this.auth" class='container'/>
   </div>
 </template>
@@ -162,8 +99,6 @@ export default {
     SearchBar,
   },
   data: () => ({
-    searchText: '',
-    q: '',
     janitor: false,
     marquees: [],
     marquee: true,
@@ -194,9 +129,6 @@ export default {
       const captchaScript = document.createElement('script');
       captchaScript.src = 'https://www.google.com/recaptcha/api.js?render=6LfB04AaAAAAAGTm-ljshaykXuT9YiePLxgqy471';
         document.head.appendChild(captchaScript);
-    },
-    searchAction() {
-      this.q = this.searchText;
     },
     ajaxGtmRequest() {
       const gtmScript = document.createElement('script');
