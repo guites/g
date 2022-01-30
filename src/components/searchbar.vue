@@ -77,9 +77,9 @@ export default {
     data: () => ({
       fetchingData: false,
       searchText: '',
-      posts: localStorage.getItem('search-posts') ?  JSON.parse(localStorage.getItem('search-posts')) : [],
+      posts: [],
       shownPosts: [],
-      replies: localStorage.getItem('search-replies') ?  JSON.parse(localStorage.getItem('search-replies')) : [],
+      replies: [],
       shownReplies: [],
       embeddedReplies: []
     }),
@@ -106,7 +106,6 @@ export default {
               username: post.username
             }
           });
-          localStorage.setItem('search-posts', JSON.stringify(filteredPosts));
           this.posts = filteredPosts;
           this.fetchingData = false;
         }
@@ -126,7 +125,6 @@ export default {
               message_id: reply.message_id
             }
           });
-          localStorage.setItem('search-replies', JSON.stringify(filteredReplies));
           this.replies = filteredReplies;
           this.fetchingData = false;
         }
