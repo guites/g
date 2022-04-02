@@ -1,201 +1,160 @@
-<style>
-    .text-warning { color: #f39c12; }
-    .text-success { color: #00bc8c; }
-    .inner-header { flex-wrap: wrap; }
-    #searchbar {
-      width: 100%;
-      display:flex;
-      flex-direction: column;
-      border: 1px solid #444;
-      padding: 25px;
-      border-radius: 4px;
-      background-color: #222;
-      margin-bottom:5px;
-    }
-
-    #searchbar #searchbar-header { width: 100%; }
-    #searchbar #searchbar-header p { border-bottom: 2px solid #444; padding:5px; margin: 5px 5px 15px; }
-
-    #searchbar #searchbar-lists { display: flex; }
-    #searchbar #searchbar-lists ul {max-width:460px;width:100%;}
-    #searchbar #searchbar-lists ul li {
-      display:block;
-      min-height:60px;
-      border: 2px solid transparent;
-      background-color: transparent;
-      transition: all 100ms;
-    }
-    #searchbar #searchbar-lists ul li div {
-      width:initial;
-      min-height:60px;
-    }
-    #searchbar #searchbar-lists ul li div small { display: initial; font-size:small; }
-    #searchbar #searchbar-lists ul .search-list-title {
-      border-bottom: 2px solid #444;
-      padding-bottom: 10px;
-      margin-bottom: 10px;
-      display: block;
-      width: 100%;
-      max-width: 200px;
-    }
-    #searchbar #searchbar-lists ul li img {
-      width: 120px; height: 60px;
-      object-fit: cover; object-position: top;
-      float:left;
-    }
-    #searchbar #searchbar-lists ul li img.search_placeholder{
-      object-fit: cover;
-      width:32px;
-      height:32px;
-    }
-    #searchbar #searchbar-lists ul li:hover {
-        border-color: #222;
-        cursor: pointer;
-        border-radius: 4px;
-        background-color: #b9b9b9;
-        color: #222;
-    }
-    a.nostyle:link {
-        text-decoration: inherit;
-        color: inherit;
-        display: contents;
-    }
-    a.nostyle:visited {
-        text-decoration: inherit;
-        color: inherit;
-        display: contents;
-    }
-    @media only screen and (max-width: 767px) {
-      #searchbar #searchbar-lists {
-        flex-direction:column;
-      }
-      #searchbar #searchbar-lists ul:nth-child(1) {
-        margin-bottom:25px;
-      }
-    }
-</style>
 <template>
-  <div id="searchbar" v-if="q != ''">
-  <div id="searchbar-header"><p><span :class=posts.aviso_class id="searchbar-aviso-posts">{{posts.aviso}}</span> &#10574; <span :class=replies.aviso_class id="searchbar-aviso-replies">{{replies.aviso}}</span></p></div>
-  <div id="searchbar-lists">
-  <ul>
-    <strong class="search-list-title">POSTS</strong>
-    <a v-for="post in posts.results" :key="post.id" class="nostyle" :href="'/#/post/' + post.id">
-    <li>
-    <img v-if="post.imageurl" @error="setPlaceholder($event)" :src="post.imageurl">
-    <img v-else class="search_placeholder" src="@/assets/sham.png">
-    <div>
-        <strong v-if="post.subject">{{post.subject}}</strong>
-        <strong v-else>gchan post #{{post.id}}</strong>
-        <small> em {{post.created}}</small>
-        <p>{{post.message}}</p>
+  <div style="width: 100%">
+    <form id="search-form">
+        <div>
+          <label for="search">Pesquisar</label>
+          <input v-model="searchText"
+          id="search"
+          name="search" type="search"
+          placeholder="Pesquise no site"
+          @input="showResults($event)"
+          aria-label="Pesquisar">
+        </div>
+        <div>
+          <small v-if="fetchingData">aguarde...</small>
+          <div v-if="fetchingData" class="loader">carregando...</div>
+        </div>
+    </form>
+    <div id="searchbar" v-if="searchText">
+      <div id="searchbar-header">
+      </div>
+      <div id="searchbar-lists">
+        <ul>
+          <strong class="search-list-title">{{shownPosts.length}} posts <small v-if="shownReplies.length > 0">({{shownReplies.length}}) respostas</small></strong>
+            <li v-for="(post, i) in shownPosts" :key="`post-${post.id}`">
+              <template v-if="i <= 5">
+                <img loading="lazy" v-if="post.imageurl" @click="fullSize($event)" @error="setPlaceholder($event)" :src="post.imageurl">
+                <img loading="lazy" v-else class="search_placeholder" src="@/assets/sham.png">
+              </template>
+              <template v-else>
+                <template v-if="post.imageurl">
+                  <button :data-src="post.imageurl" @click="showImg($event)">
+                    imagem
+                  </button>
+                  <img class="none" @click="fullSize($event)" @error="setPlaceholder($event)" src="/none">
+                </template>
+              </template>
+              <div>
+                  <a :href="`/post/${post.id}`" class="nostyle">
+                    <strong v-if="post.subject">{{post.subject}}</strong>
+                    <strong v-else>gchan post #{{post.id}}</strong>
+                    <small> em {{post.created}}</small>
+                    <p class="text-content">{{post.message}}</p>
+                  </a>
+              </div>
+            </li>
+            <li v-for="(reply, i) in shownReplies" :key="`reply-${reply.id}`">
+              <template v-if="i <= 5">
+                <img loading="lazy" v-if="reply.imageurl" @click="fullSize($event)" @error="setPlaceholder($event)" :src="reply.imageurl">
+                <img loading="lazy" v-else class="search_placeholder" src="@/assets/sham.png">
+              </template>
+              <template v-else>
+                <template v-if="reply.imageurl">
+                  <button :data-src="reply.imageurl" @click="showImg($event)">
+                    imagem
+                  </button>
+                  <img class="none" @click="fullSize($event)" @error="setPlaceholder($event)" src="/none">
+                </template>
+              </template>
+              <div>
+                  <a :href="`/post/${reply.message_id}`" class="nostyle">
+                    <strong>resposta ao post #{{reply.message_id}}</strong>
+                    <small> {{reply.created}}</small>
+                    <p class="text-content">{{reply.content}}</p>
+                  </a>
+              </div>
+            </li>
+          <p v-if="(posts.length <= 0)">0 posts! :(</p>
+        </ul>
+      </div>
     </div>
-    </li>
-    </a>
-    <p v-if="(posts.results.length <= 0)">0 posts! :(</p>
-  </ul>
-  <ul>
-    <strong class="search-list-title">RESPOSTAS</strong>
-    <a v-for="reply in replies.results" :key="reply.id" class="nostyle" :href="'/#/post/' + reply.message_id">
-    <li>
-    <img v-if="reply.imageurl" @error="setPlaceholder($event)" :src="reply.imageurl">
-    <img v-else class="search_placeholder" src="@/assets/sham.png">
-    <div>
-        <strong v-if="reply.username">por {{reply.username}}</strong>
-        <small> em {{reply.created}}</small>
-        <p>{{reply.content}}</p>
-    </div>
-    </li>
-    </a>
-    <p v-if="replies.results.length <= 0">0 replies! :(</p>
-  </ul>
-  </div>
   </div>
 </template>
 
 <script>
 export default {
     name: 'SearchBar',
-    props: ['q'],
     data: () => ({
-      maxResults: 5,
-      posts: {
-        results_index: [],
-        results: [],
-        aviso: '',
-        aviso_class: '',
-        search_url: `search-posts?q=`,
-        name: 'post'
-      },
-      replies: {
-        results_index: [],
-        results: [],
-        aviso: '',
-        aviso_class: '',
-        search_url: `search-replies?q=`,
-        name: 'reply'
-      },
+      fetchingData: false,
+      searchText: '',
+      posts: [],
+      shownPosts: [],
+      replies: [],
+      shownReplies: [],
+      embeddedReplies: []
     }),
     methods: {
+      async showResults(e) {
+        const str = e.target.value.toLowerCase();
+        await this.cachePosts();
+        await this.cacheReplies();
+        this.shownPosts = this.posts.filter((post) => post.message.toLowerCase().includes(str) || post.subject.toLowerCase().includes(str) || post.username.toLowerCase().includes(str));
+        this.shownReplies = this.replies.filter((reply) => reply.content.toLowerCase().includes(str) || reply.username.toLowerCase().includes(str));
+      },
+      async cachePosts() {
+        if (this.posts.length === 0) {
+          this.fetchingData = true;
+          const rawData = await fetch(`${this.$backendURL}messages`);
+          const postsObj = await rawData.json();
+          const filteredPosts = postsObj.results.map((post) => {
+            return {
+              created: post.created,
+              id: post.id,
+              imageurl: post.imageurl,
+              message: post.message,
+              subject: post.subject,
+              username: post.username
+            }
+          });
+          this.posts = filteredPosts;
+          this.fetchingData = false;
+        }
+      },
+      async cacheReplies() {
+        if (this.replies.length === 0) {
+          this.fetchingData = true;
+          const rawData = await fetch(`${this.$backendURL}replies`);
+          const repliesObj = await rawData.json();
+          const filteredReplies = repliesObj.results.map((reply) => {
+            return {
+              created: reply.created,
+              id: reply.id,
+              imageurl: reply.imageurl,
+              content: reply.content,
+              username: reply.username,
+              message_id: reply.message_id
+            }
+          });
+          this.replies = filteredReplies;
+          this.fetchingData = false;
+        }
+      },
       setPlaceholder(e) {
-        e.target.src = require('@/assets/sham.png');
-        e.target.classList.add('search_placeholder');
+        if (!e.target.src.includes('none')) {
+          console.log(e.target.src);
+          e.target.src = require('@/assets/sham.png');
+          e.target.classList.add('search_placeholder');
+        }
+      },
+      showImg(e) {
+        const btn = e.target;
+        const img = e.target.nextElementSibling;
+        img.src = btn.getAttribute('data-src');
+        img.className = 'fullsize';
+        btn.remove();
+      },
+      fullSize(e) {
+        if (!e.target.src.includes('none') && e.target.className !== 'search_placeholder') {
+          e.target.classList.toggle('fullsize');
+        }
       },
       search(collection, q) {
-        if (q == '') {
-          this[collection]['results_index'] = [];
-          this[collection]['results'] = [];
-          return;
-        }
-        fetch(`${this.$backendURL}${this[collection]['search_url']}${q}`).then(
-          (response) => {
-            if (!response.ok) {
-              throw new Error(response.status);
-            }
-            return response.json()
-            }).then((result) => {
-              if (result.error && result.code == 'no results') {
-                this[collection]['aviso'] = `0 ${this[collection]['name']}s`;
-                this[collection]['aviso_class'] = 'text-warning';
-                this[collection]['results_index'] = [];
-                this[collection]['results'] = [];
-                return;
-              }
-              const plural = result.results.length != 1 ? 's' : '';
-              this[collection]['aviso'] = `+${result.results.length} ${this[collection]['name']}${plural}`;
-              this[collection]['aviso_class'] = 'text-success';
-          result.results.forEach(r => {
-            if(this[collection]['results'].length >= this.maxResults) { 
-                this[collection]['results'].pop();
-                this[collection]['results_index'].pop();
-            }
-            let filtered;
-            if (collection == 'posts') {
-              filtered = (({ created, id, imageurl, message, subject, username }) => ({created, id, imageurl, message, subject, username}))(r);
-            } else if (collection == 'replies') {
-              filtered = (({ created, id, imageurl, content, message_id, username }) => ({created, id, imageurl, content, message_id, username}))(r);
-            }
-            filtered.created = new Date(filtered.created).toLocaleDateString('pt-BR');
-            if (this[collection]['results_index'].includes(filtered.id)) {
-                const duplicated_pos = this[collection]['results_index'].indexOf(filtered.id);
-                this[collection]['results_index'].splice(duplicated_pos, 1);
-                this[collection]['results'].splice(duplicated_pos, 1);
-            }
-            this[collection]['results_index'].unshift(filtered.id);
-            this[collection]['results'].unshift(filtered);
-          });
-        })
-        .catch((err) => {
-          if(err.message == '503') {
-            this[collection]['aviso'] = 'Busca indisponível! Faça um post reclamando.';
-          }
-        });
+
       },
     },
     watch: {
         q(val) {
-          this.search('posts', val);
-          this.search('replies', val);
+         // filtrar o próprio json por esse valor
         },
     },
 };

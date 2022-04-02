@@ -54,7 +54,7 @@
           <button type="button"
           @click="replyMessage($event)"
           :data-replyTo="message.id"
-          class='reply'>responder</button>
+          class='reply'>responder <img style="width: 16px;" src="@/assets/reply.white.png" loading="lazy"><img style="width: 16px;" src="@/assets/reply.grey.png" loading="lazy"></button>
           <button type="button" class='link'
           v-if="replyCount && replyCount > 2 && isHome">
             <a :href="'/#/post/' + message.id">
@@ -81,7 +81,7 @@
 
           </div>
         </div>
-        <small>{{message.created}}</small><br />
+        <small id="message-created" v-if="message.created">{{convertTZ(message.created)}}</small><br />
         <img v-if="message.gif_origin == 'giphy'"
         alt='powered by GIPHY'
         class="gif_origin"
@@ -103,18 +103,19 @@
       @load="preventVideo($event)"
       alt=""
       >
-      <div class="align-self-center media-body">
+      <div class="align-self-center media-body" :id="'quoted_' + reply.id">
         <div class="edit_tab">
           <p class="mt-0 mb-1">{{reply.username}}</p>
           <button type='button' class='link link-reply' :data-quoteid="reply.id"
           title='citar esta resposta'
           @click="adcQuote($event)">
-            #{{reply.id}}
+            #{{reply.id}} <img style="width: 16px;" src="@/assets/reply.png" loading="lazy">
           </button>
         </div>
-          <p v-html="reply.content"></p><br />
+        <p class="text-content" v-html="reply.content"></p>
+        <div v-if="checkContentLength(reply.content)" @click="expandContent($event)" class="reply-warning"><em>resposta truncada devido ao tamanho. clique para visualizar na íntegra.</em><button class="button-link" type="button">expandir</button></div>
           <div class="iframe-wrapper"></div>
-          <small>{{reply.created}}</small><br />
+          <small>{{convertTZ(reply.created)}}</small><br />
       </div>
     </li>
     <hr>
@@ -144,6 +145,24 @@ export default {
     },
   },
   methods: {
+    checkContentLength(content) {
+      let tempDiv = document.createElement("div");
+      tempDiv.innerHTML = content;
+      const hiddenQuotes = tempDiv.querySelectorAll('.quote-hidden');
+      hiddenQuotes.forEach((quote) => {
+        quote.remove();
+      });
+      return tempDiv.textContent.length > 250;
+    },
+    convertTZ(date) {
+      //source: https://stackoverflow.com/a/54127122/14427854
+      var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+      var hour = ("0" + date_sp.getHours()).slice(-2);
+      var min = ("0" + date_sp.getMinutes()).slice(-2);
+      var day = ("0" + date_sp.getDate()).slice(-2);
+      var month = ("0" + (date_sp.getMonth() + 1)).slice(-2);
+      return `${hour}:${min} ${day}/${month}/${date_sp.getFullYear()}`;
+    },
     handleMessage(messageID, action, e) {
       e.target.disabled = true;
       let method;
@@ -270,45 +289,15 @@ export default {
     adcQuote(quote) {
       this.$emit('adcQuote', quote.target.getAttribute('data-quoteid'));
     },
-    update(e) {
-      console.log(e);
-    },
-    async filterMessage(message) {
-      const theMessage = message;
-      const rgx = /http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?[\w\?=]*)?/g;
-      const string = theMessage.message;
-      const matches = string.match(rgx);
-      console.log(matches);
-      if (matches.length > 0) {
-        await this.sleep(100);
-        console.log(`#li_${this.message.id} small`);
-        const smallTag = document.querySelector(`#li_${this.message.id} small`);
-        const pTag = document.querySelector(`#li_${this.message.id} p:not(.mt-0)`);
-        const iframeWrapper = document.createElement('div');
-        iframeWrapper.className = 'iframe-wrapper';
-        const insertedNode = smallTag.parentElement.insertBefore(iframeWrapper, smallTag);
-        matches.forEach((match) => {
-          console.log(match);
-          pTag.innerHTML = pTag.innerHTML.replace(match, `[<a data-link="${match}" href="javascript:;">mostrar<img class="yt-thumb" style="display:none;"></a>]`);
-          fetch(`https://www.youtube.com/oembed?url=${match}&format=json`)
-            .then((response) => response.json())
-            .then((result) => {
-              const aTag = document.querySelector(`[data-link="${match}"]`);
-              aTag.children[0].src = result.thumbnail_url;
-              aTag.addEventListener('mouseover', this.showThumbImg, false);
-              aTag.addEventListener('mouseout', this.hideThumbImg, false);
-              aTag.addEventListener('click', this.toggleYoutubeFrame, false);
-              insertedNode.innerHTML = result.html;
-            });
-        });
-      }
-      return theMessage;
+    expandContent(ev) {
+      const textBlock = ev.target.parentElement.querySelector('.text-content');
+      textBlock.scrollTop = 0;
+      const btn = ev.target.querySelector('button');
+      textBlock.classList.toggle('show-all');
+      btn.textContent = btn.textContent == 'colapsar' ? 'expandir' : 'colapsar';
     },
   },
   computed: {
-    filterMessageText() {
-      return 'messageText';
-    },
     isHome() {
       return this.$route.name === 'Home';
     },

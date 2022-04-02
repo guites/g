@@ -22,10 +22,15 @@ if (process.env.NODE_ENV === 'production') {
       let sitemap_exists = false;
 
       if (fs.existsSync('./docs')) {
-        fs.writeFile(sitemap_path, '', function (err) {
-          if (err) throw err;
-        });
-        sitemap_exists = true;
+        if (!fs.existsSync(sitemap_path)) {
+          fs.writeFileSync(sitemap_path, '', function (err) {
+            if (err) throw err;
+          });
+          sitemap_exists = true;
+        } else {
+          sitemap_exists = true;
+        }
+
       }
 
       let stream = null;
@@ -47,13 +52,14 @@ if (process.env.NODE_ENV === 'production') {
               "content": results[i].message,
               "thumbnail": results[i].imageurl,
               "title": results[i].subject,
-              "por": results[i].username
+              "por": results[i].username,
+              "created": results[i].created
             };    
+            if (sitemap_exists) {
+              stream.write(`https://gchan.com.br/post/${post_id}` + "\n");
+            }
           }
           i++;
-          if (sitemap_exists) {
-            stream.write(`https://gchan.com.br/post/${post_id}` + "\n");
-          }
         } else {
           break;
         }
@@ -71,7 +77,7 @@ if (process.env.NODE_ENV === 'production') {
       return {
         entry: './src/main.js',
         output: {
-          path: path.resolve(__dirname, './dist'),
+          path: path.resolve(__dirname, './docs'),
           publicPath: '/',
           filename: 'build.js'
         },
@@ -123,11 +129,11 @@ if (process.env.NODE_ENV === 'production') {
           new HtmlWebpackPlugin({
             title: 'PRODUCTION prerender-spa-plugin',
             template: 'index.html',
-            filename: path.resolve(__dirname, 'dist/index.html'),
+            filename: path.resolve(__dirname, 'docs/index.html'),
             favicon: 'favicon.ico'
           }),
           new PrerenderSPAPlugin({
-            staticDir: path.join(__dirname, 'dist'),
+            staticDir: path.join(__dirname, 'docs'),
             routes: myroutes,
             renderer: new Renderer({
               // The name of the property
@@ -185,6 +191,7 @@ if (process.env.NODE_ENV === 'production') {
     devServer: {
       historyApiFallback: true,
       noInfo: false,
+      host: '0.0.0.0',
     },
     devtool: '#eval-source-map',
     plugins: [
