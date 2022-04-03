@@ -33,7 +33,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://gchan:gchan@localhost:5432/gchan
       - NODE_ENV=development
-      - CORS_ORIGIN_URL=localhost:8080
+      - CORS_ORIGIN_URL=http://localhost:8080
     command: bash -c "npm run dev"
 volumes:
   postgres-data:

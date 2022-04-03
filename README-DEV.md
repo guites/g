@@ -4,6 +4,12 @@ The app can be booted locally using Docker, which creates a database containing 
 
 It also creates a separate container in which you can run the development webpack server using `npm run dev`.
 
+The backend code is fetched via [github](https://github.com/guites/gchan-backend), and whenever new commits are added to the default branch, you will have to remove your docker cache and rebuild the container.
+
+        docker builder prune
+
+And then rebuild. **Warning**: this will clear cache related to all your containers.
+
 ## Using VS Code's devcontainer
 
 If you use vscode, you can easilly set up the project using the Remote - Containers extension.
