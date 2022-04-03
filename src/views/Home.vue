@@ -683,9 +683,7 @@ export default {
             } else {
               this.warning.message = 'Post enviado!';
               this.warning.type = 'alert-success';
-              const parsedResult = JSON.parse(result);
-              parsedResult.isNew = true;
-              this.messages.unshift(this.sanitizeSingleMessage(parsedResult));
+              this.messages.unshift(this.sanitizeSingleMessage(result));
               this.filterMessage(0);
               this.clearMsgForm();
             }
