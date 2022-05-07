@@ -229,7 +229,8 @@ export default {
     },
   },
   data: () => ({
-    apiURL: `messages/`,
+    apiURL: `messages`,
+    repliesURL: 'replies',
     imgurURLimg: 'imgupload',
     imgurURLgif: 'gifupload',
     imgurURLupload: 'videoupload',
