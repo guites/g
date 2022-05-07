@@ -752,7 +752,7 @@ export default {
         const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(postId, 10));
         this.filterMessage(msgIndex);
-        fetch(`${this.$backendURL}${this.apiURL}/${postId}/replies`).then((response) => response.json())
+        fetch(`${this.$backendURL}${this.apiURL}/${postId}/${this.repliesURL}`).then((response) => response.json())
           .then((replies) => {
             if (replies.error) {
               return;
