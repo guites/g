@@ -76,6 +76,7 @@ export default {
   },
   data: () => ({
     messageURL: 'messages/',
+    repliesURL: 'replies',
     message: {
       username: '',
       subject: '',
@@ -386,7 +387,11 @@ export default {
           .then((result) => {
             if (result.results) {
               this.message = this.sanitizeSingleMessage(result.results.shift());
+<<<<<<< HEAD
               fetch(`${this.$backendURL}${this.messageURL}/${this.id}/replies`).then((response) => response.json())
+=======
+              fetch(`${this.$backendURL}${this.messageURL}/${this.id}/${this.repliesURL}`).then((response) => response.json())
+>>>>>>> 0ae6622 (fix message and reply get url in post single page)
                 .then((replies) => {
                   if (replies.error) {
                     return;
