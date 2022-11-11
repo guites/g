@@ -75,8 +75,7 @@ export default {
     },
   },
   data: () => ({
-    messageURL: 'message/',
-    repliesURL: 'replies',
+    messageURL: 'messages/',
     message: {
       username: '',
       subject: '',
@@ -260,7 +259,7 @@ export default {
               const current_quote = quote_match[0];
               const reply_id = quote_match[1];
               if (reply_id) {
-                fetch(`${this.$backendURL}reply/${reply_id}`)
+                fetch(`${this.$backendURL}replies/${reply_id}`)
                   .then((response) => {
                     if (response.ok) {
                       return response.json();
@@ -387,7 +386,7 @@ export default {
           .then((result) => {
             if (result.results) {
               this.message = this.sanitizeSingleMessage(result.results.shift());
-              fetch(`${this.$backendURL}${this.repliesURL}/${this.id}`).then((response) => response.json())
+              fetch(`${this.$backendURL}${this.messageURL}/${this.id}/replies`).then((response) => response.json())
                 .then((replies) => {
                   if (replies.error) {
                     return;
