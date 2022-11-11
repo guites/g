@@ -296,82 +296,6 @@ header{
           }
       }
   }
-  .janitor-login{
-    form{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:center;
-      max-width: 320px;
-      margin:0 auto;
-      div{
-        width:100%;
-        padding:10px 5px 5px;
-        &.fields{
-          input{
-            width:calc(100% - 62px);
-          }
-        }
-        &.btns{
-          display: flex;
-          flex-direction:column;
-          align-items:center;
-          position:relative;
-          input,button{
-            margin:10px 5px;
-            width:150px;
-          }
-          a, button.goto-form{
-            text-decoration:underline;
-            cursor:pointer;
-            background-color:transparent;
-            border:none;
-            padding: 10px 5px;
-            opacity: 0.6;
-            color: white;
-            transition: all 300ms ease;
-            &:hover{
-              opacity:0.75;
-            }
-          }
-          button{
-            // display:none;
-          }
-          input{
-            width:75px;
-            height:30px;
-          }
-          .img-wrapper{
-            position:absolute;
-            right:0;
-            height:36.5px;
-            width:48px;
-            padding:0;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            cursor:pointer;
-            background-color: #375a7f;
-            border-color: #2b476482;
-            border-radius: 5px;
-            img{
-              width:16px;
-            }
-          }
-        }
-        div{
-          display:flex;
-          align-items:center;
-          justify-content:space-between;
-          label{
-            padding:10px;
-            width:62px;
-            display:block;
-          }
-        }
-      }
-    }
-  }
   .marquee {
     margin: 0 auto;
     width: 100%;
@@ -1609,7 +1533,7 @@ form{
   }
 }
 }
-section, .janitor-login, .media-body{
+section, .media-body{
 position:relative;
 .flash{
   top:50%;
