@@ -18,10 +18,7 @@
           @focus="clearName($event)"
           @focusout="checkForName($event)"
           >
-          <small v-if="auth.id" id="usernameHelp" class="form-text text-muted">
-            anonimato é para os fracos
-          </small>
-          <small v-else id="usernameHelp" class="form-text text-muted">
+          <small id="usernameHelp" class="form-text text-muted">
             {{smallUsernamePhrase}}
           </small>
         </div>
@@ -95,16 +92,6 @@ if (!Function.prototype.bind) { // check if native implementation available
 }
 export default {
   name: 'Home',
-  props: {
-    auth: {
-      default: () => ({
-        username: '',
-        loggedIn: '',
-        id: '',
-      }),
-      type: Object,
-    },
-  },
   data: () => ({
     apiURL: 'messages/',
     optUpload: '',
@@ -211,10 +198,6 @@ export default {
           this.message.recaptcha_token = token;
           const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
           submitButton.disabled = true;
-          if (this.auth.username) {
-            this.message.username = this.auth.username;
-            this.message.user_id = parseInt(this.auth.id, 10);
-          }
           if (/giphy/.test(this.message.imageURL)) {
             this.message.gif_origin = 'giphy';
           } else if (/gfycat/.test(this.message.imageURL)) {

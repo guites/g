@@ -40,18 +40,6 @@
         <div class="edit_tab" :data-message-id="message.id">
           <p class='message-username mt-0 mb-1 name'>por: {{message.username}}</p>
           <button type="button"
-          v-if="message.user_id === auth.id"
-          v-on:click="deleteMessage($event)"
-          class='delete'>deletar</button>
-          <button type="button"
-          v-if="message.user_id === auth.id"
-          v-on:click="editMessage($event)"
-          class='edit'>editar</button>
-          <button type="button"
-          v-if="message.user_id !== auth.id && false"
-          v-on:click="reactMessage($event)"
-          class='react'>reagir</button>
-          <button type="button"
           @click="replyMessage($event)"
           :data-replyTo="message.id"
           class='reply'>responder <img style="width: 16px;" src="@/assets/reply.white.png" loading="lazy"><img style="width: 16px;" src="@/assets/reply.grey.png" loading="lazy"></button>
@@ -128,7 +116,6 @@ export default {
     message: {},
     replies: {},
     replyCount: Number,
-    auth: {},
   },
   data: () => ({
     replyObserver: null,

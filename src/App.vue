@@ -77,7 +77,7 @@
           </form>
         </transition>
     </header>
-    <router-view :auth="this.auth" class='container'/>
+    <router-view class='container'/>
   </div>
 </template>
 <script>
@@ -107,12 +107,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    showOptions: '',
-    auth: {
-      loggedIn: '',
-      username: '',
-      id: '',
-    },
+    showOptions: ''
   }),
   methods: {
     captchaV3() {

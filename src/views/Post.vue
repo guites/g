@@ -12,7 +12,6 @@
     <h1>Respondendo ao post #{{message.id}}</h1>
     <Message
     v-bind:message="message"
-    v-bind:auth="auth"
     v-bind:replies="message.replies"
     @replyMessage="replyMessage"
     @adcQuote="adcQuote"
@@ -64,14 +63,6 @@ export default {
     id: {
       type: Number,
       required: true,
-    },
-    auth: {
-      default: () => ({
-        username: '',
-        loggedIn: '',
-        id: '',
-      }),
-      type: Object,
     },
   },
   data: () => ({

@@ -65,7 +65,6 @@
             <label for="search-media">Buscar gif</label>
           </div>
         </div>
-        <!-- <transition name="fade"> -->
           <div v-if="media_type == 'upload-media'" class="form-group">
             <label for="uploadIMG">
               envie uma imagem, gif ou vídeo
@@ -79,9 +78,6 @@
             :disabled="this.optUpload === true"
             @change="handleUpload($event)">
           </div>
-        <!-- </transition> -->
-        <!-- <div class="form-group"> -->
-          <!-- <transition name="fade"> -->
             <div v-if="media_type == 'link-media'" class="form-group">
               <label for="imageURL" v-if="!this.optUpload">
                 digite a URL de uma imagem, gif ou vídeo</label>
@@ -92,8 +88,6 @@
               :readonly="this.optUpload === true"
               >
             </div>
-              <!-- </transition> -->
-              <!-- <transition name="fade"> -->
             <div v-if="media_type == 'search-media'" class="searchgifstuffs">
               <label v-if='!this.optUpload' for='giphyURL'>digite algum termo no campo abaixo!</label>
               <input v-if='!this.optUpload'
@@ -122,8 +116,6 @@
                 </label>
               </div>
             </div>
-            <!-- </transition> -->
-            <!-- </div> -->
         <button type="submit" :disabled="uploadStatus == 'loading'" :class="[uploadStatus === 'loading' ? 'disabled' : '', 'btn btn-primary create-post']">Postar</button>
     </form>
     <div v-if="isPreviewing" class="imagePreview">
@@ -160,7 +152,6 @@
     <Message
     v-for="message in messages"
     v-bind:message="message"
-    v-bind:auth="auth"
     v-bind:replies="message.replies"
     v-bind:replyCount="message.replyCount"
     @replyMessage="replyMessage"
@@ -196,10 +187,6 @@ import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 import Gifbox from '../components/gifbox.vue';
 
-function showThumbImg(e) {
-  if (window.innerWidth < 767) return;
-  e.target.children[0].style = 'display:block;';
-}
 // The .bind method from Prototype.js 
 if (!Function.prototype.bind) { // check if native implementation available
   Function.prototype.bind = function(){ 
@@ -217,16 +204,6 @@ export default {
     ReplyBox,
     Message,
     Gifbox
-  },
-  props: {
-    auth: {
-      default: () => ({
-        username: '',
-        loggedIn: '',
-        id: '',
-      }),
-      type: Object,
-    },
   },
   data: () => ({
     apiURL: `messages`,
@@ -295,9 +272,6 @@ export default {
     },
   },
   computed: {
-    // username() {
-    //   return this.auth.username || this.message.username;
-    // },
     smallUsernamePhrase() {
       const phrases = [
         { quote: 'o que é que há, pois, num nome?', reference: 'https://pt.wikipedia.org/wiki/William_Shakespeare' },
@@ -664,10 +638,6 @@ export default {
         grecaptcha.execute(this.$captchaClient, {action: 'post'}).then((token) => token)
         .then((token) => {
           this.message.recaptcha_token = token;
-          if (this.auth.username) {
-            this.message.username = this.auth.username;
-            this.message.user_id = parseInt(this.auth.id, 10);
-          }
           fetch(`${this.$backendURL}${this.apiURL}`, {
             method: 'POST',
             body: JSON.stringify(this.message),
