@@ -16,7 +16,7 @@ If you use vscode, you can easilly set up the project using the Remote - Contain
 
 1. Install the extension via VS Code > extensions or this [link](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
 2. Go to View > Command Palette... and select option `>Remote-Containers: Reopen in Container`.
-3. Open the terminal and run `npm run dev`.
+3. Open the terminal and run `npm install` and then `npm run dev`.
 4. Access <http://localhost:8080> and verify that the app is running.
 
 The devcontainer will include a few VS Code extensions which you can edit by changing the `extensions` property in `.devcontainer/devcontainer.json`.
