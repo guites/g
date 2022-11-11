@@ -558,7 +558,7 @@ export default {
               const current_quote = quote_match[0];
               const reply_id = quote_match[1];
               if (reply_id) {
-                fetch(`${this.$backendURL}reply/${reply_id}`)
+                fetch(`${this.$backendURL}replies/${reply_id}`)
                   .then((response) => {
                     if (response.ok) {
                       return response.json();
