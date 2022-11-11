@@ -30,3 +30,9 @@ Please inspect the script for further information, and run it using
 ```
 ./docker-start.sh
 ```
+
+## Styling (scss)
+
+This project uses sass and compiles it with [gulp](https://gulpjs.com).
+
+You can edit the files in src/assets/sass and generate the css files with `npm run sass`.
