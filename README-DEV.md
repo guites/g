@@ -1,14 +1,25 @@
 # Instalation
 
+## Overview
+
 The app can be booted locally using Docker, which creates a database containing dummy data and runs the backend node.js app.
 
 It also creates a separate container in which you can run the development webpack server using `npm run dev`.
 
-The backend code is fetched via [github](https://github.com/guites/gchan-backend), and whenever new commits are added to the default branch, you will have to remove your docker cache and rebuild the container.
+The backend code is fetched via [github](https://github.com/guites/gchan-backend), and in order to fetch new commits, you will have to rebuild the backend service without using the docker cache.
 
-        docker builder prune
+A quick workaround for this is changing the value of the `CACHEBUST` argument in `.devcontainer/backend.Dockerfile`.
 
-And then rebuild. **Warning**: this will clear cache related to all your containers.
+For example
+
+        - ARG CACHEBUST=1
+        + ARG CACHEBUST=2
+
+will force docker to make a new request to the github server.
+
+After making this change, you can rebuild the containers normally.
+
+**Regarding CORS errors**: always access the frontend via `http://localhost:8080`. Any other URL will result in CORS errors, as the backend container only sets the header for that specific url.
 
 ## Using VS Code's devcontainer
 

@@ -9,6 +9,8 @@ services:
         VARIANT: 16-bullseye
     volumes:
       - ..:/workspace:cached
+    ports:
+      - 8080:8080 # expose port used by `npm run dev` to prevent CORS errors
     command: sleep infinity
   db:
     image: postgres:latest
