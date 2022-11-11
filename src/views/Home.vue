@@ -225,7 +225,6 @@ export default {
   },
   data: () => ({
     apiURL: `messages/`,
-    repliesURL: 'replies',
     imgurURLimg: 'imgupload',
     imgurURLgif: 'gifupload',
     imgurURLupload: 'videoupload',
@@ -365,7 +364,7 @@ export default {
         threshold: 0,
       },
     );
-    fetch(`${this.$backendURL}${this.apiURL}${this.offset}`).then((response) => response.json())
+    fetch(`${this.$backendURL}${this.apiURL}?offset=${this.offset}`).then((response) => response.json())
       .then((result) => {
         this.messages = this.sanitizedMessages(result.results);
       })
@@ -594,7 +593,7 @@ export default {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         this.lazyLoadObserver.unobserve(entry.target);
-        fetch(`${this.$backendURL}${this.apiURL}${this.offset}`).then((response) => response.json())
+        fetch(`${this.$backendURL}${this.apiURL}?offset=${this.offset}`).then((response) => response.json())
           .then((result) => {
             if (!result.results) return;
             this.messages = this.messages.concat(this.sanitizedMessages(result.results));
@@ -746,7 +745,7 @@ export default {
         const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(postId, 10));
         this.filterMessage(msgIndex);
-        fetch(`${this.$backendURL}${this.repliesURL}/${postId}`).then((response) => response.json())
+        fetch(`${this.$backendURL}${this.apiURL}/${postId}/replies`).then((response) => response.json())
           .then((replies) => {
             if (replies.error) {
               return;

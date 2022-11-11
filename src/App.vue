@@ -278,7 +278,7 @@ export default {
   mounted() {
     this.captchaV3();
     this.checkCookies();
-    fetch(`${this.$backendURL}marquee`).then((response) => response.json()).then((result) => {
+    fetch(`${this.$backendURL}marquees`).then((response) => response.json()).then((result) => {
       this.marquees = result.results;
     });
   },
