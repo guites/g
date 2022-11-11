@@ -47,13 +47,13 @@ body {
   border-radius: 3px;
 }
 .alert.alert-info {
-  background-color: #842cb0;
+  background-color: rgb(132, 44, 176);
 }
 .alert.alert-error {
   background-color: #e74c3c;
 }
 .alert.alert-success {
-  background-color: #72ab00;
+  background-color: rgb(114, 171, 0);
 }
 .alert h4 {
   position: relative;
@@ -99,19 +99,13 @@ body {
 }
 
 .noselect {
-  -webkit-touch-callout: none;
-  /* iOS Safari */
-  -webkit-user-select: none;
-  /* Safari */
-  -khtml-user-select: none;
-  /* Konqueror HTML */
-  -moz-user-select: none;
-  /* Old versions of Firefox */
-  -ms-user-select: none;
-  /* Internet Explorer/Edge */
-  user-select: none;
-  /* Non-prefixed version, currently
-   supported by Chrome, Edge, Opera and Firefox */
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+ supported by Chrome, Edge, Opera and Firefox */
 }
 
 a.nostyle:link {
@@ -155,8 +149,8 @@ form textarea:focus, form input[type=email]:focus, form input[type=password]:foc
 }
 form button[type=submit], form input[type=submit] {
   height: 36.5px;
-  background-color: #375a7f;
-  border-color: #2b476482;
+  background-color: rgb(55, 90, 127);
+  border-color: rgba(43, 71, 100, 0.5098039216);
   border-radius: 5px;
   color: #fff;
   cursor: pointer;
@@ -196,13 +190,13 @@ form .alert {
   border-radius: 3px;
 }
 form .alert.alert-info {
-  background-color: #842cb0;
+  background-color: rgb(132, 44, 176);
 }
 form .alert.alert-error {
   background-color: #e74c3c;
 }
 form .alert.alert-success {
-  background-color: #72ab00;
+  background-color: rgb(114, 171, 0);
 }
 form .alert h4 {
   position: relative;
@@ -263,7 +257,7 @@ header .inner-header nav ul li a:hover {
 header .inner-header nav ul li button {
   height: 36.5px;
   background-color: #2b4764;
-  border-color: #2b476482;
+  border-color: rgba(43, 71, 100, 0.5098039216);
   border-radius: 5px;
   color: #fff;
   cursor: pointer;
@@ -288,7 +282,7 @@ header .inner-header form {
 header .inner-header form button {
   height: 36.5px;
   background-color: #2b4764;
-  border-color: #2b476482;
+  border-color: rgba(43, 71, 100, 0.5098039216);
   border-radius: 5px;
   color: #fff;
   cursor: pointer;
@@ -353,7 +347,7 @@ header .janitor-login form div.btns .img-wrapper {
   justify-content: center;
   cursor: pointer;
   background-color: #375a7f;
-  border-color: #2b476482;
+  border-color: rgba(43, 71, 100, 0.5098039216);
   border-radius: 5px;
 }
 header .janitor-login form div.btns .img-wrapper img {
@@ -626,11 +620,11 @@ section.create-thread form .form-group input[type=radio].gif-type, section.creat
 }
 section.create-thread form .form-group input[type=radio].gif-type:checked + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:checked + label {
   background-color: #313131;
-  border-color: #ffff00ad;
+  border-color: rgba(255, 255, 0, 0.6784313725);
   color: #ff0;
 }
 section.create-thread form .form-group input[type=radio].gif-type:focus + label, section.create-thread form .searchgifstuffs input[type=radio].gif-type:focus + label {
-  outline: 1px solid #ffa500cc;
+  outline: 1px solid rgba(255, 165, 0, 0.8);
   outline-offset: 1px;
   outline-style: auto;
 }
@@ -674,11 +668,11 @@ section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
   max-width: 480px;
 }
 section.create-thread .gifBoxWrapper .gif-info, section.create-thread .imagePreview .gif-info {
-  color: #842cb0;
+  color: rgb(132, 44, 176);
   margin: 15px 0;
 }
 section.create-thread .gifBoxWrapper .gif-success, section.create-thread .imagePreview .gif-success {
-  color: #72ab00;
+  color: rgb(114, 171, 0);
   margin: 15px 0;
   display: flex;
   justify-content: space-between;
@@ -809,7 +803,7 @@ section.create-thread .imagePreview {
   flex-direction: column;
 }
 section.create-thread .imagePreview p.info {
-  color: #842cb0;
+  color: rgb(132, 44, 176);
 }
 section.create-thread .imagePreview p.success {
   color: #00bc8c;
@@ -1271,7 +1265,7 @@ div hr {
   margin-top: 5px;
 }
 #replybox p.info {
-  color: #842cb0;
+  color: rgb(132, 44, 176);
 }
 #replybox p.success {
   color: #00bc8c;
@@ -1465,7 +1459,7 @@ section#register form > div input {
 section#register form input[type=submit] {
   height: 36.5px;
   background-color: #2b4764;
-  border-color: #2b476482;
+  border-color: rgba(43, 71, 100, 0.5098039216);
   border-radius: 5px;
   color: #fff;
   cursor: pointer;
@@ -1665,12 +1659,10 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
   section.create-thread .gifBoxWrapper, section.create-thread .imagePreview {
     width: 100%;
   }
-
   #replybox {
     left: 0;
     top: 0;
   }
-
   .list-unstyled {
     width: 95%;
     margin: 0 auto;
@@ -1714,11 +1706,9 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
   header .inner-header form label {
     margin-bottom: 5px;
   }
-
   #replybox {
     max-width: calc(100vw - 25px);
   }
-
   div li {
     flex-direction: column;
     align-items: start;
@@ -1738,7 +1728,6 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
   div li.reply-item img, div li.reply-item video {
     width: 250px;
   }
-
   section#cookie_consent {
     width: 100vw;
     height: 120px;
@@ -1749,7 +1738,6 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
   section#cookie_consent .cookie_consent_wrapper .cookie-btns a {
     margin-bottom: 5px;
   }
-
   #searchbar #searchbar-lists {
     flex-direction: column;
   }
@@ -1766,7 +1754,6 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
   div li img {
     width: 100%;
   }
-
   section.create-thread form .form-group.media-type-radios {
     flex-direction: column;
   }
@@ -1856,4 +1843,15 @@ section .flash a, .janitor-login .flash a, .media-body .flash a {
   87.5% {
     box-shadow: 0em -2.6em 0em 0em rgba(255, 255, 255, 0.2), 1.8em -1.8em 0 0em rgba(255, 255, 255, 0.2), 2.5em 0em 0 0em rgba(255, 255, 255, 0.2), 1.75em 1.75em 0 0em rgba(255, 255, 255, 0.2), 0em 2.5em 0 0em rgba(255, 255, 255, 0.2), -1.8em 1.8em 0 0em rgba(255, 255, 255, 0.5), -2.6em 0em 0 0em rgba(255, 255, 255, 0.7), -1.8em -1.8em 0 0em #ffffff;
   }
+}
+#scroll-is-over {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 0 0 25px;
+}
+#scroll-is-over button {
+  padding: 5px;
+  margin: 5px;
 }

@@ -2,7 +2,7 @@
   <div>
      <section @click="removeWarning($event)" class="create-thread">
       <form @submit.prevent="addMessage()">
-        <h2 @click="focusMessage()">Poste no gchan</h2>
+        <h2 @click="focusMessage()" id="poste-no-gchan">Poste no gchan</h2>
         <div v-if="warning.message" :class="'alert ' + warning.type">
           <span v-on:click="warning.message=''">x</span>
           <h4></h4>
@@ -183,6 +183,11 @@
       >
       </ReplyBox>
     </template>
+    <div v-if="scrollIsOver" id="scroll-is-over">
+      <h3>Acabou!</h3>
+      <p>ヾ( ￣O￣)ツ</p>
+      <p>Você viu todos os posts... que tal <button @click="focusMessage()">compartilhar alguma coisa</button>?</p>
+    </div>
   </div>
 </template>
 
@@ -271,6 +276,7 @@ export default {
     ],
     offset: 0,
     messagesBatchSize: 15,
+    scrollIsOver: false,
   }),
   watch: {
       'message.username': function (newVal, oldVal) {
@@ -602,7 +608,7 @@ export default {
             const messages = document.querySelector('div.container').children;
             for (let i = 0; i < this.messagesBatchSize; i += 1) {
               if (!messages[i + this.offset]) {
-                console.log('chegou no fim! yey');
+                this.scrollIsOver = true;
                 return;
               }
                this.replyObserver.observe(messages[i + this.offset].children[0]);
