@@ -11,6 +11,9 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
+    meta: {
+      title: "gchan: um lugar para amigos"
+    }
   },
   {
     path: '/info',
@@ -42,5 +45,14 @@ router.beforeEach((to, from, next) => {
   }
   next();
 });
+
+const DEFAULT_TITLE = 'gchan: um lugar para amigos';
+router.afterEach((to, from) => {
+  Vue.nextTick(() => {
+    if (to.name != "Post") {
+      document.title = to.meta.title || DEFAULT_TITLE;
+    }
+  });
+})
 
 export default router;

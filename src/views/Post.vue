@@ -108,6 +108,7 @@ export default {
     // loads username from localStorage
     const rememberedUsername = localStorage.getItem('gchan_username');
     if (rememberedUsername) this.replierUsername = rememberedUsername;
+    document.title = `gchan: post #${this.id}`;
   },
   methods: {
     rememberUsername() {
