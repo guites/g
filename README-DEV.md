@@ -4,7 +4,7 @@
 
 The app can be booted locally using Docker, which creates a database containing dummy data and runs the backend node.js app.
 
-It also creates a separate container in which you can run the development webpack server using `npm run dev`.
+It also creates a separate container in which you can run the development vue-cli server using `npm run dev`.
 
 The backend code is fetched via [github](https://github.com/guites/gchan-backend), and in order to fetch new commits, you will have to rebuild the backend service without using the docker cache.
 
