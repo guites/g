@@ -6,7 +6,7 @@
         <div class="inner-header">
             <nav>
                 <ul>
-                    <li><a href="/"><h1>gchan</h1><img src="@/assets/sham.png" alt="gchan logo"></a></li>
+                    <li><a href="/"><h1>gchan</h1><img src="@/assets/sham-32.png" alt="gchan logo"></a></li>
                     <li v-if="!isHome"><a href='/'>mensagens</a></li>
                     <li v-if="!isInfo"><a href='/#/info'>informações</a></li>
                 </ul>
