@@ -12,6 +12,7 @@ Help()
    echo "u     Runs docker-compose up on the project services."
    echo "d     Runs docker-compose down on the project services."
    echo "s     Starts the front-end development server."
+   echo "b     Builds the app for deployment into the /dist directory."
    echo
 }
 
@@ -23,20 +24,36 @@ down_container() {
   docker compose -f .devcontainer/docker-compose.yml down
 }
 
+npm_install() {
+  docker exec -w /workspace gchan-frontend-app-1 npm install
+}
+
 run_dev_server() {
   docker exec -it -w /workspace gchan-frontend-app-1 bash -c "npm run dev || exit 1"
+}
+
+run_build() {
+  docker exec -w /workspace gchan-frontend-app-1 npm run build
+}
+
+build_deployment_files() {
+  .devcontainer/post-start.sh prod
+  if ! run_build; then
+    npm_install
+    run_build
+  fi
 }
 
 start_dev_server() {
   .devcontainer/post-start.sh dev
   if ! run_dev_server; then
-    docker exec -w /workspace gchan-frontend-app-1 npm install
+    npm_install
     run_dev_server
   fi
 }
 
 # handle script options
-while getopts ":uds" option; do
+while getopts ":udsb" option; do
    case $option in
       u) # ups the container
         up_container
@@ -46,6 +63,9 @@ while getopts ":uds" option; do
         exit;;
       s) # starts the development server
         start_dev_server
+        exit;;
+      b) # builds necessary files for deployment
+        build_deployment_files
         exit;;
       \?) # invalid option
         echo "Invalid option!"
