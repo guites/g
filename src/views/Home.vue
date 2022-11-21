@@ -2,7 +2,7 @@
   <div>
      <section @click="removeWarning($event)" class="create-thread">
       <form @submit.prevent="addMessage()">
-        <h2 @click="focusMessage()">Poste no gchan</h2>
+        <h2 @click="focusMessage()" id="poste-no-gchan">Poste no gchan</h2>
         <div v-if="warning.message" :class="'alert ' + warning.type">
           <span v-on:click="warning.message=''">x</span>
           <h4></h4>
@@ -65,7 +65,6 @@
             <label for="search-media">Buscar gif</label>
           </div>
         </div>
-        <!-- <transition name="fade"> -->
           <div v-if="media_type == 'upload-media'" class="form-group">
             <label for="uploadIMG">
               envie uma imagem, gif ou vídeo
@@ -79,9 +78,6 @@
             :disabled="this.optUpload === true"
             @change="handleUpload($event)">
           </div>
-        <!-- </transition> -->
-        <!-- <div class="form-group"> -->
-          <!-- <transition name="fade"> -->
             <div v-if="media_type == 'link-media'" class="form-group">
               <label for="imageURL" v-if="!this.optUpload">
                 digite a URL de uma imagem, gif ou vídeo</label>
@@ -92,8 +88,6 @@
               :readonly="this.optUpload === true"
               >
             </div>
-              <!-- </transition> -->
-              <!-- <transition name="fade"> -->
             <div v-if="media_type == 'search-media'" class="searchgifstuffs">
               <label v-if='!this.optUpload' for='giphyURL'>digite algum termo no campo abaixo!</label>
               <input v-if='!this.optUpload'
@@ -122,8 +116,6 @@
                 </label>
               </div>
             </div>
-            <!-- </transition> -->
-            <!-- </div> -->
         <button type="submit" :disabled="uploadStatus == 'loading'" :class="[uploadStatus === 'loading' ? 'disabled' : '', 'btn btn-primary create-post']">Postar</button>
     </form>
     <div v-if="isPreviewing" class="imagePreview">
@@ -160,7 +152,6 @@
     <Message
     v-for="message in messages"
     v-bind:message="message"
-    v-bind:auth="auth"
     v-bind:replies="message.replies"
     v-bind:replyCount="message.replyCount"
     @replyMessage="replyMessage"
@@ -183,6 +174,11 @@
       >
       </ReplyBox>
     </template>
+    <div v-if="scrollIsOver" id="scroll-is-over">
+      <h3>Acabou!</h3>
+      <p>ヾ( ￣O￣)ツ</p>
+      <p>Você viu todos os posts... que tal <button @click="focusMessage()">compartilhar alguma coisa</button>?</p>
+    </div>
   </div>
 </template>
 
@@ -191,10 +187,6 @@ import ReplyBox from '../components/replybox.vue';
 import Message from '../components/message.vue';
 import Gifbox from '../components/gifbox.vue';
 
-function showThumbImg(e) {
-  if (window.innerWidth < 767) return;
-  e.target.children[0].style = 'display:block;';
-}
 // The .bind method from Prototype.js 
 if (!Function.prototype.bind) { // check if native implementation available
   Function.prototype.bind = function(){ 
@@ -213,18 +205,8 @@ export default {
     Message,
     Gifbox
   },
-  props: {
-    auth: {
-      default: () => ({
-        username: '',
-        loggedIn: '',
-        id: '',
-      }),
-      type: Object,
-    },
-  },
   data: () => ({
-    apiURL: `messages/`,
+    apiURL: `messages`,
     repliesURL: 'replies',
     imgurURLimg: 'imgupload',
     imgurURLgif: 'gifupload',
@@ -272,6 +254,7 @@ export default {
     ],
     offset: 0,
     messagesBatchSize: 15,
+    scrollIsOver: false,
   }),
   watch: {
       'message.username': function (newVal, oldVal) {
@@ -289,9 +272,6 @@ export default {
     },
   },
   computed: {
-    // username() {
-    //   return this.auth.username || this.message.username;
-    // },
     smallUsernamePhrase() {
       const phrases = [
         { quote: 'o que é que há, pois, num nome?', reference: 'https://pt.wikipedia.org/wiki/William_Shakespeare' },
@@ -365,7 +345,7 @@ export default {
         threshold: 0,
       },
     );
-    fetch(`${this.$backendURL}${this.apiURL}${this.offset}`).then((response) => response.json())
+    fetch(`${this.$backendURL}${this.apiURL}?offset=${this.offset}`).then((response) => response.json())
       .then((result) => {
         this.messages = this.sanitizedMessages(result.results);
       })
@@ -553,7 +533,7 @@ export default {
               const current_quote = quote_match[0];
               const reply_id = quote_match[1];
               if (reply_id) {
-                fetch(`${this.$backendURL}reply/${reply_id}`)
+                fetch(`${this.$backendURL}replies/${reply_id}`)
                   .then((response) => {
                     if (response.ok) {
                       return response.json();
@@ -594,7 +574,7 @@ export default {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) return;
         this.lazyLoadObserver.unobserve(entry.target);
-        fetch(`${this.$backendURL}${this.apiURL}${this.offset}`).then((response) => response.json())
+        fetch(`${this.$backendURL}${this.apiURL}?offset=${this.offset}`).then((response) => response.json())
           .then((result) => {
             if (!result.results) return;
             this.messages = this.messages.concat(this.sanitizedMessages(result.results));
@@ -603,7 +583,7 @@ export default {
             const messages = document.querySelector('div.container').children;
             for (let i = 0; i < this.messagesBatchSize; i += 1) {
               if (!messages[i + this.offset]) {
-                console.log('chegou no fim! yey');
+                this.scrollIsOver = true;
                 return;
               }
                this.replyObserver.observe(messages[i + this.offset].children[0]);
@@ -658,10 +638,6 @@ export default {
         grecaptcha.execute(this.$captchaClient, {action: 'post'}).then((token) => token)
         .then((token) => {
           this.message.recaptcha_token = token;
-          if (this.auth.username) {
-            this.message.username = this.auth.username;
-            this.message.user_id = parseInt(this.auth.id, 10);
-          }
           fetch(`${this.$backendURL}${this.apiURL}`, {
             method: 'POST',
             body: JSON.stringify(this.message),
@@ -683,9 +659,7 @@ export default {
             } else {
               this.warning.message = 'Post enviado!';
               this.warning.type = 'alert-success';
-              const parsedResult = JSON.parse(result);
-              parsedResult.isNew = true;
-              this.messages.unshift(this.sanitizeSingleMessage(parsedResult));
+              this.messages.unshift(this.sanitizeSingleMessage(result));
               this.filterMessage(0);
               this.clearMsgForm();
             }
@@ -748,7 +722,7 @@ export default {
         const msgIndex = this.messages.findIndex((el) => parseInt(el.id, 10)
           === parseInt(postId, 10));
         this.filterMessage(msgIndex);
-        fetch(`${this.$backendURL}${this.repliesURL}/${postId}`).then((response) => response.json())
+        fetch(`${this.$backendURL}${this.apiURL}/${postId}/${this.repliesURL}`).then((response) => response.json())
           .then((replies) => {
             if (replies.error) {
               return;

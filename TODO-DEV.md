@@ -1,0 +1,6 @@
+1. Clone gchan-backend [x]
+2. Create a dummy db dump file based on the dump from heroku [x]
+3. Create a postgres docker config that loads the dump on creation: [source](https://github.com/docker-library/docs/blob/master/postgres/README.md) [x]
+4. Finish devcontainer implementation [x]
+5. Add a check on the backend to only verify captcha if env == production [x]
+6. Create a bash script that will load the necessary env vars and docker-compose up/down, delete created containers/images, for non vs-code users [x]

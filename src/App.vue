@@ -6,13 +6,9 @@
         <div class="inner-header">
             <nav>
                 <ul>
-                    <li><a href="/"><h1>gchan</h1><img src="@/assets/sham.png" alt="gchan logo"></a></li>
+                    <li><a href="/"><h1>gchan</h1><img src="@/assets/sham-32.png" alt="gchan logo"></a></li>
                     <li v-if="!isHome"><a href='/'>mensagens</a></li>
                     <li v-if="!isInfo"><a href='/#/info'>informações</a></li>
-                    <!-- <li>
-                      <button v-if="!auth.loggedIn" v-on:click="janitor=!janitor">login</button>
-                      <button v-if="auth.loggedIn" v-on:click="logOut()">logout</button>
-                    </li> -->
                 </ul>
             </nav>
             <SearchBar></SearchBar>
@@ -81,7 +77,7 @@
           </form>
         </transition>
     </header>
-    <router-view :auth="this.auth" class='container'/>
+    <router-view class='container'/>
   </div>
 </template>
 <script>
@@ -111,18 +107,7 @@ export default {
     error: '',
     username: '',
     password: '',
-    showOptions: '',
-    auth: {
-      loggedIn: '',
-      username: '',
-      id: '',
-    },
-    loginFlash: {
-      type: '',
-      header: '',
-      text: '',
-      message: '',
-    },
+    showOptions: ''
   }),
   methods: {
     captchaV3() {
@@ -163,64 +148,6 @@ export default {
         document.cookie = `cookie_consent_variable=true;expires=${expires};path=/;Secure`;
         this.ajaxGtmRequest();
       }
-    },
-    async login() {
-      fetch(`${this.$backendURL}login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        credentials: 'include',
-        body: `email=${this.username}&password=${this.password}`,
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.id && data.name && data.email && data.password) {
-            this.auth.loggedIn = true;
-            this.auth.username = data.name;
-            this.auth.id = data.id;
-            this.loginFlash.type = 'success';
-            this.loginFlash.header = 'Parabéns!';
-            this.loginFlash.link = '/';
-            this.loginFlash.text = 'Login realizado com sucesso!\nVocê já pode postar.\n';
-            this.username = '';
-            this.password = '';
-          } else if (data.message) {
-            this.loginFlash.type = 'error';
-            this.loginFlash.header = 'Oh não!';
-            this.loginFlash.text = `${data.message}\nTente novamente!\n`;
-          }
-        });
-    },
-    checkLogin() {
-      fetch(`${this.$backendURL}login`, {
-        method: 'GET',
-        credentials: 'include',
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.id && data.name && data.email && data.password) {
-            this.auth.loggedIn = true;
-            this.auth.username = data.name;
-            this.auth.id = data.id;
-          } else {
-            this.auth.loggedIn = '';
-          }
-        });
-    },
-    logOut() {
-      fetch(`${this.$backendURL}logout`, {
-        method: 'DELETE',
-        credentials: 'include',
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          if (!data.login) {
-            this.auth.loggedIn = false;
-            this.auth.username = '';
-            this.auth.id = '';
-          }
-        });
     },
     showMarqueeOpts() {
       document.querySelector('.marquee').classList.toggle('has-opts');
@@ -272,13 +199,10 @@ export default {
       document.querySelector('#register form #name').focus();
     },
   },
-  beforeMount() {
-    this.checkLogin();
-  },
   mounted() {
     this.captchaV3();
     this.checkCookies();
-    fetch(`${this.$backendURL}marquee`).then((response) => response.json()).then((result) => {
+    fetch(`${this.$backendURL}marquees`).then((response) => response.json()).then((result) => {
       this.marquees = result.results;
     });
   },
