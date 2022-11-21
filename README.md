@@ -1,28 +1,66 @@
-# Repositório oficial do gchan!
+# Instalation
 
-Projeto com front-end em vuejs / backend em node.
+## Overview
 
-Contribuições são bem-vindas.
+The app can be booted locally using Docker, which creates a database containing dummy data and runs the backend node.js app.
 
-## Instalação no local
+It also creates a separate container in which you can run the development vue-cli server using `npm run dev`.
 
-Clone o projeto e instale através do package.json
+The backend code is fetched via [github](https://github.com/guites/gchan-backend), and in order to fetch new commits, you will have to rebuild the backend service without using the docker cache.
 
-    git clone git@github.com:guites/g.git && cd g && npm i
+A quick workaround for this is changing the value of the `CACHEBUST` argument in `.devcontainer/backend.Dockerfile`.
 
-Altere as URLs do ambiente de produção pro ambiente dev:
+For example
 
-    while read -r line; do sed -i 's{https://gchan-message-board.herokuapp.com{http://localhost:5000{' $line; done < <(grep -rl 'https://gchan-message-board.herokuapp.com' src/);
-    while read -r line; do sed -i 's{https://gchan.com.br{http://localhost:8080{' $line; done < <(grep -rl 'https://gchan.com.br' src/);
+        - ARG CACHEBUST=1
+        + ARG CACHEBUST=2
 
-Depois, 
+will force docker to make a new request to the github server.
 
-    npm run dev
+After making this change, you can rebuild the containers normally.
 
-Antes de dar push no master, leia as instruções em client-deploy.sh
+**Regarding CORS errors**: always access the frontend via `http://localhost:8080`. Any other URL will result in CORS errors, as the backend container only sets the header for that specific url.
 
-### Prints
+## Using VS Code's devcontainer
 
-Projeto em 10/2021
+If you use vscode, you can easilly set up the project using the Remote - Containers extension.
 
-![print do topo da home em 10/2021](prints/20102021-fs8.png)
+1. Install the extension via VS Code > extensions or this [link](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers)
+2. Go to View > Command Palette... and select option `>Remote-Containers: Reopen in Container`.
+3. Open the terminal and run `npm install` and then `npm run dev`.
+4. Access <http://localhost:8080> and verify that the app is running.
+
+The devcontainer will include a few VS Code extensions which you can edit by changing the `extensions` property in `.devcontainer/devcontainer.json`.
+
+## Using Docker
+
+If you are using Docker there are a few extra steps which I've bundled in the `docker-start.sh` script.
+
+Please inspect the script for further information, and run it using
+
+```
+./docker-start.sh
+```
+
+## Styling (scss)
+
+This project uses sass and compiles it with [gulp](https://gulpjs.com).
+
+You can edit the files in src/assets/sass and generate the css files with `npm run sass`.
+
+## Building for deployment
+
+The files can be built for deployment by running
+
+                npm run build
+
+Make sure to switch the `projectURL` and `backendURL` global variables found in `src/main.js` to the production URLs.
+
+                Vue.prototype.$projectURL = 'https://gchan.com.br/';
+                Vue.prototype.$backendURL = 'https://gchan-backend.com.br';
+
+The `docker-start.sh` script has a helper function, `./docker-start -b` which automatically switches the URLs and builds the files into the `./dist` directory.
+
+After building, you can deploy the files to any http server, for example, with node's [http-server](https://www.npmjs.com/package/http-server) package:
+
+        cd /dist && npx http-server .
