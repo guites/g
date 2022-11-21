@@ -13,6 +13,7 @@ Help()
    echo "d     Runs docker-compose down on the project services."
    echo "s     Starts the front-end development server."
    echo "b     Builds the app for deployment into the /dist directory."
+   echo "c     Watches for changes in scss files (compiles into css)."
    echo
 }
 
@@ -52,8 +53,12 @@ start_dev_server() {
   fi
 }
 
+watch_sass() {
+  docker exec -it -w /workspace gchan-frontend-app-1 bash -c "npm run sass || exit 1"
+}
+
 # handle script options
-while getopts ":udsb" option; do
+while getopts ":udsbc" option; do
    case $option in
       u) # ups the container
         up_container
@@ -66,6 +71,9 @@ while getopts ":udsb" option; do
         exit;;
       b) # builds necessary files for deployment
         build_deployment_files
+        exit;;
+      c) # Watches for changes in scss files (compiles into css)
+        watch_sass
         exit;;
       \?) # invalid option
         echo "Invalid option!"
