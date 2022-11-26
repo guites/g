@@ -1,28 +1,33 @@
 {
   "name": "gchan",
-  "description": "gchan frontend dependencies",
   "version": "0.1.1",
-  "author": "gui.garcia67@gmail.com",
-  "license": "MIT",
   "private": true,
+  "description": "gchan frontend dependencies",
+  "author": "gui.garcia67@gmail.com",
   "scripts": {
-    "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
+    "dev": "vue-cli-service serve",
     "sass": "./node_modules/gulp/bin/gulp.js watch"
   },
   "dependencies": {
+    "@vue/cli-service": "^5.0.8",
     "vue": "^2.6.11",
-    "vue-router": "^3.2.0"
+    "vue-router": "^3.2.0",
+    "vuetify": "^2.6.0"
   },
   "devDependencies": {
-    "@vue/cli-service": "^5.0.8",
+    "@vue/cli": "^5.0.8",
     "gulp": "^4.0.2",
     "gulp-sass": "^5.0.0",
-    "sass": "^1.42.1"
+    "sass": "^1.42.1",
+    "sass-loader": "^10.0.0",
+    "vue-cli-plugin-vuetify": "~2.5.8",
+    "vuetify-loader": "^1.7.0"
   },
   "browserslist": [
     "> 1%",
     "last 2 versions",
     "not dead"
-  ]
+  ],
+  "license": "MIT"
 }
