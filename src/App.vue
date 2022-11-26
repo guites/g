@@ -15,12 +15,9 @@ export default {
   components: {
     AppBar,
   },
-  data: () => ({
-    productionHost: "gchan.com.br",
-  }),
   computed: {
     isProduction() {
-      return window.location.host === this.productionHost;
+      return window.location.host === this.$productionURL;
     },
   },
   methods: {
