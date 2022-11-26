@@ -195,6 +195,7 @@ export default {
       subject: "",
       message: "",
       imageURL: "",
+      recaptcha_token: "",
     },
     warning: {
       type: "",
@@ -213,6 +214,11 @@ export default {
       value: "",
     },
   }),
+  computed: {
+    isProduction() {
+      return window.location.host === this.$productionURL;
+    },
+  },
   methods: {
     removeWarning(e) {
       if (e.target.classList.contains("alert") || e.target.closest(".alert")) {
@@ -223,7 +229,21 @@ export default {
         this.warning.message = "";
       }
     },
-    addMessage() {
+    async recaptchaCall() {
+      let recaptcha_token = "";
+      grecaptcha.ready(() => {
+        grecaptcha
+          .execute(this.$captchaClienty, { action: "post" })
+          .then((token) => {
+            recaptcha_token = token;
+          });
+      });
+      while (recaptcha_token == "") {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      return recaptcha_token;
+    },
+    async addMessage() {
       const submitButton = document.querySelector(
         ".create-thread > form > button[type=submit]"
       );
@@ -231,47 +251,45 @@ export default {
       submitButton.classList.add("disabled");
       this.warning.message = "Enviando, aguarde...";
       this.warning.type = "alert-info";
-      grecaptcha.ready(() => {
-        grecaptcha
-          .execute(this.$captchaClient, { action: "post" })
-          .then((token) => token)
-          .then((token) => {
-            this.message.recaptcha_token = token;
-            fetch(`${this.$backendURL}${this.apiURL}`, {
-              method: "POST",
-              body: JSON.stringify(this.message),
-              headers: {
-                "content-type": "application/json",
-              },
-            })
-              .then((response) => response.json())
-              .then((result) => {
-                if (result.details) {
-                  const error = result.details
-                    .map((detail) => detail.message)
-                    .join(".");
-                  this.warning.message = error;
-                  this.warning.type = "alert-error";
-                } else if (result.error) {
-                  if (result.origin === "psql") {
-                    if (result.code === "23505") {
-                      this.warning.message =
-                        "Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ";
-                      this.warning.type = "alert-error";
-                    }
-                  }
-                } else {
-                  this.warning.message = "Post enviado!";
-                  this.warning.type = "alert-success";
-                  this.messages.unshift(this.sanitizeSingleMessage(result));
-                  this.filterMessage(0);
-                  this.clearMsgForm();
-                }
-                submitButton.disabled = false;
-                submitButton.classList.remove("disabled");
-              });
-          });
+      this.message.recaptcha_token = this.isProduction
+        ? await this.recaptchaCall()
+        : "";
+      const response = await fetch(`${this.$backendURL}${this.$messages}`, {
+        method: "POST",
+        body: JSON.stringify(this.message),
+        headers: {
+          "content-type": "application/json",
+        },
       });
+      if (!response.ok) {
+        this.warning.message = "Algo deu errado (ಥ﹏ಥ)";
+        this.warning.type = "alert-error";
+        // TODO: handle different error codes, etc
+      }
+      if (response.ok) {
+        const result = await response.json();
+        if (result.details) {
+          const error = result.details
+            .map((detail) => detail.message)
+            .join(".");
+          this.warning.message = error;
+        } else if (result.error) {
+          if (result.origin === "psql") {
+            if (result.code === "23505") {
+              this.warning.message =
+                "Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ";
+              this.warning.type = "alert-error";
+            }
+          }
+        } else {
+          this.warning.message = "Post enviado!";
+          this.warning.type = "alert-success";
+          this.$emit("new-post", result);
+          this.clearMsgForm();
+        }
+      }
+      submitButton.disabled = false;
+      submitButton.classList.remove("disabled");
     },
     async handleUpload(e) {
       this.uploadStatus = "loading";

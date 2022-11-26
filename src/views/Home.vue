@@ -1,7 +1,7 @@
 <template>
   <v-container>
     <v-container class="create-thread">
-      <PostForm></PostForm>
+      <PostForm @new-post="addNewPost"></PostForm>
     </v-container>
     <Message
       v-for="message in messages"
@@ -603,6 +603,10 @@ export default {
           image.style.display = "initial";
         }
       }
+    },
+    addNewPost(post) {
+      this.messages.unshift(this.sanitizeSingleMessage(post));
+      this.filterMessage(0);
     },
   },
 };
