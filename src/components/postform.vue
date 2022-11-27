@@ -32,12 +32,6 @@
           name="media-type"
           value="link-media"
         ></v-radio>
-        <v-radio
-          label="Buscar gif"
-          id="search-media"
-          name="media-type"
-          value="search-media"
-        ></v-radio>
       </v-radio-group>
     </v-container>
     <v-row
@@ -66,77 +60,20 @@
         </v-icon></v-file-input
       >
     </v-row>
-    <div v-if="media_type == 'link-media'" class="form-group">
-      <label for="imageURL" v-if="!this.optUpload">
-        digite a URL de uma imagem, gif ou vídeo</label
-      >
-      <input
-        style="width: 100%"
-        v-model="message.imageURL"
-        type="url"
-        class="form-control"
-        id="imageURL"
+    <v-row v-if="media_type == 'link-media'">
+      <v-text-field
+        label="Digite a URL de uma imagem, gif ou vídeo"
         placeholder="https://~"
-        :readonly="this.optUpload === true"
-      />
-    </div>
-    <div v-if="media_type == 'search-media'" class="searchgifstuffs">
-      <label v-if="!this.optUpload" for="giphyURL"
-        >digite algum termo no campo abaixo!</label
-      >
-      <input
-        v-if="!this.optUpload"
-        @keyup="setGifSearchText($event)"
-        @touchend="setGifSearchText($event)"
-        v-model="message.giphyURL"
-        type="text"
-        class="form-control"
-        id="giphyURL"
-        placeholder="cats"
-      />
-      <input
-        style="visibility: hidden"
-        v-model="message.imageURL"
         type="url"
-        class="form-control"
-        id="imageURL"
-        readonly
-      />
-      <Gifbox
-        v-bind:gifSearch="gifSearch"
-        v-bind:imageURL="message.imageURL"
-        @gifIsBeingSearched="gifIsBeingSearched"
-        @setGifAsImageURL="setGifAsImageURL"
-        v-if="screenSize <= 979"
-      ></Gifbox>
-      <div
-        v-if="!this.optUpload"
-        class="gif-search-toggle"
-        data-toggle="buttons"
+        v-model="message.imageURL"
+        :readonly="this.optUpload === true"
+        dense
+        outlined
+        class="pa-6"
+        prepend-inner-icon="mdi-lead-pencil"
       >
-        <input
-          v-model="gifSearch.gif_origin"
-          class="gif-type"
-          type="radio"
-          name="options"
-          id="option_giphy"
-          autocomplete="off"
-          checked
-          value="giphy"
-        />
-        <label for="option_giphy" class="btn btn-primary"> Giphy </label>
-        <input
-          v-model="gifSearch.gif_origin"
-          class="gif-type"
-          type="radio"
-          name="options"
-          id="option_gfycat"
-          autocomplete="off"
-          value="gfycat"
-        />
-        <label for="option_gfycat" class="btn btn-primary"> gfycat </label>
-      </div>
-    </div>
+      </v-text-field>
+    </v-row>
     <v-btn
       type="submit"
       :disabled="uploadStatus == 'loading'"
@@ -191,23 +128,12 @@
       ></video>
       <p v-else>Formato não suportado! ::(</p>
     </div>
-    <Gifbox
-      v-bind:gifSearch="gifSearch"
-      v-bind:imageURL="message.imageURL"
-      @gifIsBeingSearched="gifIsBeingSearched"
-      @setGifAsImageURL="setGifAsImageURL"
-      v-if="screenSize > 979"
-    ></Gifbox>
   </v-form>
 </template>
 <script>
-import Gifbox from "./gifbox.vue";
 export default {
   name: "PostForm",
   props: ["allowedVideoFormats"],
-  components: {
-    Gifbox,
-  },
   data: () => ({
     message: {
       username: "",
@@ -226,13 +152,6 @@ export default {
     uploadStatus: "",
     isPreviewing: "",
     screenSize: "",
-    gifSearch: {
-      gif_origin: "giphy",
-      isBeingSearched: "",
-      gifsPerPage: 4,
-      numPages: 5,
-      value: "",
-    },
     upload: {},
     uploadfilename: null,
   }),
@@ -389,7 +308,6 @@ export default {
       this.message.user_id = 0;
       this.message.recaptcha_token = "";
       this.isPreviewing = "";
-      this.gifSearch.isBeingSearched = "";
       const uploadIMG = document.querySelector("#uploadIMG");
       if (uploadIMG) {
         uploadIMG.value = "";
@@ -504,29 +422,10 @@ export default {
     onResize(event) {
       this.screenSize = event.target.innerWidth;
     },
-    gifIsBeingSearched(isIt) {
-      this.gifSearch.isBeingSearched = isIt;
-    },
-    setGifSearchText(e) {
-      this.gifSearch.value = e.target.value;
-    },
-    setGifAsImageURL(imageURL) {
-      this.message.imageURL = imageURL;
-    },
   },
   watch: {
     "message.username": function (newVal, oldVal) {
       this.rememberUsername();
-    },
-    "gifSearch.isBeingSearched": function (newVal, oldVal) {
-      if (newVal !== "") {
-        this.isPreviewing = "";
-      }
-    },
-    isPreviewing(val) {
-      if (val !== "") {
-        this.gifSearch.isBeingSearched = "";
-      }
     },
   },
   mounted() {
