@@ -160,9 +160,14 @@ export default {
     addMarquee() {
       const submitButton = document.querySelector('#marqueeForm input[type="submit"]');
       submitButton.disabled = true;
-      fetch(`${this.$backendURL}marquee`, {
+      let marqueePayload = {
+        content: this.marqueeMessage.content,
+        has_url: this.marqueeMessage.has_url,
+      };
+      if (this.marqueeMessage.has_url === true) marqueePayload['href'] = this.marqueeMessage.href
+      fetch(`${this.$backendURL}marquees`, {
         method: 'POST',
-        body: JSON.stringify(this.marqueeMessage),
+        body: JSON.stringify(marqueePayload),
         headers: {
           'content-type': 'application/json',
         },
