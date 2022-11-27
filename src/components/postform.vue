@@ -4,6 +4,7 @@
     lazy-validation
     @click="removeWarning($event)"
     @submit.prevent="addMessage()"
+    id="postForm"
   >
     <h2 id="poste-no-gchan">Poste no gchan</h2>
     <div v-if="warning.message" :class="'alert ' + warning.type">
@@ -11,13 +12,38 @@
       <h4></h4>
       <p>{{ warning.message }}</p>
     </div>
-    <v-text-field v-model="message.username" label="Nome"> </v-text-field>
+    <v-text-field
+      :messages="
+        message.username
+          ? 'anonimato é para os fracos'
+          : 'o anonimato é a fama do futuro'
+      "
+      v-model="message.username"
+      label="Nome"
+    >
+    </v-text-field>
+    <v-expand-transition>
+      <v-checkbox
+        dense
+        class="ma-0"
+        v-if="message.username"
+        v-model="rememberMe"
+        @change="rememberUsername()"
+        label="Lembrar meu nome"
+      ></v-checkbox>
+    </v-expand-transition>
     <v-text-field v-model="message.subject" label="Assunto"> </v-text-field>
     <v-textarea
       :rules="messageRules"
       label="Mensagem"
       v-model="message.message"
-    ></v-textarea>
+      required
+      ref="messageField"
+    >
+      <template #label>
+        Mensagem <span class="red--text"><strong> *</strong></span>
+      </template>
+    </v-textarea>
     <v-container class="px-0" fluid>
       <v-radio-group v-model="media_type">
         <v-radio
@@ -39,7 +65,6 @@
       @drop.prevent="handleDragAndDrop($event.dataTransfer.files[0])"
       @dragover.prevent
       v-if="media_type == 'upload-media'"
-      class="form-group"
     >
       <v-file-input
         v-model="uploadfilename"
@@ -142,6 +167,7 @@ export default {
       imageURL: "",
       recaptcha_token: "",
     },
+    rememberMe: true,
     messageRules: [(v) => !!v || "Fale algo pro mundo!"],
     warning: {
       type: "",
@@ -185,9 +211,12 @@ export default {
       return recaptcha_token;
     },
     async addMessage() {
-      this.$refs.postform.validate();
+      const formIsValid = this.$refs.postform.validate();
+      if (!formIsValid) {
+        return this.$refs.messageField.focus();
+      }
       const submitButton = document.querySelector(
-        "#create-thread > form > button[type=submit]"
+        "#postForm button[type=submit]"
       );
       submitButton.disabled = true;
       submitButton.classList.add("disabled");
@@ -227,6 +256,7 @@ export default {
           this.warning.message = "Post enviado!";
           this.warning.type = "alert-success";
           this.$emit("new-post", result);
+          this.$refs.postform.resetValidation();
           this.clearMsgForm();
         }
       }
@@ -323,7 +353,6 @@ export default {
           localStorage.removeItem("gchan_username");
         }
       }
-      this.rememberedUsername = this.message.username;
     },
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
@@ -431,6 +460,8 @@ export default {
   mounted() {
     this.screenSize = window.innerWidth;
     window.addEventListener("resize", this.onResize);
+    const rememberedUsername = localStorage.getItem("gchan_username");
+    if (rememberedUsername) this.message.username = rememberedUsername;
   },
   beforeDestroy() {
     window.removeEventListener("resize", this.onResize);
