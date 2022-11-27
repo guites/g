@@ -1,14 +1,16 @@
 <template>
   <v-container>
     <v-container id="create-thread">
-      <v-row>
+      <v-row class="d-flex justify-center">
         <v-col>
           <PostForm
             @new-post="addNewPost"
             :allowedVideoFormats="this.allowedVideoFormats"
           ></PostForm>
         </v-col>
-        <v-col></v-col>
+        <v-col>
+          <v-container></v-container>
+        </v-col>
       </v-row>
     </v-container>
     <v-divider class="pa-6 ma-4"></v-divider>
@@ -206,9 +208,6 @@ export default {
             }
           });
       });
-    // loads username from localStorage
-    const rememberedUsername = localStorage.getItem("gchan_username");
-    // if (rememberedUsername) this.message.username = rememberedUsername;
   },
   methods: {
     convertTZ(date) {

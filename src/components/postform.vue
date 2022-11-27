@@ -2,9 +2,9 @@
   <v-form
     ref="postform"
     lazy-validation
-    @click="removeWarning($event)"
     @submit.prevent="addMessage()"
     id="postForm"
+    style="width: 100%; max-width: 500px"
   >
     <h2 id="poste-no-gchan">Poste no gchan</h2>
     <div v-if="warning.message" :class="'alert ' + warning.type">
@@ -61,10 +61,10 @@
       </v-radio-group>
     </v-container>
     <v-row
+      v-if="media_type == 'upload-media'"
       v-cloak
       @drop.prevent="handleDragAndDrop($event.dataTransfer.files[0])"
       @dragover.prevent
-      v-if="media_type == 'upload-media'"
     >
       <v-file-input
         v-model="uploadfilename"
@@ -91,7 +91,7 @@
         placeholder="https://~"
         type="url"
         v-model="message.imageURL"
-        :readonly="this.optUpload === true"
+        :readonly="this.upload.data !== undefined"
         dense
         outlined
         class="pa-6"
@@ -109,15 +109,8 @@
     >
       Postar
     </v-btn>
-    <div v-if="isPreviewing" class="imagePreview">
-      <div
-        style="
-          width: 100%;
-          align-items: center;
-          display: flex;
-          justify-content: space-between;
-        "
-      >
+    <v-container v-if="uploadStatus !== ''" id="mediaPreview">
+      <v-row>
         <p v-if="uploadStatus == 'loading'" class="info">Aguarde...</p>
         <p v-if="uploadStatus == 'success'" class="success">
           Upload concluído!
@@ -135,24 +128,9 @@
           >
           ou <a href="mailto:gui.garcia67@gmail.com">email</a>
         </p>
-      </div>
-      <img
-        v-if="isPreviewing === 'image'"
-        src=""
-        id="imageToUpload"
-        alt="pré-visualização de imagem para upload"
-      />
-      <video
-        v-else-if="isPreviewing === 'video'"
-        id="videoToUpload"
-        src=""
-        autoplay="true"
-        loop="true"
-        muted="true"
-        playsinline="true"
-      ></video>
-      <p v-else>Formato não suportado! ::(</p>
-    </div>
+      </v-row>
+      <v-row id="renderPreview"> </v-row>
+    </v-container>
   </v-form>
 </template>
 <script>
@@ -174,12 +152,9 @@ export default {
       message: "",
     },
     media_type: "upload-media",
-    optUpload: "",
-    uploadStatus: "",
-    isPreviewing: "",
-    screenSize: "",
     upload: {},
     uploadfilename: null,
+    uploadStatus: "",
   }),
   computed: {
     isProduction() {
@@ -187,15 +162,6 @@ export default {
     },
   },
   methods: {
-    removeWarning(e) {
-      if (e.target.classList.contains("alert") || e.target.closest(".alert")) {
-        // caso clicar no popup, só fecha se for no Xzinho
-        return;
-      }
-      if (this.warning.message != "" && this.warning.type != "alert-info") {
-        this.warning.message = "";
-      }
-    },
     async recaptchaCall() {
       let recaptcha_token = "";
       grecaptcha.ready(() => {
@@ -270,14 +236,12 @@ export default {
     async handleUpload(file) {
       if (!file) return;
       this.uploadStatus = "loading";
-      let imagePreviewDiv;
       const input = document.querySelector("#uploadIMG");
+
       // TODO: delete previous img from imgur if user chose to upload a new one
       if (file.type.startsWith("image/")) {
-        this.isPreviewing = "image";
         await this.sleep(100);
-        imagePreviewDiv = document.querySelector(".imagePreview");
-        await this.readAsDataURL(file, imagePreviewDiv.querySelector("img"));
+        // await this.previewImageFromFile(file);
         await this.uploadToImgur("image", file);
         return;
       }
@@ -294,11 +258,9 @@ export default {
           input.value = "";
           return;
         }
-        this.isPreviewing = "video";
+
         await this.sleep(100);
-        imagePreviewDiv = document.querySelector(".imagePreview");
-        const objUrl = URL.createObjectURL(file);
-        imagePreviewDiv.children[0].src = objUrl;
+        // previewVideoFromFile(file);
         await this.uploadToImgur("video", file);
         return;
       }
@@ -318,12 +280,13 @@ export default {
         .then((response) => response.json())
         .then((r) => {
           if (r.data === true && r.success === true) {
-            this.uploadStatus = "";
-            this.optUpload = false;
-            this.isPreviewing = "";
             this.message.imageURL = "";
-            document.querySelector("input[name=uploadIMG]").value = "";
+            const uploadIMG = document.querySelector("#uploadIMG");
+            if (uploadIMG) {
+              uploadIMG.value = "";
+            }
             this.upload = {};
+            this.uploadStatus = "";
             this.uploadfilename = null;
           }
         });
@@ -337,12 +300,13 @@ export default {
       this.message.imageURL = "";
       this.message.user_id = 0;
       this.message.recaptcha_token = "";
-      this.isPreviewing = "";
       const uploadIMG = document.querySelector("#uploadIMG");
       if (uploadIMG) {
         uploadIMG.value = "";
       }
-      this.optUpload = "";
+      this.upload = {};
+      this.uploadStatus = "";
+      this.uploadfilename = null;
     },
     rememberUsername() {
       if (this.message.username !== "" && this.rememberMe) {
@@ -357,18 +321,40 @@ export default {
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
-    async uploadToImgur(kind, arquivo) {
-      const imgPreviewWrapper = document.querySelector(".imagePreview");
-      const mediaInUse = imgPreviewWrapper.querySelector("img,video");
-      mediaInUse.classList.add("uploading");
-
+    renderUpload() {
+      // injects either an <img> or <video> tag containing this.upload's data into the dom
+      const renderPreview = document.querySelector("#renderPreview");
+      const isVideo = this.upload.data.type.startsWith("video/");
+      if (isVideo) {
+        // TODO: add .hls and .gifv as fallback sources
+        renderPreview.innerHTML = `
+        <video
+          src="${this.upload.data.link}"
+          autoplay="true"
+          controls
+          loop="true"
+          muted="true"
+          playsinline="true"
+        >
+          <source src="${this.upload.data.link}" type="${this.upload.data.type}"
+        </video>
+        `;
+        return;
+      }
+      renderPreview.innerHTML = `
+      <img
+        src="${this.upload.data.link}"
+        alt="pré-visualização de imagem para upload"
+      />`;
+    },
+    async uploadToImgur(kind, file) {
       const postURL =
         kind === "image"
           ? `${this.$backendURL}imgur/images`
           : `${this.$backendURL}imgur/videos`;
 
       const formData = new FormData();
-      formData.append("file", arquivo);
+      formData.append("file", file);
 
       const response = await fetch(postURL, {
         method: "POST",
@@ -386,31 +372,24 @@ export default {
       if (result.status === 200 && result.success === true) {
         this.upload = result;
         this.message.imageURL = this.upload.data.link;
-        // remove a pesquisa por gifs
-        this.optUpload = true;
+        // prevents user from messing with the URL value after upload to imgur is complete
         await this.sleep(100);
-
-        if (this.upload.data.type.startsWith("video/")) {
-          // TODO: set a maximum timeout to avoid getting user stuck waiting forever
-          while (this.upload.data.processing.status !== "completed") {
-            await new Promise(async () => {
-              setTimeout(async () => {
-                this.upload = await fetch(
-                  `${this.$backendURL}imgur/${result.data.id}`
-                );
-              }, 100);
-            });
-          }
-          // TODO: add .hls and .gifv as fallback sources
-          mediaInUse.innerHTML = `
-                <source src="${this.upload.data.link}"
-                type="${this.upload.data.type}">
-              `;
-        } else {
-          mediaInUse.src = this.upload.data.link;
+        // TODO: set a maximum timeout to avoid getting user stuck waiting forever
+        while (this.upload.data.processing.status !== "completed") {
+          await new Promise(async () => {
+            setTimeout(async () => {
+              this.upload = await fetch(
+                `${this.$backendURL}imgur/${result.data.id}`
+              );
+            }, 100);
+          });
         }
-        mediaInUse.classList.remove("uploading");
-      } else if (this.upload.status === 500 && this.upload.success === false) {
+        this.uploadStatus = "success";
+        this.renderUpload();
+        return;
+      }
+
+      if (this.upload.status === 500 && this.upload.success === false) {
         this.warning.message = `
               Erro no servidor de upload! :(\n
               Tente subir sua imagem em outro lugar\n
@@ -420,19 +399,20 @@ export default {
               https://giphy.com/upload,\n etc)
               `;
         this.warning.type = "alert-error";
-        this.isPreviewing = "";
-      } else {
-        this.warning.message = `
+        this.uploadStatus = "success";
+        return;
+      }
+
+      this.warning.message = `
               Aceitamos apenas imagens no formato\n
               JPEG, PNG, GIF, APNG e TIFF!
             `;
-        this.warning.type = "alert-error";
-        this.isPreviewing = "";
-      }
-
+      this.warning.type = "alert-error";
       this.uploadStatus = "success";
     },
-    readAsDataURL(file, img) {
+    previewImageFromFile(file) {
+      // this method renders the preview of an image received via file input
+      const img = document.querySelector("#mediaPreview img");
       return new Promise((resolve) => {
         const fileReader = new FileReader();
         fileReader.onload = function () {
@@ -448,8 +428,11 @@ export default {
         fileReader.readAsDataURL(file);
       });
     },
-    onResize(event) {
-      this.screenSize = event.target.innerWidth;
+    previewVideoFromFile(file) {
+      // this method renders the preview of a video received via file input
+      const objUrl = URL.createObjectURL(file);
+      const mediaPreviewDiv = document.querySelector("#mediaPreview");
+      mediaPreviewDiv.children[0].src = objUrl;
     },
   },
   watch: {
@@ -458,13 +441,8 @@ export default {
     },
   },
   mounted() {
-    this.screenSize = window.innerWidth;
-    window.addEventListener("resize", this.onResize);
     const rememberedUsername = localStorage.getItem("gchan_username");
     if (rememberedUsername) this.message.username = rememberedUsername;
-  },
-  beforeDestroy() {
-    window.removeEventListener("resize", this.onResize);
   },
 };
 </script>
