@@ -1,5 +1,5 @@
 <template>
-  <form @click="removeWarning($event)" @submit.prevent="addMessage()">
+  <v-form @click="removeWarning($event)" @submit.prevent="addMessage()">
     <h2 id="poste-no-gchan">Poste no gchan</h2>
     <div v-if="warning.message" :class="'alert ' + warning.type">
       <span v-on:click="warning.message = ''">x</span>
@@ -8,7 +8,11 @@
     </div>
     <v-text-field v-model="message.username" label="Nome"> </v-text-field>
     <v-text-field v-model="message.subject" label="Assunto"> </v-text-field>
-    <v-textarea label="Mensagem" v-model="message.message"></v-textarea>
+    <v-textarea
+      :rules="messageRules"
+      label="Mensagem"
+      v-model="message.message"
+    ></v-textarea>
     <v-container class="px-0" fluid>
       <v-radio-group v-model="media_type">
         <v-radio
@@ -31,27 +35,35 @@
         ></v-radio>
       </v-radio-group>
     </v-container>
-    <div v-if="media_type == 'upload-media'" class="form-group">
-      <label for="uploadIMG">
-        envie uma imagem, gif ou vídeo
-        <span title="Erros podem ocorrer ¯\_(ツ)_/¯" class="badge beta">
-          BETA
-        </span>
-      </label>
-      <input
-        type="file"
-        name="uploadIMG"
+    <v-row
+      v-cloak
+      @drop.prevent="handleDragAndDrop($event.dataTransfer.files[0])"
+      @dragover.prevent
+      v-if="media_type == 'upload-media'"
+      class="form-group"
+    >
+      <v-file-input
+        v-model="uploadfilename"
+        label="Envie uma imagem, gif ou vídeo"
+        outlined
+        dense
         id="uploadIMG"
-        :disabled="this.optUpload === true"
+        name="uploadIMG"
         @change="handleUpload($event)"
-      />
-    </div>
+        :messages="['Ou arraste um arquivo para cá']"
+        prepend-inner-icon="mdi-paperclip"
+        prepend-icon=""
+        class="pa-6"
+        :clearable="false"
+      >
+        <v-icon v-if="this.upload.data" slot="append" @click="removeUpload()">
+          mdi-close
+        </v-icon></v-file-input
+      >
+    </v-row>
     <div v-if="media_type == 'link-media'" class="form-group">
       <label for="imageURL" v-if="!this.optUpload">
         digite a URL de uma imagem, gif ou vídeo</label
-      >
-      <label for="imageURL" class="upload-concluido" v-else
-        >Upload Concluído!</label
       >
       <input
         style="width: 100%"
@@ -144,17 +156,18 @@
           Upload concluído!
         </p>
         <p v-if="uploadStatus == 'error'" class="error">
-          Erro ao realizar o upload!
+          Erro ao realizar o upload! o(〒﹏〒)o <br />Por favor, nos avise pelo
+          <!-- TODO: contact info shoulnd't be hardcoded -->
+          <a
+            target="_blank"
+            :href="`http://twitter.com/intent/tweet?url=${this.$projectURL}&text=%3CDescreva%20o%20problema%20e%20n%C3%B3s%20entraremos%20em%20contato%21%3E&via=gui_garcia67`"
+            >tweeter</a
+          >,
+          <a target="_blank" href="https://github.com/guites/g/issues/new"
+            >github</a
+          >
+          ou <a href="mailto:gui.garcia67@gmail.com">email</a>
         </p>
-        <button
-          type="button"
-          v-if="this.optUpload"
-          :class="[uploadStatus === 'loading' ? 'disabled' : '']"
-          :disabled="uploadStatus == 'loading'"
-          @click="removeUpload($event)"
-        >
-          Remover arquivo
-        </button>
       </div>
       <img
         v-if="isPreviewing === 'image'"
@@ -180,12 +193,13 @@
       @setGifAsImageURL="setGifAsImageURL"
       v-if="screenSize > 979"
     ></Gifbox>
-  </form>
+  </v-form>
 </template>
 <script>
 import Gifbox from "./gifbox.vue";
 export default {
   name: "PostForm",
+  props: ["allowedVideoFormats"],
   components: {
     Gifbox,
   },
@@ -197,6 +211,7 @@ export default {
       imageURL: "",
       recaptcha_token: "",
     },
+    messageRules: [(v) => !!v || "Fale algo pro mundo!"],
     warning: {
       type: "",
       message: "",
@@ -213,6 +228,8 @@ export default {
       numPages: 5,
       value: "",
     },
+    upload: {},
+    uploadfilename: null,
   }),
   computed: {
     isProduction() {
@@ -291,53 +308,57 @@ export default {
       submitButton.disabled = false;
       submitButton.classList.remove("disabled");
     },
-    async handleUpload(e) {
+    handleDragAndDrop(file) {
+      this.uploadfilename = file;
+      this.handleUpload(file);
+    },
+    async handleUpload(file) {
+      if (!file) return;
       this.uploadStatus = "loading";
       let imagePreviewDiv;
-      const file = e.target.files[0];
       const input = document.querySelector("#uploadIMG");
+      // TODO: delete previous img from imgur if user chose to upload a new one
       if (file.type.startsWith("image/")) {
         this.isPreviewing = "image";
         await this.sleep(100);
         imagePreviewDiv = document.querySelector(".imagePreview");
         await this.readAsDataURL(file, imagePreviewDiv.querySelector("img"));
         await this.uploadToImgur("image", file);
-      } else if (file.type.startsWith("video/")) {
-        if (this.allowedUploadVideoFormats.includes(file.type)) {
-          this.isPreviewing = "video";
-          await this.sleep(100);
-          imagePreviewDiv = document.querySelector(".imagePreview");
-          const objUrl = URL.createObjectURL(file);
-          imagePreviewDiv.children[0].src = objUrl;
-          await this.uploadToImgur("video", file);
-        } else {
+        return;
+      }
+
+      if (file.type.startsWith("video/")) {
+        if (!this.allowedVideoFormats.includes(file.type)) {
           this.uploadStatus = "error";
           this.warning.message = `
             Formato de vídeo não aceito!\n
             Funciona apenas com os formatos abaixo:\n
-            ${this.allowedUploadVideoFormats.join(", ")}
+            ${this.allowedVideoFormats.join(", ")}
           `;
           this.warning.type = "alert-error";
           input.value = "";
+          return;
         }
-      } else {
-        this.warning.message = `
-          Aceitamos apenas imagens,\n
-          gifs e vídeos!
-        `;
-        this.warning.type = "alert-error";
-        input.value = "";
+        this.isPreviewing = "video";
+        await this.sleep(100);
+        imagePreviewDiv = document.querySelector(".imagePreview");
+        const objUrl = URL.createObjectURL(file);
+        imagePreviewDiv.children[0].src = objUrl;
+        await this.uploadToImgur("video", file);
+        return;
       }
+
+      this.warning.message = `
+        Aceitamos apenas imagens,\n
+        gifs e vídeos!
+    `;
+      this.warning.type = "alert-error";
+      input.value = "";
     },
-    removeUpload(e) {
+    removeUpload() {
       this.uploadStatus = "loading";
-      const deleteHash = e.target.getAttribute("data-deletehash").trim();
-      fetch(`${this.$backendURL}imgur/${deleteHash}`, {
+      fetch(`${this.$backendURL}imgur/delete/${this.upload.data.deletehash}`, {
         method: "DELETE",
-        headers: {
-          Authorization: "Client-ID 3435e574a9859d1",
-        },
-        redirect: "follow",
       })
         .then((response) => response.json())
         .then((r) => {
@@ -347,6 +368,8 @@ export default {
             this.isPreviewing = "";
             this.message.imageURL = "";
             document.querySelector("input[name=uploadIMG]").value = "";
+            this.upload = {};
+            this.uploadfilename = null;
           }
         });
     },
@@ -385,45 +408,57 @@ export default {
       const imgPreviewWrapper = document.querySelector(".imagePreview");
       const mediaInUse = imgPreviewWrapper.querySelector("img,video");
       mediaInUse.classList.add("uploading");
-      //const submitButton = document.querySelector('.create-thread > form > button[type=submit]');
-      //submitButton.disabled = true;
-      //submitButton.classList.add('disabled');
 
-      let postURL;
+      const postURL =
+        kind === "image"
+          ? `${this.$backendURL}imgur/images`
+          : `${this.$backendURL}imgur/videos`;
+
       const formData = new FormData();
-      if (kind === "image") {
-        formData.append("image", arquivo);
-        postURL = `${this.$backendURL}${this.imgurURLgif}`;
-      } else {
-        formData.append("video", arquivo);
-        postURL = `${this.$backendURL}${this.imgurURLupload}`;
-      }
-      const requestOptions = {
+      formData.append("file", arquivo);
+
+      const response = await fetch(postURL, {
         method: "POST",
         body: formData,
         redirect: "follow",
-      };
-      fetch(postURL, requestOptions)
-        .then((response) => response.json())
-        .then(async (result) => {
-          if (result.status === 200 && result.success === true) {
-            this.message.imageURL = result.data.link;
-            // remove a pesquisa por gifs
-            this.optUpload = true;
-            await this.sleep(100);
-            if (result.data.type.startsWith("video/")) {
-              mediaInUse.innerHTML = `
-                <source src="${result.data.link}"
-                type="${result.data.type}">
+      });
+      if (!response.ok) {
+        this.uploadStatus = "error";
+        // TODO: prevent image/video preview on upload error
+        return;
+      }
+
+      const result = await response.json();
+
+      if (result.status === 200 && result.success === true) {
+        this.upload = result;
+        this.message.imageURL = this.upload.data.link;
+        // remove a pesquisa por gifs
+        this.optUpload = true;
+        await this.sleep(100);
+
+        if (this.upload.data.type.startsWith("video/")) {
+          // TODO: set a maximum timeout to avoid getting user stuck waiting forever
+          while (this.upload.data.processing.status !== "completed") {
+            await new Promise(async () => {
+              setTimeout(async () => {
+                this.upload = await fetch(
+                  `${this.$backendURL}imgur/${result.data.id}`
+                );
+              }, 100);
+            });
+          }
+          // TODO: add .hls and .gifv as fallback sources
+          mediaInUse.innerHTML = `
+                <source src="${this.upload.data.link}"
+                type="${this.upload.data.type}">
               `;
-            } else {
-              mediaInUse.src = result.data.link;
-            }
-            mediaInUse.classList.remove("uploading");
-            const removeBtn = imgPreviewWrapper.querySelector("button");
-            removeBtn.setAttribute("data-deletehash", result.data.deletehash);
-          } else if (result.status === 500 && result.success === false) {
-            this.warning.message = `
+        } else {
+          mediaInUse.src = this.upload.data.link;
+        }
+        mediaInUse.classList.remove("uploading");
+      } else if (this.upload.status === 500 && this.upload.success === false) {
+        this.warning.message = `
               Erro no servidor de upload! :(\n
               Tente subir sua imagem em outro lugar\n
               e poste usando o link!\n
@@ -431,24 +466,18 @@ export default {
               https://imgur.com/upload,\n
               https://giphy.com/upload,\n etc)
               `;
-            this.warning.type = "alert-error";
-            this.isPreviewing = "";
-          } else {
-            this.warning.message = `
+        this.warning.type = "alert-error";
+        this.isPreviewing = "";
+      } else {
+        this.warning.message = `
               Aceitamos apenas imagens no formato\n
               JPEG, PNG, GIF, APNG e TIFF!
             `;
-            this.warning.type = "alert-error";
-            this.isPreviewing = "";
-          }
-          //submitButton.disabled = false;
-          //submitButton.classList.remove('disabled');
-          this.uploadStatus = "success";
-        })
-        .catch((error) => {
-          this.uploadStatus = "error";
-          console.log("error", error);
-        });
+        this.warning.type = "alert-error";
+        this.isPreviewing = "";
+      }
+
+      this.uploadStatus = "success";
     },
     readAsDataURL(file, img) {
       return new Promise((resolve) => {

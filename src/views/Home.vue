@@ -1,7 +1,10 @@
 <template>
   <v-container>
     <v-container class="create-thread">
-      <PostForm @new-post="addNewPost"></PostForm>
+      <PostForm
+        @new-post="addNewPost"
+        :allowedVideoFormats="this.allowedVideoFormats"
+      ></PostForm>
     </v-container>
     <Message
       v-for="message in messages"
@@ -16,7 +19,7 @@
     </Message>
     <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
-      :allowedUploadVideoFormats="this.allowedUploadVideoFormats"
+      :allowedVideoFormats="this.allowedVideoFormats"
       :quotesToAdd="this.quotesToAdd"
       :rememberedUsername="this.rememberedUsername"
       :rememberMe="this.rememberMe"
@@ -64,9 +67,6 @@ export default {
   data: () => ({
     apiURL: `messages`,
     repliesURL: "replies",
-    imgurURLimg: "imgupload",
-    imgurURLgif: "gifupload",
-    imgurURLupload: "videoupload",
     messages: [],
     replyObserver: null,
     messageToReplyTo: "",
@@ -75,7 +75,10 @@ export default {
     hasSubject: false,
     rememberMe: 1,
     rememberedUsername: "",
-    allowedUploadVideoFormats: [
+    offset: 0,
+    messagesBatchSize: 15,
+    scrollIsOver: false,
+    allowedVideoFormats: [
       "video/mp4",
       "video/webm",
       "video/x-matroska",
@@ -85,9 +88,6 @@ export default {
       "video/x-ms-wmv",
       "video/mpeg",
     ],
-    offset: 0,
-    messagesBatchSize: 15,
-    scrollIsOver: false,
   }),
   computed: {
     smallUsernamePhrase() {
