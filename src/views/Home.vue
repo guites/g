@@ -1,11 +1,17 @@
 <template>
   <v-container>
-    <v-container class="create-thread">
-      <PostForm
-        @new-post="addNewPost"
-        :allowedVideoFormats="this.allowedVideoFormats"
-      ></PostForm>
+    <v-container id="create-thread">
+      <v-row>
+        <v-col>
+          <PostForm
+            @new-post="addNewPost"
+            :allowedVideoFormats="this.allowedVideoFormats"
+          ></PostForm>
+        </v-col>
+        <v-col></v-col>
+      </v-row>
     </v-container>
+    <v-divider class="pa-6 ma-4"></v-divider>
     <Message
       v-for="message in messages"
       v-bind:message="message"

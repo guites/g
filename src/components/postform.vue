@@ -1,5 +1,10 @@
 <template>
-  <v-form @click="removeWarning($event)" @submit.prevent="addMessage()">
+  <v-form
+    ref="postform"
+    lazy-validation
+    @click="removeWarning($event)"
+    @submit.prevent="addMessage()"
+  >
     <h2 id="poste-no-gchan">Poste no gchan</h2>
     <div v-if="warning.message" :class="'alert ' + warning.type">
       <span v-on:click="warning.message = ''">x</span>
@@ -132,7 +137,7 @@
         <label for="option_gfycat" class="btn btn-primary"> gfycat </label>
       </div>
     </div>
-    <button
+    <v-btn
       type="submit"
       :disabled="uploadStatus == 'loading'"
       :class="[
@@ -141,7 +146,7 @@
       ]"
     >
       Postar
-    </button>
+    </v-btn>
     <div v-if="isPreviewing" class="imagePreview">
       <div
         style="
@@ -261,8 +266,9 @@ export default {
       return recaptcha_token;
     },
     async addMessage() {
+      this.$refs.postform.validate();
       const submitButton = document.querySelector(
-        ".create-thread > form > button[type=submit]"
+        "#create-thread > form > button[type=submit]"
       );
       submitButton.disabled = true;
       submitButton.classList.add("disabled");
