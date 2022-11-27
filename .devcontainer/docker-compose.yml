@@ -1,0 +1,41 @@
+version: '3.8'
+name: gchan-frontend
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: devcontainer.Dockerfile
+      args:
+        VARIANT: 16-bullseye
+    volumes:
+      - ..:/workspace:cached
+    ports:
+      - 8080:8080 # expose port used by `npm run dev` to prevent CORS errors
+    command: sleep infinity
+  db:
+    image: postgres:latest
+    restart: unless-stopped
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ../.docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - 4450:4450 # expose backend api port
+      - 5432:5432 # expose database port
+  backend:
+    build:
+      context: .
+      dockerfile: backend.Dockerfile
+    # Runs app on the same network as the database container
+    network_mode: service:db
+    # set environment vars for node app
+    environment:
+      - DATABASE_URL=postgresql://gchan:gchan@localhost:5432/gchan
+      - NODE_ENV=development
+      - CORS_ORIGIN_URL=*
+    command: bash -c "npm run dev"
+volumes:
+  postgres-data:

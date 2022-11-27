@@ -3,8 +3,6 @@ import VueRouter from 'vue-router';
 import Home from '../views/Home.vue';
 import Info from '../views/Info.vue';
 import Post from '../views/Post.vue';
-import New from '../views/New.vue';
-import About from '../views/About.vue';
 
 Vue.use(VueRouter);
 
@@ -13,11 +11,9 @@ const routes = [
     path: '/',
     name: 'Home',
     component: Home,
-  },
-  {
-    path: '/about',
-    name: 'About',
-    component: About,
+    meta: {
+      title: "gchan: um lugar para amigos"
+    }
   },
   {
     path: '/info',
@@ -32,11 +28,6 @@ const routes = [
       const id = Number.parseInt(route.params.id, 10);
       return { id };
     },
-  },
-  {
-    path: '/new',
-    name: 'New post',
-    component: New,
   },
 ];
 
@@ -54,5 +45,14 @@ router.beforeEach((to, from, next) => {
   }
   next();
 });
+
+const DEFAULT_TITLE = 'gchan: um lugar para amigos';
+router.afterEach((to, from) => {
+  Vue.nextTick(() => {
+    if (to.name != "Post") {
+      document.title = to.meta.title || DEFAULT_TITLE;
+    }
+  });
+})
 
 export default router;
