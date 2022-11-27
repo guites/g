@@ -1,5 +1,5 @@
 <template>
-  <v-app-bar app dark>
+  <v-app-bar app>
     <div class="d-flex align-center">
       <v-toolbar-title><h1>gchan</h1></v-toolbar-title>
       <v-img
