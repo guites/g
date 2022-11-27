@@ -208,9 +208,9 @@ export default {
   data: () => ({
     apiURL: `messages`,
     repliesURL: 'replies',
-    imgurURLimg: 'imgupload',
-    imgurURLgif: 'gifupload',
-    imgurURLupload: 'videoupload',
+    imgurURLimg: 'imgur/images',
+    imgurURLgif: 'imgur/images',
+    imgurURLupload: 'imgur/videos',
     optUpload: '',
     messages: [],
     replyObserver: null,
@@ -792,10 +792,10 @@ export default {
       let postURL;
       const formData = new FormData();
       if (kind === 'image') {
-        formData.append('image', arquivo);
+        formData.append('file', arquivo);
         postURL = `${this.$backendURL}${this.imgurURLgif}`;
       } else {
-        formData.append('video', arquivo);
+        formData.append('file', arquivo);
         postURL = `${this.$backendURL}${this.imgurURLupload}`;
       }
       const requestOptions = {

@@ -539,12 +539,12 @@ export default {
       // blank line
       const formData = new FormData();
       if (kind === 'image') {
-        formData.append('image', file);
-        await this.postImgGif(formData,`${this.$backendURL}gifupload`);
+        formData.append('file', file);
+        await this.postImgGif(formData,`${this.$backendURL}imgur/images`);
       } else {
         this.isUploading = true;
-        formData.append('video', file);
-        fetch(`${this.$backendURL}videoupload`, {
+        formData.append('file', file);
+        fetch(`${this.$backendURL}imgur/videos`, {
           method: 'POST',
           body: formData,
           redirect: 'follow',
