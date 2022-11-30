@@ -14,7 +14,7 @@
       </v-row>
     </v-container>
     <v-divider class="pa-6 ma-4"></v-divider>
-    <Message
+    <Thread
       v-for="message in messages"
       v-bind:message="message"
       v-bind:replies="message.replies"
@@ -24,7 +24,7 @@
       @update="message = $event"
       v-bind:key="message.id"
     >
-    </Message>
+    </Thread>
     <ReplyBox
       :messageToReplyTo="this.messageToReplyTo"
       :allowedVideoFormats="this.allowedVideoFormats"
@@ -48,7 +48,7 @@
 <script>
 import PostForm from "../components/postform.vue";
 import ReplyBox from "../components/replybox.vue";
-import Message from "../components/message.vue";
+import Thread from "../components/thread.vue";
 
 // The .bind method from Prototype.js
 if (!Function.prototype.bind) {
@@ -69,7 +69,7 @@ export default {
   name: "Home",
   components: {
     ReplyBox,
-    Message,
+    Thread,
     PostForm,
   },
   data: () => ({
@@ -97,39 +97,6 @@ export default {
       "video/mpeg",
     ],
   }),
-  computed: {
-    smallUsernamePhrase() {
-      const phrases = [
-        {
-          quote: "o que é que há, pois, num nome?",
-          reference: "https://pt.wikipedia.org/wiki/William_Shakespeare",
-        },
-        {
-          quote: "remember: no use for a name",
-          reference: "https://www.youtube.com/watch?v=mEdd1NHnwIE",
-        },
-        {
-          quote: "o homem é menos ele mesmo quando fala de sua pessoa",
-          reference: "https://pt.wikipedia.org/wiki/Oscar_Wilde",
-        },
-        {
-          quote: "o anonimato é a fama do futuro",
-          reference: "https://pt.wikipedia.org/wiki/John_Boyle",
-        },
-        {
-          quote: "a vingança nunca é plena, mata a alma e a envenena",
-          reference: "https://pt.wikiquote.org/wiki/Seu_Madruga",
-        },
-        {
-          quote: "Ski-bi dibby dib yo da dub dub",
-          reference: "https://www.youtube.com/watch?v=Hy8kmNEo1i8",
-        },
-        { quote: "Baby don't hurt me", reference: "watsalov" },
-        { quote: "Pode entrar armado no gchan?", reference: "jairinho" },
-      ];
-      return phrases[Math.floor(phrases.length * Math.random())].quote;
-    },
-  },
   mounted() {
     const mouseActions = ["mouseover", "mouseout", "click"];
     mouseActions.forEach((ev) => {
@@ -197,16 +164,14 @@ export default {
         this.messages = this.sanitizedMessages(result.results);
       })
       .then(() => {
-        document
-          .querySelectorAll(".list-unstyled li.media")
-          .forEach((li, index) => {
-            this.replyObserver.observe(li);
-            if (index === this.messagesBatchSize - 1) {
-              this.offset += 15;
-              li.setAttribute("data-offset", this.offset);
-              this.lazyLoadObserver.observe(li);
-            }
-          });
+        document.querySelectorAll("[data-type='post']").forEach((li, index) => {
+          this.replyObserver.observe(li);
+          if (index === this.messagesBatchSize - 1) {
+            this.offset += 15;
+            li.setAttribute("data-offset", this.offset);
+            this.lazyLoadObserver.observe(li);
+          }
+        });
       });
   },
   methods: {

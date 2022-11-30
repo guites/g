@@ -1,35 +1,35 @@
 <style>
-  .container h1 {
-    max-width:980px;
-    width:100%;
-    border-bottom: 1px solid #424242;
-    margin: 20px auto;
-    padding:0 0 20px 0;
-  }
+.container h1 {
+  max-width: 980px;
+  width: 100%;
+  border-bottom: 1px solid #424242;
+  margin: 20px auto;
+  padding: 0 0 20px 0;
+}
 </style>
 <template>
   <section>
-    <h1>Respondendo ao post #{{message.id}}</h1>
-    <Message
-    v-bind:message="message"
-    v-bind:replies="message.replies"
-    @replyMessage="replyMessage"
-    @adcQuote="adcQuote"
-    @update="message = $event"
-    v-bind:key="message.id"
+    <h1>Respondendo ao post #{{ message.id }}</h1>
+    <Thread
+      v-bind:message="message"
+      v-bind:replies="message.replies"
+      @replyMessage="replyMessage"
+      @adcQuote="adcQuote"
+      @update="message = $event"
+      v-bind:key="message.id"
     >
-    </Message>
+    </Thread>
     <template>
       <ReplyBox
-      :messageToReplyTo="this.messageToReplyTo"
-      :allowedUploadVideoFormats="this.allowedUploadVideoFormats"
-      :quotesToAdd="this.quotesToAdd"
-      :rememberedUsername="this.rememberedUsername"
-      :rememberMe="this.rememberMe"
-      @closeReply="this.closeReply"
-      @addReplyToThread="this.addReplyToThread"
-      @updateUsername="this.updateUsername"
-      @updateRememberMe="this.updateRememberMe"
+        :messageToReplyTo="this.messageToReplyTo"
+        :allowedUploadVideoFormats="this.allowedUploadVideoFormats"
+        :quotesToAdd="this.quotesToAdd"
+        :rememberedUsername="this.rememberedUsername"
+        :rememberMe="this.rememberMe"
+        @closeReply="this.closeReply"
+        @addReplyToThread="this.addReplyToThread"
+        @updateUsername="this.updateUsername"
+        @updateRememberMe="this.updateRememberMe"
       >
       </ReplyBox>
     </template>
@@ -37,11 +37,11 @@
 </template>
 
 <script>
-import ReplyBox from '../components/replybox.vue';
-import Message from '../components/message.vue';
+import ReplyBox from "../components/replybox.vue";
+import Message from "../components/thread.vue";
 
 export default {
-  name: 'Post',
+  name: "Post",
   components: {
     ReplyBox,
     Message,
@@ -53,38 +53,38 @@ export default {
     },
   },
   data: () => ({
-    messageURL: 'messages/',
-    repliesURL: 'replies',
+    messageURL: "messages/",
+    repliesURL: "replies",
     message: {
-      username: '',
-      subject: '',
-      message: '',
-      imageURL: '',
+      username: "",
+      subject: "",
+      message: "",
+      imageURL: "",
       user_id: 0,
-      gif_origin: 'none',
+      gif_origin: "none",
     },
-    replierUsername: '',
+    replierUsername: "",
     rememberMe: 1,
-    rememberedUsername: '',
-    quotesToAdd: '',
-    messageToReplyTo: '',
+    rememberedUsername: "",
+    quotesToAdd: "",
+    messageToReplyTo: "",
     allowedUploadVideoFormats: [
-      'video/mp4',
-      'video/webm',
-      'video/x-matroska',
-      'video/quicktime',
-      'video/x-flv',
-      'video/x-msvideo',
-      'video/x-ms-wmv',
-      'video/mpeg',
+      "video/mp4",
+      "video/webm",
+      "video/x-matroska",
+      "video/quicktime",
+      "video/x-flv",
+      "video/x-msvideo",
+      "video/x-ms-wmv",
+      "video/mpeg",
     ],
   }),
   watch: {
-    'replierUsername': function (newVal, oldVal) {
+    replierUsername: function (newVal, oldVal) {
       this.rememberUsername();
     },
     id(val) {
-        this.getThePost();
+      this.getThePost();
     },
   },
   beforeMount() {
@@ -92,30 +92,30 @@ export default {
   },
   mounted() {
     // loads username from localStorage
-    const rememberedUsername = localStorage.getItem('gchan_username');
+    const rememberedUsername = localStorage.getItem("gchan_username");
     if (rememberedUsername) this.replierUsername = rememberedUsername;
     document.title = `gchan: post #${this.id}`;
   },
   methods: {
     rememberUsername() {
-        if (this.replierUsername !== '' && this.rememberMe) {
-          localStorage.setItem('gchan_username', this.replierUsername);
-        } else {
-          const getUsername = localStorage.getItem('gchan_username');
-          if (getUsername) {
-            localStorage.removeItem('gchan_username');
-          }
+      if (this.replierUsername !== "" && this.rememberMe) {
+        localStorage.setItem("gchan_username", this.replierUsername);
+      } else {
+        const getUsername = localStorage.getItem("gchan_username");
+        if (getUsername) {
+          localStorage.removeItem("gchan_username");
         }
-        this.rememberedUsername = this.replierUsername;
+      }
+      this.rememberedUsername = this.replierUsername;
     },
     sanitizeSingleMessage(message) {
       const sanitized = message;
       if (message.message) {
-        sanitized.message = message.message.replace(/</g, '&lt;');
-        sanitized.message = message.message.replace(/>/g, '&gt;');
+        sanitized.message = message.message.replace(/</g, "&lt;");
+        sanitized.message = message.message.replace(/>/g, "&gt;");
       } else {
-        sanitized.content = message.content.replace(/</g, '&lt;');
-        sanitized.content = message.content.replace(/>/g, '&gt;');
+        sanitized.content = message.content.replace(/</g, "&lt;");
+        sanitized.content = message.content.replace(/>/g, "&gt;");
       }
       return sanitized;
     },
@@ -129,7 +129,12 @@ export default {
     },
     convertTZ(date) {
       //source: https://stackoverflow.com/a/54127122/14427854
-      var date_sp = new Date((typeof date === "string" ? new Date(date) : date).toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+      var date_sp = new Date(
+        (typeof date === "string" ? new Date(date) : date).toLocaleString(
+          "en-US",
+          { timeZone: "America/Sao_Paulo" }
+        )
+      );
       var hour = ("0" + date_sp.getHours()).slice(-2);
       var min = ("0" + date_sp.getMinutes()).slice(-2);
       var day = ("0" + date_sp.getDate()).slice(-2);
@@ -144,13 +149,14 @@ export default {
     },
     escapeRegExp(stringToGoIntoTheRegex) {
       // https://stackoverflow.com/a/17886301/14427854
-      return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+      return stringToGoIntoTheRegex.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
     },
     filterMessage(index) {
-      const isReply = typeof index === 'object' && index !== null;
+      const isReply = typeof index === "object" && index !== null;
       let messageIndexForReplies;
       // const yt_rgx = /(?:https?:\/\/)?(?:m\.)?(?:www\.)?youtu\.?be(?:\.com)?\/?\S*(?:watch|embed)?(?:\S*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
-      const yt_rgx = /(?:https?:\/\/)?(?:m\.)?(?:www\.)?youtu\.?be(?:\.com)?\/?\S*(?:watch|embed)?(?:\S*v=|v\/|\/)([\w\-]+)(?:[\&\?]?([\w\-]+)?=?([\w\%\-]+)?)+/g;
+      const yt_rgx =
+        /(?:https?:\/\/)?(?:m\.)?(?:www\.)?youtu\.?be(?:\.com)?\/?\S*(?:watch|embed)?(?:\S*v=|v\/|\/)([\w\-]+)(?:[\&\?]?([\w\-]+)?=?([\w\%\-]+)?)+/g;
       const quotes_rgx = new RegExp("&gt;&gt;([0-9]{1,5}):", "g");
       let string;
       if (isReply) {
@@ -162,24 +168,29 @@ export default {
       const quote_matches = string.matchAll(quotes_rgx);
       if (quote_matches !== null || matches !== null) {
         if (isReply) {
-          if (index.filtered === '1') return;
+          if (index.filtered === "1") return;
           index.yt_iframes = [];
           index.filtered = 1;
         } else {
-          if (this.message.filtered === '1') return;
-          this.$set(this.message, 'yt_thumbnails', []);
-          this.$set(this.message, 'yt_iframes', []);
-          this.$set(this.message, 'filtered', '1');
+          if (this.message.filtered === "1") return;
+          this.$set(this.message, "yt_thumbnails", []);
+          this.$set(this.message, "yt_iframes", []);
+          this.$set(this.message, "filtered", "1");
         }
 
         if (matches !== null) {
           if (matches.length > 0) {
             for (let i = 0; i < matches.length; i += 1) {
-              fetch(`https://www.youtube.com/oembed?url=${matches[i]}&format=json`)
-                .then(async (response) => {
-                  if (response.ok) {
-                    const result = await response.json();
-                    const htmlString = `[<a data-link="${matches[i]}" data-thumb="${result.thumbnail_url}" href="javascript:;" onmouseover="this.nextElementSibling.style='display:block;'" onmouseout="this.nextElementSibling.style='display:none;'" onclick="
+              fetch(
+                `https://www.youtube.com/oembed?url=${matches[i]}&format=json`
+              ).then(async (response) => {
+                if (response.ok) {
+                  const result = await response.json();
+                  const htmlString = `[<a data-link="${
+                    matches[i]
+                  }" data-thumb="${
+                    result.thumbnail_url
+                  }" href="javascript:;" onmouseover="this.nextElementSibling.style='display:block;'" onmouseout="this.nextElementSibling.style='display:none;'" onclick="
                     this.childNodes[0].textContent == 'mostrar' ? this.childNodes[0].textContent = 'esconder' : this.childNodes[0].textContent = 'mostrar';
                     const current_li = this.closest('li');
                     // seleciona, se existir, o iframe que estiver carregado
@@ -195,38 +206,59 @@ export default {
                       }
                       current_frame.remove();
                     }
-                    this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${result.thumbnail_url}'>${result.html.replace(/"/g, '\'')}</div>\`;
-                    ">mostrar</a><img class="yt-thumb" style="display:none;" src="${result.thumbnail_url}">]`;
-                    const checkUrlRgx = new RegExp(this.escapeRegExp(`data-link="${matches[i]}"`));
-                    if (isReply) {
-                      if (!checkUrlRgx.test(index.content)) {
-                        index.content = index.content.replaceAll(matches[i], htmlString);
-                      }
-                    } else {
-                      if (!checkUrlRgx.test(this.message.message)) {
-                        this.message.message = this.message.message.replaceAll(matches[i], htmlString);
-                      }
+                    this.closest('li').querySelector('.iframe-wrapper').innerHTML = \`<div data-checkiframe='${
+                      result.thumbnail_url
+                    }'>${result.html.replace(/"/g, "'")}</div>\`;
+                    ">mostrar</a><img class="yt-thumb" style="display:none;" src="${
+                      result.thumbnail_url
+                    }">]`;
+                  const checkUrlRgx = new RegExp(
+                    this.escapeRegExp(`data-link="${matches[i]}"`)
+                  );
+                  if (isReply) {
+                    if (!checkUrlRgx.test(index.content)) {
+                      index.content = index.content.replaceAll(
+                        matches[i],
+                        htmlString
+                      );
                     }
                   } else {
-                    let htmlString;
-                    if (matches[i].startsWith('http://') || matches[i].startsWith('https://')) {
-                      if (response.status === 400) {
-                        htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.nextElementSibling.style='display:block;'" onmouseout="this.nextElementSibling.style='display:none;'">youtube?</a>]<span class="yt-warning" style="display:none;">não conseguimos verificar este link. Tenha cautela!</span>`;
-                      } else if (response.status === 404) {
-                        htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?</a>]<span class="yt-warning" style="display:none;">não conseguimos verificar este link. Tenha cautela!</span>`;
-                      } else {
-                        return
-                      }
-                      if (isReply) {
-                        index.content = index.content.replace(matches[i], htmlString);
-                      } else {
-                        this.message.message = this.message.message.replace(matches[i], htmlString);
-                      }
+                    if (!checkUrlRgx.test(this.message.message)) {
+                      this.message.message = this.message.message.replaceAll(
+                        matches[i],
+                        htmlString
+                      );
+                    }
+                  }
+                } else {
+                  let htmlString;
+                  if (
+                    matches[i].startsWith("http://") ||
+                    matches[i].startsWith("https://")
+                  ) {
+                    if (response.status === 400) {
+                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.nextElementSibling.style='display:block;'" onmouseout="this.nextElementSibling.style='display:none;'">youtube?</a>]<span class="yt-warning" style="display:none;">não conseguimos verificar este link. Tenha cautela!</span>`;
+                    } else if (response.status === 404) {
+                      htmlString = `[<a target="_blank" href="${matches[i]}" onmouseover="this.children[0].style='display:block;'" onmouseout="this.children[0].style='display:none;'">youtube?</a>]<span class="yt-warning" style="display:none;">não conseguimos verificar este link. Tenha cautela!</span>`;
                     } else {
                       return;
                     }
+                    if (isReply) {
+                      index.content = index.content.replace(
+                        matches[i],
+                        htmlString
+                      );
+                    } else {
+                      this.message.message = this.message.message.replace(
+                        matches[i],
+                        htmlString
+                      );
+                    }
+                  } else {
+                    return;
                   }
-                });
+                }
+              });
             }
           }
         }
@@ -247,26 +279,43 @@ export default {
                     }
                   })
                   .then((r) => {
-                    const sanitizedQuoteMsg = this.sanitizeSingleMessage(r.results[0]);
+                    const sanitizedQuoteMsg = this.sanitizeSingleMessage(
+                      r.results[0]
+                    );
                     let quote_content = sanitizedQuoteMsg.content;
                     if (quote_content.length > 250) {
                       quote_content = quote_content.substring(0, 220);
-                      quote_content += '<i style="font-size: 11px;">[... resposta truncada devido ao tamanho]</i>';
+                      quote_content +=
+                        '<i style="font-size: 11px;">[... resposta truncada devido ao tamanho]</i>';
                     }
                     const quote_message_id = sanitizedQuoteMsg.message_id;
                     let htmlString = `<a class="quote" href='/post/${quote_message_id}#quoted_${reply_id}'>${current_quote}</a><li class="media reply-item quote-hidden" id="quoted_hidden_${reply_id}">`;
-                    if (sanitizedQuoteMsg.imageurl != '') {
+                    if (sanitizedQuoteMsg.imageurl != "") {
                       htmlString += `<img onerror="this.src='/nao_tem_preview.jpg'; this.onerror=null;" loading="lazy" data-src="${sanitizedQuoteMsg.imageurl}" src="${sanitizedQuoteMsg.imageurl}" alt="" class="img-thumbnail">`;
                     }
-                    htmlString += `<div class="align-self-center media-body"><div class="edit_tab"><p class="mt-0 mb-1">${sanitizedQuoteMsg.username}</p><button class="link link-reply">#${sanitizedQuoteMsg.id}</button></div><p class="text-content is-quoted">${quote_content}</p><small>${this.convertTZ(sanitizedQuoteMsg.created)}</small><br/></div></li>`;
+                    htmlString += `<div class="align-self-center media-body"><div class="edit_tab"><p class="mt-0 mb-1">${
+                      sanitizedQuoteMsg.username
+                    }</p><button class="link link-reply">#${
+                      sanitizedQuoteMsg.id
+                    }</button></div><p class="text-content is-quoted">${quote_content}</p><small>${this.convertTZ(
+                      sanitizedQuoteMsg.created
+                    )}</small><br/></div></li>`;
                     if (isReply) {
-                      index.content = index.content.replaceAll(current_quote, htmlString);
+                      index.content = index.content.replaceAll(
+                        current_quote,
+                        htmlString
+                      );
                     } else {
-                      this.message.message = this.message.message.replace(current_quote, htmlString);
+                      this.message.message = this.message.message.replace(
+                        current_quote,
+                        htmlString
+                      );
                     }
                   })
                   .catch((err) => {
-                    console.log('resposta de id '+reply_id+' não encontrada.');
+                    console.log(
+                      "resposta de id " + reply_id + " não encontrada."
+                    );
                   });
               }
             }
@@ -277,60 +326,75 @@ export default {
     },
     targetQuote() {
       this.$nextTick(() => {
-        const checkTarget = window.location.href.split('#');
+        const checkTarget = window.location.href.split("#");
         if (checkTarget.length > 1) {
           const targetQuote = checkTarget.splice(-1)[0];
-          const quoteElement = document.querySelector('#'+targetQuote);
+          const quoteElement = document.querySelector("#" + targetQuote);
           if (quoteElement) {
-            quoteElement.scrollIntoView({top: 0, behavior: 'smooth'});
-            quoteElement.classList.add('target');
-            document.querySelector('body').addEventListener('click', function(e) {
-              if (!e.target.classList.contains('quote')) {
-                const checkTarget = document.querySelector('.target');
-                if (checkTarget) {
-                  checkTarget.classList.remove('target');
-                }
-              } else {
-                // clicou num link de quote
-                e.preventDefault();
-                const checkTarget = e.target.href.split('#');
-                if (checkTarget.length > 1) {
-                  const targetQuote = checkTarget.splice(-1)[0];
-                  const quoteElement = document.querySelector('#'+targetQuote);
-                  if (quoteElement) {
-                    quoteElement.scrollIntoView({top: 0, behavior: 'smooth'});
-                    const lastTarget = document.querySelector('.target');
-                    if (lastTarget) lastTarget.classList.remove('target');
-                    quoteElement.classList.add('target');
-                    history.replaceState(null, '', e.target.href);
-                  } else {
-                    window.location.href = e.target.href;
+            quoteElement.scrollIntoView({ top: 0, behavior: "smooth" });
+            quoteElement.classList.add("target");
+            document
+              .querySelector("body")
+              .addEventListener("click", function (e) {
+                if (!e.target.classList.contains("quote")) {
+                  const checkTarget = document.querySelector(".target");
+                  if (checkTarget) {
+                    checkTarget.classList.remove("target");
+                  }
+                } else {
+                  // clicou num link de quote
+                  e.preventDefault();
+                  const checkTarget = e.target.href.split("#");
+                  if (checkTarget.length > 1) {
+                    const targetQuote = checkTarget.splice(-1)[0];
+                    const quoteElement = document.querySelector(
+                      "#" + targetQuote
+                    );
+                    if (quoteElement) {
+                      quoteElement.scrollIntoView({
+                        top: 0,
+                        behavior: "smooth",
+                      });
+                      const lastTarget = document.querySelector(".target");
+                      if (lastTarget) lastTarget.classList.remove("target");
+                      quoteElement.classList.add("target");
+                      history.replaceState(null, "", e.target.href);
+                    } else {
+                      window.location.href = e.target.href;
+                    }
                   }
                 }
-              }
-            });
+              });
           }
         }
       });
     },
     getThePost() {
-      fetch(`${this.$backendURL}${this.messageURL}${this.id}`).then((response) => response.json())
-          .then((result) => {
-            if (result.results) {
-              this.message = this.sanitizeSingleMessage(result.results.shift());
-              fetch(`${this.$backendURL}${this.messageURL}/${this.id}/${this.repliesURL}`).then((response) => response.json())
-                .then((replies) => {
-                  if (replies.error) {
-                    return;
-                  }
-                  this.$set(this.message, 'replies', this.sanitizedMessages(replies));
-                  this.message.replies = this.filteredReps(replies);
-                  this.targetQuote();
-                });
-            } else {
-              window.location.href = '/';
-            }
-          });
+      fetch(`${this.$backendURL}${this.messageURL}${this.id}`)
+        .then((response) => response.json())
+        .then((result) => {
+          if (result.results) {
+            this.message = this.sanitizeSingleMessage(result.results.shift());
+            fetch(
+              `${this.$backendURL}${this.messageURL}/${this.id}/${this.repliesURL}`
+            )
+              .then((response) => response.json())
+              .then((replies) => {
+                if (replies.error) {
+                  return;
+                }
+                this.$set(
+                  this.message,
+                  "replies",
+                  this.sanitizedMessages(replies)
+                );
+                this.message.replies = this.filteredReps(replies);
+                this.targetQuote();
+              });
+          } else {
+            window.location.href = "/";
+          }
+        });
     },
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
@@ -338,21 +402,21 @@ export default {
     sanitizeSingleMessage(message) {
       const sanitized = message;
       if (message.message) {
-        sanitized.message = message.message.replace(/</g, '&lt;');
-        sanitized.message = message.message.replace(/>/g, '&gt;');
+        sanitized.message = message.message.replace(/</g, "&lt;");
+        sanitized.message = message.message.replace(/>/g, "&gt;");
       } else {
-        sanitized.content = message.content.replace(/</g, '&lt;');
-        sanitized.content = message.content.replace(/>/g, '&gt;');
+        sanitized.content = message.content.replace(/</g, "&lt;");
+        sanitized.content = message.content.replace(/>/g, "&gt;");
       }
       return sanitized;
     },
     showThumbImg(e) {
       if (window.innerWidth < 767) return;
-      e.target.children[0].style = 'display:block;';
+      e.target.children[0].style = "display:block;";
     },
     hideThumbImg(e) {
       if (window.innerWidth < 767) return;
-      e.target.children[0].style = 'display:none;';
+      e.target.children[0].style = "display:none;";
     },
     replyMessage(reply) {
       this.messageToReplyTo = reply;
@@ -367,17 +431,19 @@ export default {
       this.rememberMe = remember;
     },
     closeReply() {
-      this.messageToReplyTo = '';
+      this.messageToReplyTo = "";
     },
     addReplyToThread(reply) {
       let typeCheckedReply;
-      if (typeof reply === 'string') {
+      if (typeof reply === "string") {
         typeCheckedReply = JSON.parse(reply);
       } else {
         typeCheckedReply = reply;
       }
-      if (this.message.replies === undefined) this.message.replies = []; 
-      this.message.replies.push(this.filterMessage(this.sanitizeSingleMessage(typeCheckedReply)));
+      if (this.message.replies === undefined) this.message.replies = [];
+      this.message.replies.push(
+        this.filterMessage(this.sanitizeSingleMessage(typeCheckedReply))
+      );
     },
   },
 };
