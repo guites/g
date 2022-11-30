@@ -1,5 +1,5 @@
 <template>
-  <v-list class="my-6">
+  <v-container class="mt-6">
     <Post :message="message" :created="convertTZ(message.created)"></Post>
     <Reply
       v-for="reply of replies"
@@ -7,7 +7,8 @@
       :reply="reply"
       :created="convertTZ(reply.created)"
     ></Reply>
-  </v-list>
+    <v-divider class="mb-6"></v-divider>
+  </v-container>
 </template>
 <script>
 import Post from "./post.vue";
@@ -173,19 +174,6 @@ export default {
         };
       }
       video.addEventListener("error", onerrorCallback(this.$backendURL));
-    },
-    preventVideo(imgURL) {
-      return;
-      // TODO: see how this dynamic is going to work since
-      // we are recreating the wrapper innerHTML everytime
-      const image = target.target;
-      const prevSibling = image.previousElementSibling;
-      if (prevSibling) {
-        if (prevSibling.tagName === "VIDEO") {
-          image.previousElementSibling.remove();
-          image.style.display = "initial";
-        }
-      }
     },
     fullSizeDiv(div) {
       div.classList.toggle("fullsize");

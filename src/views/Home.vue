@@ -541,39 +541,6 @@ export default {
       this.messageFlash.message = message;
       this.messageFlash.messageID = parseInt(messageID, 10);
     },
-    fullSize(e) {
-      e.target.classList.toggle("fullsize");
-    },
-    createVideo(target) {
-      const image = target.target;
-      const video = document.createElement("video");
-      video.classList.add("img-thumbnail");
-      video.src = image.src;
-      video.autoplay = true;
-      video.loop = true;
-      video.muted = true;
-      video.playsInline = true;
-      image.parentElement.insertBefore(video, image);
-      image.style.display = "none";
-      image.error = null;
-      video.addEventListener("click", (e) => {
-        this.fullSize(e);
-      });
-      video.onerror = function test(e) {
-        e.target.parentElement.querySelector(".img-thumbnail").src =
-          "http://via.placeholder.com/300?text=erro ao carregar url  :(";
-      };
-    },
-    preventVideo(target) {
-      const image = target.target;
-      const prevSibling = image.previousElementSibling;
-      if (prevSibling) {
-        if (prevSibling.tagName === "VIDEO") {
-          image.previousElementSibling.remove();
-          image.style.display = "initial";
-        }
-      }
-    },
     addNewPost(post) {
       this.messages.unshift(this.sanitizeSingleMessage(post));
       this.filterMessage(0);

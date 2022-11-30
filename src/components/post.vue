@@ -11,15 +11,20 @@
 .img_button >>> .v-btn__content {
   opacity: 1 !important;
 }
+video {
+  width: 100%;
+}
 </style>
 <template>
   <v-list-item data-type="post" :id="'li_' + message.id">
-    <v-container elevation="25" outlined>
+    <v-container>
       <v-row dense>
-        <v-col :cols="imgExpanded ? 12 : 2">
-          <v-tooltip v-if="message.imageurl" top>
+        <v-col :cols="imgExpanded ? 12 : undefined">
+          <v-tooltip v-if="message.imageurl && mediaType == 'img'" top>
             <template v-slot:activator="{ on, attrs }">
               <v-btn
+                v-if="mediaType == 'img'"
+                :ripple="false"
                 class="img_button"
                 style=""
                 v-bind="attrs"
@@ -31,19 +36,16 @@
                   :aspect-ratio="16 / 9"
                   :alt="message.subject"
                   :src="message.imageurl"
-                  @error="createVideo($event, message.id)"
+                  @error="mediaType = 'video'"
                   :height="imgExpanded ? undefined : 250"
                   contain
+                  v-if="mediaType === 'img'"
                 >
                   <template v-slot:placeholder>
-                    <v-row
-                      class="fill-height ma-0"
-                      align="center"
-                      justify="center"
-                    >
+                    <v-row class="fill-height ma-0" justify="center">
                       <v-progress-circular
                         indeterminate
-                        color="black"
+                        color="grey"
                       ></v-progress-circular>
                     </v-row>
                   </template>
@@ -53,22 +55,47 @@
             <span v-if="imgExpanded">Colapsar</span>
             <span v-else>Expandir</span>
           </v-tooltip>
+          <video
+            v-if="message.imageurl && mediaType === 'video'"
+            :src="message.imageurl"
+            autoplay
+            loop
+            muted
+            playsinline
+            controls
+            @error="mediaType = 'error'"
+          ></video>
+          <v-container
+            v-if="message.imageurl && mediaType === 'error'"
+            style="height: 100%; user-select: none"
+            fluid
+            class="d-flex flex-column align-center justify-center"
+            ><p>Erro ao carregar mídia!</p>
+            <p>{{ message.imageurl }}</p>
+            <p>(・`ω´・)</p></v-container
+          >
           <v-container
             style="height: 100%; user-select: none"
             fluid
             class="d-flex flex-column align-center justify-center"
-            v-else
+            v-if="message.imageurl == ''"
             ><p>Sem imagem!</p>
             <p>(・`ω´・)</p></v-container
           >
         </v-col>
-        <v-col>
-          <v-container class="secondary">
+        <v-col cols="8">
+          <v-container>
+            <h2 v-if="message.subject">
+              {{ message.subject }} <small>/ #{{ message.id }}</small>
+            </h2>
+            <h2 v-else>
+              post <small>#{{ message.id }}</small>
+            </h2>
             <v-row class="ma-3" :data-message-id="message.id">
-              <p class="ma-0 mr-3">
+              <h3 class="ma-0 mr-3">
                 por:
                 <span class="font-weight-bold">{{ message.username }}</span>
-              </p>
+              </h3>
               <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -88,17 +115,12 @@
                 v-if="isHome"
                 class="d-flex align-center"
                 :to="`/post/${message.id}`"
-                >acompanhar discussão</router-link
+                >ver discussão</router-link
               >
             </v-row>
             <div v-if="isHome && replyCount && replyCount > 2">
               <small>Este post possui {{ replyCount }} respostas!</small>
             </div>
-            <p>
-              <span>#{{ message.id }} / </span>
-              <span v-if="message.subject">{{ message.subject }}</span>
-              <span v-else>gchan post</span>
-            </p>
             <p v-html="message.message"></p>
             <br />
             <div v-if="message.yt_iframes" ref="yt_iframes">
@@ -118,6 +140,7 @@ export default {
   name: "Message",
   data: () => ({
     imgExpanded: false,
+    mediaType: "img",
   }),
   props: {
     message: {
