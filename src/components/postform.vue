@@ -7,11 +7,6 @@
     style="width: 100%; max-width: 500px"
   >
     <h2 id="poste-no-gchan">Poste no gchan</h2>
-    <div v-if="warning.message" :class="'alert ' + warning.type">
-      <span v-on:click="warning.message = ''">x</span>
-      <h4></h4>
-      <p>{{ warning.message }}</p>
-    </div>
     <v-text-field
       :messages="
         message.username
@@ -53,7 +48,7 @@
           value="upload-media"
         ></v-radio>
         <v-radio
-          label="Colocar URL"
+          label="Digitar URL"
           id="link-media"
           name="media-type"
           value="link-media"
@@ -88,7 +83,7 @@
     <v-row v-if="media_type == 'link-media'">
       <v-text-field
         label="Digite a URL de uma imagem, gif ou vídeo"
-        placeholder="https://~"
+        placeholder="https://i.imgur.com/BTNIDBR.gif"
         type="url"
         v-model="message.imageURL"
         :readonly="this.upload.data !== undefined"
@@ -162,20 +157,6 @@ export default {
     },
   },
   methods: {
-    async recaptchaCall() {
-      let recaptcha_token = "";
-      grecaptcha.ready(() => {
-        grecaptcha
-          .execute(this.$captchaClienty, { action: "post" })
-          .then((token) => {
-            recaptcha_token = token;
-          });
-      });
-      while (recaptcha_token == "") {
-        await new Promise((r) => setTimeout(r, 100));
-      }
-      return recaptcha_token;
-    },
     async addMessage() {
       const formIsValid = this.$refs.postform.validate();
       if (!formIsValid) {
@@ -189,7 +170,7 @@ export default {
       this.warning.message = "Enviando, aguarde...";
       this.warning.type = "alert-info";
       this.message.recaptcha_token = this.isProduction
-        ? await this.recaptchaCall()
+        ? await this.recaptchaCall("post")
         : "";
       const response = await fetch(`${this.$backendURL}${this.$messages}`, {
         method: "POST",
@@ -203,28 +184,24 @@ export default {
         this.warning.type = "alert-error";
         // TODO: handle different error codes, etc
       }
-      if (response.ok) {
-        const result = await response.json();
-        if (result.details) {
-          const error = result.details
-            .map((detail) => detail.message)
-            .join(".");
-          this.warning.message = error;
-        } else if (result.error) {
-          if (result.origin === "psql") {
-            if (result.code === "23505") {
-              this.warning.message =
-                "Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ";
-              this.warning.type = "alert-error";
-            }
+      const result = await response.json();
+      if (result.details) {
+        const error = result.details.map((detail) => detail.message).join(".");
+        this.warning.message = error;
+      } else if (result.error) {
+        if (result.origin === "psql") {
+          if (result.code === "23505") {
+            this.warning.message =
+              "Mensagem duplicada!\ngit gud e altere algum dos campos antes de enviar ᕦ(ò_óˇ)ᕤ";
+            this.warning.type = "alert-error";
           }
-        } else {
-          this.warning.message = "Post enviado!";
-          this.warning.type = "alert-success";
-          this.$emit("new-post", result);
-          this.$refs.postform.resetValidation();
-          this.clearMsgForm();
         }
+      } else {
+        this.warning.message = "Post enviado!";
+        this.warning.type = "alert-success";
+        this.$emit("new-post", result);
+        this.$refs.postform.resetValidation();
+        this.clearMsgForm();
       }
       submitButton.disabled = false;
       submitButton.classList.remove("disabled");

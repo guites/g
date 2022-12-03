@@ -13,7 +13,7 @@
     <Thread
       v-bind:message="message"
       v-bind:replies="message.replies"
-      @replyMessage="replyMessage"
+      @clickReply="replyMessage"
       @adcQuote="adcQuote"
       @update="message = $event"
       v-bind:key="message.id"
@@ -38,13 +38,13 @@
 
 <script>
 import ReplyBox from "../components/replybox.vue";
-import Message from "../components/thread.vue";
+import Thread from "../components/thread.vue";
 
 export default {
   name: "Post",
   components: {
     ReplyBox,
-    Message,
+    Thread,
   },
   props: {
     id: {

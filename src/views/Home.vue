@@ -4,6 +4,7 @@
       <v-row class="d-flex justify-center">
         <v-col>
           <PostForm
+            :recaptchaCall="this.recaptchaCall"
             @new-post="addNewPost"
             :allowedVideoFormats="this.allowedVideoFormats"
           ></PostForm>
@@ -19,18 +20,20 @@
       v-bind:message="message"
       v-bind:replies="message.replies"
       v-bind:replyCount="message.replyCount"
-      @replyMessage="replyMessage"
+      @clickReply="replyMessage"
       @adcQuote="adcQuote"
       @update="message = $event"
       v-bind:key="message.id"
     >
     </Thread>
     <ReplyBox
+      :show="this.messageToReplyTo != ''"
       :messageToReplyTo="this.messageToReplyTo"
       :allowedVideoFormats="this.allowedVideoFormats"
       :quotesToAdd="this.quotesToAdd"
       :rememberedUsername="this.rememberedUsername"
       :rememberMe="this.rememberMe"
+      :recaptchaCall="this.recaptchaCall"
       @closeReply="this.closeReply"
       @addReplyToThread="this.addReplyToThread"
       @updateUsername="this.updateUsername"
@@ -470,7 +473,9 @@ export default {
       this.quotesToAdd = quote;
     },
     updateUsername(username) {
-      this.message.username = username;
+      if (this.message) {
+        this.message.username = username;
+      }
     },
     updateRememberMe(remember) {
       this.rememberMe = remember;
@@ -487,8 +492,8 @@ export default {
         typeCheckedReply = reply;
       }
       const msgIndex = this.messages.findIndex(
-        (el) =>
-          parseInt(el.id, 10) === parseInt(typeCheckedReply.message_id, 10)
+        (msg) =>
+          parseInt(msg.id, 10) === parseInt(typeCheckedReply.message_id, 10)
       );
       if (this.messages[msgIndex].replies === undefined)
         this.messages[msgIndex].replies = [];
@@ -544,6 +549,20 @@ export default {
     addNewPost(post) {
       this.messages.unshift(this.sanitizeSingleMessage(post));
       this.filterMessage(0);
+    },
+    async recaptchaCall(action) {
+      let recaptcha_token = "";
+      grecaptcha.ready(() => {
+        grecaptcha
+          .execute(this.$captchaClienty, { action: action })
+          .then((token) => {
+            recaptcha_token = token;
+          });
+      });
+      while (recaptcha_token == "") {
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      return recaptcha_token;
     },
   },
 };

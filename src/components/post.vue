@@ -101,8 +101,7 @@ video {
                   <v-btn
                     icon
                     color="grey"
-                    @click="replyMessage($event)"
-                    :data-replyTo="message.id"
+                    @click.stop="clickReply(message.id)"
                     v-bind="attrs"
                     v-on="on"
                   >
@@ -161,6 +160,9 @@ export default {
   methods: {
     fullSize() {
       this.imgExpanded = !this.imgExpanded;
+    },
+    clickReply(messageId) {
+      this.$emit("clickReply", messageId);
     },
   },
 };

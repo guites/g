@@ -1,11 +1,14 @@
 <template>
   <v-container class="mt-6">
-    <Post :message="message" :created="convertTZ(message.created)"></Post>
+    <Post
+      :message="message"
+      :created="convertTZ(message.created)"
+      @clickReply="clickReply"
+    ></Post>
     <Reply
       v-for="reply of replies"
       v-bind:key="reply.id"
       :reply="reply"
-      :created="convertTZ(reply.created)"
     ></Reply>
     <v-divider class="mb-6"></v-divider>
   </v-container>
@@ -45,6 +48,7 @@ export default {
       return tempDiv.textContent.length > 250;
     },
     convertTZ(date) {
+      if (!date) return "";
       //source: https://stackoverflow.com/a/54127122/14427854
       var date_sp = new Date(
         (typeof date === "string" ? new Date(date) : date).toLocaleString(
@@ -182,8 +186,8 @@ export default {
       e.target.closest(".v-list-item").classList.toggle("flex-column");
       e.target.closest(".v-image").classList.toggle("post-thumbnail");
     },
-    replyMessage(reply) {
-      this.$emit("replyMessage", reply.target.getAttribute("data-replyto"));
+    clickReply(reply) {
+      this.$emit("clickReply", reply);
     },
     adcQuote(quote) {
       this.$emit("adcQuote", quote.target.getAttribute("data-quoteid"));
