@@ -20,10 +20,13 @@ video {
     <v-container>
       <v-row dense>
         <v-col :cols="imgExpanded ? 12 : undefined">
-          <v-tooltip v-if="message.imageurl && mediaType == 'img'" top>
+          <v-tooltip
+            content-class="tooltip-top"
+            v-if="message.imageurl && mediaType == 'img'"
+            top
+          >
             <template v-slot:activator="{ on, attrs }">
               <v-btn
-                v-if="mediaType == 'img'"
                 :ripple="false"
                 class="img_button"
                 style=""
@@ -39,7 +42,6 @@ video {
                   @error="mediaType = 'video'"
                   :height="imgExpanded ? undefined : 250"
                   contain
-                  v-if="mediaType === 'img'"
                 >
                   <template v-slot:placeholder>
                     <v-row class="fill-height ma-0" justify="center">
