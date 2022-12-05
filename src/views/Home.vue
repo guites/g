@@ -438,8 +438,6 @@ export default {
       const isReply = typeof index === 'object' && index !== null;
       let replyIndex;
       let messageIndexForReplies;
-      //const yt_rgx = /(?:https?:\/\/)?(?:www\.)?youtu\.?be(?:\.com)?\/?.*(?:watch|embed)?(?:.*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
-      //const yt_rgx = /(?:https?:\/\/)?(?:m\.)?(?:www\.)?youtu\.?be(?:\.com)?\/?\S*(?:watch|embed)?(?:\S*v=|v\/|\/)([\w\-_]+)[\&\?]?([\w\_]+)?=?([\w\%]+)?&?([\w\-\_]+)?=?[\w]?/g;
       const yt_rgx = /(?:https?:\/\/)?(?:m\.)?(?:www\.)?youtu\.?be(?:\.com)?\/?\S*(?:watch|embed)?(?:\S*v=|v\/|\/)([\w\-]+)(?:[\&\?]?([\w\-]+)?=?([\w\%\-]+)?)+/g;
       const quotes_rgx = new RegExp("&gt;&gt;([0-9]{1,5}):", "g");
       // se for um objeto, estou passando uma reply como argumento da função
