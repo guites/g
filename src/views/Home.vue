@@ -599,9 +599,6 @@ export default {
     toggleSubject() {
       this.hasSubject = !this.hasSubject;
     },
-    isMyPost() {
-      return true;
-    },
     clearMsgForm() {
       if (!this.rememberMe) {
         this.message.username = '';
