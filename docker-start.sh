@@ -17,12 +17,22 @@ Help()
    echo
 }
 
+# uses either docker-compose or docker compose depending on host installation
+d_compose() {
+  docker compose > /dev/null 2>&1
+  if [ "$?" == "1" ]; then
+      docker-compose $@
+  else
+      docker compose $@
+  fi
+}
+
 up_container() {
-  docker compose -f .devcontainer/docker-compose.yml up
+  d_compose -f .devcontainer/docker-compose.yml up
 }
 
 down_container() {
-  docker compose -f .devcontainer/docker-compose.yml down
+  d_compose -f .devcontainer/docker-compose.yml down
 }
 
 npm_install() {
