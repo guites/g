@@ -17,11 +17,11 @@ swap_urls() {
 }
 
 if [ $environment == 'dev' ]; then
-   swap_urls 'https://gchan-message-board.herokuapp.com' 'http://localhost:4450'
+   swap_urls 'https://gchan.guites.dataware.com.br' 'http://localhost:4450'
    swap_urls 'https://gchan.com.br' 'http://localhost:8080'
 fi
 
 if [ $environment == 'prod' ]; then
-    swap_urls 'http://localhost:4450' 'https://gchan-message-board.herokuapp.com'
+    swap_urls 'http://localhost:4450' 'https://gchan.guites.dataware.com.br'
     swap_urls 'http://localhost:8080' 'https://gchan.com.br'
 fi
