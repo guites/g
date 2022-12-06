@@ -1107,19 +1107,24 @@ div{
         div.iframe-wrapper {
           display:flex;
           width:100%;
-          // &.open {
-          //   display:initial;
-          // }
           div {
             width:100%;
             display:block;
             &.open {
               display:block;
             }
-            iframe {
-              max-width:100%;
-              width: 640px;
-              height:360px;
+            &[data-checkiframe] {
+              iframe {
+                max-width:100%;
+                width: 640px;
+                height:360px;
+              }
+            }
+            &[data-check-instagram-frame] {
+              iframe {
+                width: 320px;
+                height: 480px;
+              }
             }
           }
         }

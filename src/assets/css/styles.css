@@ -999,10 +999,14 @@ div li div div.iframe-wrapper div {
 div li div div.iframe-wrapper div.open {
   display: block;
 }
-div li div div.iframe-wrapper div iframe {
+div li div div.iframe-wrapper div[data-checkiframe] iframe {
   max-width: 100%;
   width: 640px;
   height: 360px;
+}
+div li div div.iframe-wrapper div[data-check-instagram-frame] iframe {
+  width: 320px;
+  height: 480px;
 }
 div li div small {
   display: block;
