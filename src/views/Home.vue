@@ -2,12 +2,15 @@
 video {
   width: 100%;
 }
+img {
+  max-width: 100%;
+}
 </style>
 <template>
   <v-container>
     <v-container id="create-thread">
       <v-row class="d-flex justify-center">
-        <v-col cols="6">
+        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
           <PostForm
             :recaptchaCall="this.recaptchaCall"
             @new-post="addNewPost"
@@ -17,7 +20,7 @@ video {
             ref="postform"
           ></PostForm>
         </v-col>
-        <v-col cols="6">
+        <v-col :cols="$vuetify.breakpoint.mobile ? 12 : 6">
           <v-container
             class="flex-column justify-center fill-height"
             v-if="uploadedMedia.status == 'uploading'"
@@ -30,25 +33,23 @@ video {
             ></v-progress-circular>
           </v-container>
           <v-container v-if="uploadedMedia.status == 'success'">
-            <v-banner class="mb-2"
+            <v-banner single-line class="mb-2"
               >Preview
               <template v-slot:actions>
-                <v-btn text color="primary" @click="sendRemoveUploadSignal()">
+                <v-btn
+                  small
+                  text
+                  color="primary"
+                  @click="sendRemoveUploadSignal()"
+                >
                   Remover</v-btn
                 >
               </template>
             </v-banner>
-            <v-img
+            <img
               v-if="uploadedMedia.mediaType == 'image'"
               :src="uploadedMedia.upload.data.link"
-            >
-              <template v-slot:placeholder>
-                <v-progress-circular
-                  indeterminate
-                  color="grey lighten-5"
-                ></v-progress-circular>
-              </template>
-            </v-img>
+            />
             <video
               v-if="uploadedMedia.mediaType == 'video'"
               :src="uploadedMedia.upload.data.link"
@@ -60,6 +61,7 @@ video {
       </v-row>
     </v-container>
     <v-divider class="pa-6 ma-4"></v-divider>
+    <h2>Posts recentes</h2>
     <Thread
       v-for="message in messages"
       v-bind:message="message"
