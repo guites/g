@@ -94,44 +94,15 @@
       >
       </v-text-field>
     </v-row>
-    <v-btn
-      type="submit"
-      :disabled="uploadStatus == 'loading'"
-      :class="[
-        uploadStatus === 'loading' ? 'disabled' : '',
-        'btn btn-primary create-post',
-      ]"
-    >
+    <v-btn type="submit" :class="['btn btn-primary create-post']">
       Postar
     </v-btn>
-    <v-container v-if="uploadStatus !== ''" id="mediaPreview">
-      <v-row>
-        <p v-if="uploadStatus == 'loading'" class="info">Aguarde...</p>
-        <p v-if="uploadStatus == 'success'" class="success">
-          Upload concluído!
-        </p>
-        <p v-if="uploadStatus == 'error'" class="error">
-          Erro ao realizar o upload! o(〒﹏〒)o <br />Por favor, nos avise pelo
-          <!-- TODO: contact info shoulnd't be hardcoded -->
-          <a
-            target="_blank"
-            :href="`http://twitter.com/intent/tweet?url=${this.$projectURL}&text=%3CDescreva%20o%20problema%20e%20n%C3%B3s%20entraremos%20em%20contato%21%3E&via=gui_garcia67`"
-            >tweeter</a
-          >,
-          <a target="_blank" href="https://github.com/guites/g/issues/new"
-            >github</a
-          >
-          ou <a href="mailto:gui.garcia67@gmail.com">email</a>
-        </p>
-      </v-row>
-      <v-row id="renderPreview"> </v-row>
-    </v-container>
   </v-form>
 </template>
 <script>
 export default {
   name: "PostForm",
-  props: ["allowedVideoFormats"],
+  props: ["allowedVideoFormats", "removeUploadSignal"],
   data: () => ({
     message: {
       username: "",
@@ -149,7 +120,6 @@ export default {
     media_type: "upload-media",
     upload: {},
     uploadfilename: null,
-    uploadStatus: "",
   }),
   computed: {
     isProduction() {
@@ -212,7 +182,6 @@ export default {
     },
     async handleUpload(file) {
       if (!file) return;
-      this.uploadStatus = "loading";
       const input = document.querySelector("#uploadIMG");
 
       // TODO: delete previous img from imgur if user chose to upload a new one
@@ -225,13 +194,6 @@ export default {
 
       if (file.type.startsWith("video/")) {
         if (!this.allowedVideoFormats.includes(file.type)) {
-          this.uploadStatus = "error";
-          this.warning.message = `
-            Formato de vídeo não aceito!\n
-            Funciona apenas com os formatos abaixo:\n
-            ${this.allowedVideoFormats.join(", ")}
-          `;
-          this.warning.type = "alert-error";
           input.value = "";
           return;
         }
@@ -242,31 +204,7 @@ export default {
         return;
       }
 
-      this.warning.message = `
-        Aceitamos apenas imagens,\n
-        gifs e vídeos!
-    `;
-      this.warning.type = "alert-error";
       input.value = "";
-    },
-    removeUpload() {
-      this.uploadStatus = "loading";
-      fetch(`${this.$backendURL}imgur/delete/${this.upload.data.deletehash}`, {
-        method: "DELETE",
-      })
-        .then((response) => response.json())
-        .then((r) => {
-          if (r.data === true && r.success === true) {
-            this.message.imageURL = "";
-            const uploadIMG = document.querySelector("#uploadIMG");
-            if (uploadIMG) {
-              uploadIMG.value = "";
-            }
-            this.upload = {};
-            this.uploadStatus = "";
-            this.uploadfilename = null;
-          }
-        });
     },
     clearMsgForm() {
       if (!this.rememberMe) {
@@ -282,7 +220,6 @@ export default {
         uploadIMG.value = "";
       }
       this.upload = {};
-      this.uploadStatus = "";
       this.uploadfilename = null;
     },
     rememberUsername() {
@@ -298,33 +235,14 @@ export default {
     sleep(ms) {
       return new Promise((resolve) => setTimeout(resolve, ms));
     },
-    renderUpload() {
-      // injects either an <img> or <video> tag containing this.upload's data into the dom
-      const renderPreview = document.querySelector("#renderPreview");
-      const isVideo = this.upload.data.type.startsWith("video/");
-      if (isVideo) {
-        // TODO: add .hls and .gifv as fallback sources
-        renderPreview.innerHTML = `
-        <video
-          src="${this.upload.data.link}"
-          autoplay="true"
-          controls
-          loop="true"
-          muted="true"
-          playsinline="true"
-        >
-          <source src="${this.upload.data.link}" type="${this.upload.data.type}"
-        </video>
-        `;
-        return;
-      }
-      renderPreview.innerHTML = `
-      <img
-        src="${this.upload.data.link}"
-        alt="pré-visualização de imagem para upload"
-      />`;
-    },
     async uploadToImgur(kind, file) {
+      this.$emit("showMediaPreview", {
+        status: "uploading",
+        mediaType: kind,
+        upload: {},
+        removeUploadSignal: false,
+      });
+
       const postURL =
         kind === "image"
           ? `${this.$backendURL}imgur/images`
@@ -339,7 +257,12 @@ export default {
         redirect: "follow",
       });
       if (!response.ok) {
-        this.uploadStatus = "error";
+        this.$emit("showMediaPreview", {
+          status: "error",
+          mediaType: kind,
+          upload: {},
+          removeUploadSignal: false,
+        });
         // TODO: prevent image/video preview on upload error
         return;
       }
@@ -361,31 +284,60 @@ export default {
             }, 100);
           });
         }
-        this.uploadStatus = "success";
-        this.renderUpload();
+        this.$emit("showMediaPreview", {
+          status: "success",
+          mediaType: kind,
+          upload: this.upload,
+          removeUploadSignal: false,
+        });
         return;
       }
 
       if (this.upload.status === 500 && this.upload.success === false) {
-        this.warning.message = `
-              Erro no servidor de upload! :(\n
-              Tente subir sua imagem em outro lugar\n
-              e poste usando o link!\n
-              (https://postimages.org/,\n
-              https://imgur.com/upload,\n
-              https://giphy.com/upload,\n etc)
-              `;
-        this.warning.type = "alert-error";
-        this.uploadStatus = "success";
+        this.$emit("showMediaPreview", {
+          status: "error",
+          mediaType: kind,
+          upload: {},
+          removeUploadSignal: false,
+        });
         return;
       }
-
-      this.warning.message = `
-              Aceitamos apenas imagens no formato\n
-              JPEG, PNG, GIF, APNG e TIFF!
-            `;
-      this.warning.type = "alert-error";
-      this.uploadStatus = "success";
+      this.$emit("showMediaPreview", {
+        status: "error",
+        mediaType: kind,
+        upload: {},
+        removeUploadSignal: false,
+      });
+    },
+    removeUpload() {
+      this.$emit("showMediaPreview", {
+        status: "uploading",
+        mediaType: "",
+        upload: {},
+        removeUploadSignal: false,
+      });
+      fetch(`${this.$backendURL}imgur/delete/${this.upload.data.deletehash}`, {
+        method: "DELETE",
+      })
+        .then((response) => response.json())
+        .then((r) => {
+          if (r.data === true && r.success === true) {
+            this.message.imageURL = "";
+            const uploadIMG = document.querySelector("#uploadIMG");
+            if (uploadIMG) {
+              uploadIMG.value = "";
+            }
+            this.upload = {};
+            this.uploadfilename = null;
+            this.$emit("showMediaPreview", {
+              status: "",
+              mediaUrl: "",
+              mediaType: "",
+              upload: {},
+              removeUploadSignal: false,
+            });
+          }
+        });
     },
     previewImageFromFile(file) {
       // this method renders the preview of an image received via file input
@@ -415,6 +367,9 @@ export default {
   watch: {
     "message.username": function (newVal, oldVal) {
       this.rememberUsername();
+    },
+    removeUploadSignal: function (newVal, oldVal) {
+      if (newVal) this.removeUpload();
     },
   },
   mounted() {

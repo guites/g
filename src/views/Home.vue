@@ -1,16 +1,61 @@
+<style scoped>
+video {
+  width: 100%;
+}
+</style>
 <template>
   <v-container>
     <v-container id="create-thread">
       <v-row class="d-flex justify-center">
-        <v-col>
+        <v-col cols="6">
           <PostForm
             :recaptchaCall="this.recaptchaCall"
             @new-post="addNewPost"
+            @showMediaPreview="showMediaPreview"
             :allowedVideoFormats="this.allowedVideoFormats"
+            :removeUploadSignal="this.uploadedMedia.removeUploadSignal"
+            ref="postform"
           ></PostForm>
         </v-col>
-        <v-col>
-          <v-container></v-container>
+        <v-col cols="6">
+          <v-container
+            class="flex-column justify-center fill-height"
+            v-if="uploadedMedia.status == 'uploading'"
+          >
+            <p>Enviando...</p>
+            <v-progress-circular
+              indeterminate
+              color="primary"
+              :size="50"
+            ></v-progress-circular>
+          </v-container>
+          <v-container v-if="uploadedMedia.status == 'success'">
+            <v-banner class="mb-2"
+              >Preview
+              <template v-slot:actions>
+                <v-btn text color="primary" @click="sendRemoveUploadSignal()">
+                  Remover</v-btn
+                >
+              </template>
+            </v-banner>
+            <v-img
+              v-if="uploadedMedia.mediaType == 'image'"
+              :src="uploadedMedia.upload.data.link"
+            >
+              <template v-slot:placeholder>
+                <v-progress-circular
+                  indeterminate
+                  color="grey lighten-5"
+                ></v-progress-circular>
+              </template>
+            </v-img>
+            <video
+              v-if="uploadedMedia.mediaType == 'video'"
+              :src="uploadedMedia.upload.data.link"
+              @loadstart="setVideoMaxHeight($event)"
+              controls
+            />
+          </v-container>
         </v-col>
       </v-row>
     </v-container>
@@ -99,6 +144,13 @@ export default {
       "video/x-ms-wmv",
       "video/mpeg",
     ],
+    uploadedMedia: {
+      status: "",
+      mediaUrl: "",
+      mediaType: "",
+      upload: {},
+      removeUploadSignal: false,
+    },
   }),
   mounted() {
     const mouseActions = ["mouseover", "mouseout", "click"];
@@ -563,6 +615,18 @@ export default {
         await new Promise((r) => setTimeout(r, 100));
       }
       return recaptcha_token;
+    },
+    showMediaPreview(uploadedMedia) {
+      this.uploadedMedia = uploadedMedia;
+    },
+    setVideoMaxHeight(e) {
+      const postform = this.$refs.postform.$el;
+      const video = e.target;
+      if (!postform || !video) return;
+      video.style.maxHeight = `${postform.getBoundingClientRect().height}px`;
+    },
+    sendRemoveUploadSignal() {
+      this.uploadedMedia.removeUploadSignal = true;
     },
   },
 };
