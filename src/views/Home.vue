@@ -504,13 +504,6 @@ export default {
     },
     deleteMessage(e) {
       const messageID = e.target.parentElement.getAttribute("data-message-id");
-      this.msgFlash(
-        "error",
-        messageID,
-        "Deletar mensagem",
-        "Tem certa que deseja deletar esta mensagem? ):",
-        "ela não ofendeu ninguém"
-      );
     },
     editMessage() {
       alert("o dev é burro e ainda não adicionou este método (づ´• ﹏ •`)づ");
@@ -590,13 +583,6 @@ export default {
             });
           });
       });
-    },
-    msgFlash(type, messageID, header, text, message) {
-      this.messageFlash.type = type;
-      this.messageFlash.header = header;
-      this.messageFlash.text = text;
-      this.messageFlash.message = message;
-      this.messageFlash.messageID = parseInt(messageID, 10);
     },
     addNewPost(post) {
       this.messages.unshift(this.sanitizeSingleMessage(post));
