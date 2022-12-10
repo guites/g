@@ -10,6 +10,9 @@ video {
   overflow: hidden;
   max-height: 375px;
 }
+.midia-column-mobile {
+  max-width: 375px;
+}
 </style>
 <template>
   <v-list-item data-type="post" :id="'li_' + message.id">
@@ -18,17 +21,19 @@ video {
         <v-col
           ref="media_col"
           :cols="mediaExpanded || $vuetify.breakpoint.mobile ? 12 : 4"
-          :class="!mediaExpanded ? 'limit-height' : ''"
+          :class="midiaColumnClasses()"
         >
           <v-btn
             x-small
             :ripple="false"
             plain
-            v-if="!mediaExpanded"
+            v-if="message.imageurl && !mediaExpanded && mediaType != 'error'"
             @click="expandMedia($event)"
             >{{
               isMediaOverflowing
-                ? "Imagem cortada. Clique para expandir"
+                ? mediaType == "img"
+                  ? "Imagem cortada. Clique para expandir"
+                  : "Vídeo cortado. Clique para expandir"
                 : "Clique para expandir"
             }}</v-btn
           >
@@ -36,7 +41,6 @@ video {
             class="reply-media pa-3"
             ref="midia_img"
             v-if="message.imageurl && mediaType == 'img'"
-            :aspect-ratio="16 / 9"
             :alt="message.subject"
             :src="message.imageurl"
             contain
@@ -52,10 +56,14 @@ video {
             v-if="message.imageurl && mediaType === 'video' && mediaExpanded"
             @click="colapseVideo()"
             plain
+            block
+            class="justify-start"
+            :ripple="false"
           >
             Colapsar
           </v-btn>
           <video
+            class="pa-3"
             ref="midia_video"
             v-if="message.imageurl && mediaType === 'video'"
             :src="message.imageurl"
@@ -65,6 +73,7 @@ video {
             autoplay
             role="button"
             tabindex="0"
+            @loadeddata="checkMediaOverflow"
             @error="mediaType = 'error'"
             @click="expandVideo($event)"
             @keydown="expandVideo($event)"
@@ -218,6 +227,14 @@ export default {
         video.focus();
         return this.expandVideo(e);
       }
+    },
+    midiaColumnClasses() {
+      if (this.mediaExpanded) return "";
+      let classes = "limit-height ";
+      if (this.$vuetify.breakpoint.mobile) {
+        classes += "midia-column-mobile";
+      }
+      return classes;
     },
   },
 };
