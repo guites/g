@@ -1,3 +1,9 @@
+<style>
+.v-application--wrap {
+  max-width: 980px;
+  margin: 0 auto;
+}
+</style>
 <template>
   <v-app>
     <AppBar></AppBar>
