@@ -1,7 +1,7 @@
 FROM alpine/git:latest AS builder
 WORKDIR /clone-workspace
 ARG CACHEBUST=1
-RUN git clone https://github.com/guites/gchan-backend.git
+RUN git clone https://github.com/gchan-board/gchan-backend.git
 
 FROM node:14-slim
 WORKDIR /workspace
