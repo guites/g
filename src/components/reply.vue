@@ -2,15 +2,6 @@
 .v-image >>> .v-image__image.v-image__image--contain {
   background-position: top center !important;
 }
-.img_button {
-  width: 100% !important;
-  height: 100% !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-.img_button >>> .v-btn__content {
-  opacity: 1 !important;
-}
 video {
   width: 100%;
 }
@@ -31,6 +22,7 @@ video {
           contain
           role="button"
           tabindex="0"
+          loading="lazy"
           @error="mediaType = 'video'"
           @click="expandImage($event)"
           @keydown="expandImage($event)"
