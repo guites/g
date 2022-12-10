@@ -1,71 +1,73 @@
 <style scoped>
-.v-image >>> .v-image__image.v-image__image--contain {
-  background-position: top center !important;
-}
-.img_button {
-  width: 100% !important;
-  height: 100% !important;
-  padding: 0 !important;
-  margin: 0 !important;
-}
-.img_button >>> .v-btn__content {
-  opacity: 1 !important;
-}
 video {
   width: 100%;
+}
+.reply-media {
+  width: 100%;
+  height: auto;
+}
+.limit-height {
+  overflow: hidden;
+  max-height: 375px;
 }
 </style>
 <template>
   <v-list-item data-type="post" :id="'li_' + message.id">
     <v-container>
       <v-row dense>
-        <v-col :cols="imgExpanded ? 12 : undefined">
-          <v-tooltip
-            content-class="tooltip-top"
-            v-if="message.imageurl && mediaType == 'img'"
-            top
+        <v-col
+          ref="media_col"
+          :cols="mediaExpanded || $vuetify.breakpoint.mobile ? 12 : 4"
+          :class="!mediaExpanded ? 'limit-height' : ''"
+        >
+          <v-btn
+            x-small
+            :ripple="false"
+            plain
+            v-if="!mediaExpanded"
+            @click="expandMedia($event)"
+            >{{
+              isMediaOverflowing
+                ? "Imagem cortada. Clique para expandir"
+                : "Clique para expandir"
+            }}</v-btn
           >
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                :ripple="false"
-                class="img_button"
-                style=""
-                v-bind="attrs"
-                v-on="on"
-                plain
-                @click="fullSize"
-              >
-                <v-img
-                  :aspect-ratio="16 / 9"
-                  :alt="message.subject"
-                  :src="message.imageurl"
-                  @error="mediaType = 'video'"
-                  :height="imgExpanded ? undefined : 250"
-                  contain
-                >
-                  <template v-slot:placeholder>
-                    <v-row class="fill-height ma-0" justify="center">
-                      <v-progress-circular
-                        indeterminate
-                        color="grey"
-                      ></v-progress-circular>
-                    </v-row>
-                  </template>
-                </v-img>
-              </v-btn>
-            </template>
-            <span v-if="imgExpanded">Colapsar</span>
-            <span v-else>Expandir</span>
-          </v-tooltip>
+          <img
+            class="reply-media pa-3"
+            ref="midia_img"
+            v-if="message.imageurl && mediaType == 'img'"
+            :aspect-ratio="16 / 9"
+            :alt="message.subject"
+            :src="message.imageurl"
+            contain
+            role="button"
+            tabindex="0"
+            loading="lazy"
+            @load="checkMediaOverflow"
+            @error="mediaType = 'video'"
+            @click="expandImage($event)"
+            @keydown="expandImage($event)"
+          />
+          <v-btn
+            v-if="message.imageurl && mediaType === 'video' && mediaExpanded"
+            @click="colapseVideo()"
+            plain
+          >
+            Colapsar
+          </v-btn>
           <video
+            ref="midia_video"
             v-if="message.imageurl && mediaType === 'video'"
             :src="message.imageurl"
-            autoplay
             loop
             muted
             playsinline
-            controls
+            autoplay
+            role="button"
+            tabindex="0"
             @error="mediaType = 'error'"
+            @click="expandVideo($event)"
+            @keydown="expandVideo($event)"
           ></video>
           <v-container
             v-if="message.imageurl && mediaType === 'error'"
@@ -123,7 +125,6 @@ video {
               <small>Este post possui {{ replyCount }} respostas!</small>
             </div>
             <p v-html="message.message"></p>
-            <br />
             <div v-if="message.yt_iframes" ref="yt_iframes">
               <div></div>
             </div>
@@ -140,8 +141,9 @@ video {
 export default {
   name: "Message",
   data: () => ({
-    imgExpanded: false,
+    mediaExpanded: false,
     mediaType: "img",
+    isMediaOverflowing: false,
   }),
   props: {
     message: {
@@ -161,10 +163,61 @@ export default {
   },
   methods: {
     fullSize() {
-      this.imgExpanded = !this.imgExpanded;
+      this.mediaExpanded = !this.mediaExpanded;
     },
     clickReply(messageId) {
       this.$emit("clickReply", messageId);
+    },
+    colapseVideo() {
+      const video = this.$refs.midia_video;
+      if (!video) return;
+
+      video.controls = false;
+      this.mediaExpanded = false;
+    },
+    expandVideo(e) {
+      if (this.mediaExpanded) return;
+      if (e instanceof KeyboardEvent && e.key !== "Enter" && e.key !== " ") {
+        return;
+      }
+      e.preventDefault();
+      const video = this.$refs.midia_video;
+      if (!video) return;
+
+      video.style.maxWidth = `${video.videoWidth}px`;
+      video.style.maxHeight = `${video.videoHeight}px`;
+
+      video.controls = true;
+      this.mediaExpanded = true;
+    },
+    expandImage(e) {
+      if (e instanceof KeyboardEvent && e.key !== "Enter" && e.key !== " ") {
+        return;
+      }
+      e.preventDefault();
+      const img = this.$refs.midia_img;
+      if (!img) return;
+      img.style.maxWidth = this.mediaExpanded ? "" : `${img.naturalWidth}px`;
+      img.style.maxHeight = this.mediaExpanded ? "" : `${img.naturalHeight}px`;
+      this.mediaExpanded = !this.mediaExpanded;
+    },
+    checkMediaOverflow() {
+      const mediaCol = this.$refs.media_col;
+      if (mediaCol) {
+        this.isMediaOverflowing = mediaCol.scrollHeight > mediaCol.clientHeight;
+      }
+    },
+    expandMedia(e) {
+      const img = this.$refs.midia_img;
+      if (img) {
+        img.focus();
+        return this.expandImage(e);
+      }
+      const video = this.$refs.midia_video;
+      if (video) {
+        video.focus();
+        return this.expandVideo(e);
+      }
     },
   },
 };
